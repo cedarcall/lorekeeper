@@ -52,6 +52,8 @@ Route::group(['prefix' => 'inventory', 'namespace' => 'Users'], function() {
     Route::get('selector', 'InventoryController@getSelector');
 });
 
+Route::get('safetydeposit', 'Users\InventoryController@getSafetyDepositBox');
+
 Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function() {
     Route::get('/', 'CharacterController@getIndex');
     Route::post('sort', 'CharacterController@postSortCharacters');
