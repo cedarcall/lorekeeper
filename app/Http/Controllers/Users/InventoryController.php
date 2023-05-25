@@ -319,37 +319,5 @@ class InventoryController extends Controller
             'submissions' => $item ? $submissions : null,
         ]);
     }
-    /**
-     * Show the account search page.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function getSafetyDepositBox(Request $request)
-    {
-        $user = Auth::user();
 
-        $query = UserStorage::where('user_id',$user->id);
-
-        if($request->get('storable_id')) $query->where('storable_id', $request->get('storable_id'));
-
-        $sort = $request->only(['sort']);
-        switch(isset($sort['sort']) ? $sort['sort'] : null) {
-            default: case 'newest':
-                $query->orderBy('created_at', 'DESC');
-                break;
-            case 'oldest':
-                $query->orderBy('created_at', 'ASC');
-                break;
-        }
-
-        $sum = $query->sum('count');
-        $query = $query->get()->groupBy('storable_type')->transform(function($item, $k) {
-            return $item->groupBy('storable_id');
-        })->first();
-
-        return view('home.storage', [
-            'storages'  => $query->paginate(30)->appends($request->query()),
-            'sum' => $sum,
-        ]);
-    }
 }
