@@ -45,12 +45,10 @@ class StorageManager extends Service
 
         try {
             foreach($stacks as $key=>$stack) {
-                $quantity = $quantities[$key];
+                $quantity = (int)$quantities[$key];
 
                 $storage = (new UserStorage)->storageDetails($stack);
                 if(!$storage) throw new \Exception("An invalid object was selected.");
-
-                $existing = UserStorage::where('user_id',$user->id)->where('storer_id', $storage['id'])->where('storable_type', $storage['type'])->first();
 
                 if($this->depositOrigins($user, $stack, $quantity, $storage)){
                     if(!$this->creditStorage(
@@ -58,8 +56,7 @@ class StorageManager extends Service
                         $stack,
                         $stack->data,
                         $quantity,
-                        $storage,
-                        $existing
+                        $storage
                     )) throw new \Exception("Unable to add object to storage.");
 
                 } else throw new \Exception("Unable to deposit object.");
@@ -84,28 +81,22 @@ class StorageManager extends Service
      * @param  int                                                    $quantity
      * @return bool
      */
-    public function creditStorage($user, $stack, $data, $quantity, $storage, $existing = null)
+    public function creditStorage($user, $stack, $data, $quantity, $storage)
     {
         DB::beginTransaction();
 
         try {
+            $user_storage = UserStorage::where([
+                ['user_id',       '=', $user->id],
+                ['storer_type',   '=', get_class($stack)],
+                ['storer_id',     '=', $stack->id],
+                ['data',          '=', json_encode($stack->data)]
+            ])->first();
 
-            $new = false;
-
-            // If there is a current storage for this stack, check specifics.
-            if(
-                !isset($existing) ||
-                (
-                    $existing->data != $stack->data
-                    || $existing->user_id != $user->id
-                    || $existing->storable_id != $stack->id
-                    || $existing->storer_type != get_class($stack)
-                )
-            ) $new = true;
-            if(isset($new) && $new){
+            if(!$user_storage) {
                 $user_storage = UserStorage::create([
                     'user_id'       =>  $user->id,
-                    'count'         =>  (int) $quantity,
+                    'count'         =>  $quantity,
                     'storable_id'   =>  (int) $storage['id'],
                     'storable_type' =>  $storage['type'],
                     'storer_id'     =>  (int) $stack->id,
@@ -113,11 +104,9 @@ class StorageManager extends Service
                     'data'          =>  json_encode($data),
                 ]);
             } else {
-                $user_storage = $existing;
-                $user_storage->update(['count' => ($existing->count + $quantity)]);
+                $user_storage->count += $quantity;
                 $user_storage->save();
             }
-
 
             return $this->commitReturn($user_storage);
         } catch(\Exception $e) {
@@ -151,6 +140,75 @@ class StorageManager extends Service
     }
 
 
+    public function withdrawStack($user, $data){
+        DB::beginTransaction();
 
+        try {
+
+            $quantities = array_filter($data['remove']);
+
+            if(isset($data['remove_one'])){
+                // Prepare remove with use of remove_one button
+                $quantities = [ $data['remove_one'] => 1 ];
+                $stacks = UserStorage::where('id',(int)$data['remove_one'])->get()->keyBy('id');
+            } elseif(isset($data['remove_all'])) {
+                // Prepare remove with use of remove all button
+                $stack = UserStorage::find((int)$data['remove_all']);
+                if(!$stack) throw new \Exception("Invalid storage object.");
+
+                $stacks = UserStorage::where([
+                    ['user_id','=', $user->id],
+                    ['storable_type','=', $stack->storable_type],
+                    ['storable_id','=', $stack->storable_id],
+                    ])->get()->keyBy('id');
+
+                $quantities = [];
+                foreach($stacks as $key => $stack) $quantities[$key] = $stack->count;
+            } else {
+                $stacks = UserStorage::whereIn('id',array_keys($quantities))->get()->keyBy('id');
+            }
+
+            if(!$stacks->count()) throw new \Exception("No stacks selected.");
+
+            foreach($stacks as $key=>$stack) {
+                $quantity = $quantities[$key];
+
+                if($this->withdrawDestination($user, $stack, $quantity)){
+                    $stack->count -= $quantity;
+                    if($stack->count < 0) throw new \Exception("Cannot withdraw more objects than were stored.");
+                    $stack->save();
+                    if($stack->count == 0) $stack->delete(); // Clean up if count is 0
+                } else throw new \Exception("Unable to withdraw object.");
+            }
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Handles processing of
+     *
+     * @param  \App\Models\User\User|\App\Models\Character\Character  $sender
+     * @param  \App\Models\User\User|\App\Models\Character\Character  $recipient
+     * @param  string                                                 $type
+     * @param  array                                                  $data
+     * @param  \App\Models\Item\Item                                  $item
+     * @param  int                                                    $quantity
+     * @return bool
+     */
+    public function withdrawDestination($user, $stack, $quantity)
+    {
+        $data = $stack->data;
+        $type = 'Storage Withdrawal';
+
+        switch($stack->storer_type){
+            default: case 'App/Models/User/UserItem':       if(!(new InventoryManager)->creditItem($user, $user, $type, $data, $stack->storable, $quantity)) return false;
+            // case 'App/Models/User/UserCurrency':        (new InventoryManager)->debitCurrency($user, null, $type, $data, $stack->currency_id, $quantity);
+        }
+
+        return true;
+    }
 
 }

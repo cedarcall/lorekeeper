@@ -52,7 +52,10 @@ Route::group(['prefix' => 'inventory', 'namespace' => 'Users'], function() {
     Route::get('selector', 'InventoryController@getSelector');
 });
 
-Route::get('safetydeposit', 'Users\InventoryController@getSafetyDepositBox');
+Route::group(['prefix' => __('safetydeposit.url'), 'namespace' => 'Users'], function() {
+    Route::get('/', 'StorageController@getIndex');
+    Route::post('withdraw', 'StorageController@postWithdraw');
+});
 
 Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function() {
     Route::get('/', 'CharacterController@getIndex');

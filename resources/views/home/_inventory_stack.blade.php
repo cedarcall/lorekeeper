@@ -120,7 +120,7 @@
                     <a class="card-title h5 collapse-title" data-toggle="collapse" href="#depositForm">@if($stack->first()->user_id != $user->id) [ADMIN] @endif Deposit Item</a>
                     <div id="depositForm" class="collapse">
                         <p>
-                            This item will be moved into your <a href="{{ url('safetydeposit') }}" target="_blank">safety deposit box</a> for later usage. <br/>
+                            This item will be moved into your <a href="{{ url(__('safetydeposit.url')) }}" target="_blank">{{ ucwords(__('safetydeposit.name')) }}</a> for later usage. <br/>
                             It will not be usable in trades, submissions, etc until you move it back into your inventory.
                         </p>
                         <div class="text-right">
