@@ -590,3 +590,112 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
 
     return implode(', ', array_slice($string, 0, count($string) - 1)).(count($string) > 2 ? ', and ' : ' and ').end($string);
 }
+
+/**
+ * Gets the valid reward types, based on an array of "showXYZ" values and $isCharacter boolean.
+ * For example, raffle tickets can not be given to characters.
+ *
+ * @param array $showData
+ * @param mixed $recipient
+ *
+ * @return array
+ */
+function getRewardTypes($showData, $recipient) {
+    if ($recipient == 'User') {
+        return ['Item' => 'Item', 'Currency' => 'Currency'] +
+            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
+            ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []);
+    } elseif ($recipient == 'Character') {
+        return ['Item' => 'Item', 'Currency' => 'Currency'] +
+            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []);
+    } else {
+        throw new Exception('No recipient given.');
+    }
+}
+
+/**
+ * Gets the reward data needed for loot/reward selection blades.
+ *
+ * Builds an array structured to match keys with the above getRewardTypes.
+ * For example:
+ * [ 'Item' => $items, 'Currency' => $currencies]
+ *
+ * $useCustomSelectize is utilized when rendering within the trade listing blades.
+ *
+ * @param array $showData
+ * @param bool  $useCustomSelectize
+ * @param mixed $recipient
+ *
+ * @return array
+ */
+function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize = false) {
+    // We call getRewardTypes here, rather than as a parameter, to prevent accidentally getting mismatched arrays.
+    $rewardTypes = getRewardTypes($showData, $recipient);
+
+    $rewardLootData = [];
+
+    // Iterate through each valid key in $rewardTypes and get the data associated with it
+    foreach ($rewardTypes as $rewardKey => $rewardType) {
+        $query = null;
+
+        switch ($rewardKey) {
+            case 'Item':
+                $query = App\Models\Item\Item::orderBy('name')
+                    ->where(function ($query) use ($showData) {
+                        if ($showData['isTradeable']) {
+                            $query->where('allow_transfer', 1);
+                        }
+                    })->where(function ($query) use ($recipient) {
+                        if ($recipient == 'Character') {
+                            $query->whereRelation('category', 'is_character_owned', 1);
+                        }
+                    });
+                break;
+            case 'Currency':
+                $query = App\Models\Currency\Currency::query();
+                if ($recipient == 'Character') {
+                    $query->where('is_character_owned', 1);
+                } elseif ($recipient == 'User') {
+                    $query->where('is_user_owned', 1);
+                }
+                $query->where(function ($query) use ($showData) {
+                    if ($showData['isTradeable']) {
+                        $query->where('allow_user_to_user', 1);
+                    }
+                })
+                    ->orderBy('sort_character', 'DESC');
+                break;
+            case 'LootTable':
+                $query = App\Models\Loot\LootTable::orderBy('name');
+                break;
+            case 'Raffle':
+                $query = App\Models\Raffle\Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name');
+                break;
+                // Add the query builder for your other assets here, set with the matching key in getRewardTypes
+                // If your asset type does not have a model, you may need to add special handling here.
+                //
+                // case 'Example':
+                //  $query = \App\Models\Example::orderby('name');
+                //  break;
+        }
+
+        // If your asset type does not have a model with an id and name value, then you may need to add special handling here.
+        if ($useCustomSelectize) {
+            $data = $query->get()->mapWithKeys(function ($item) {
+                return [
+                    $item->id => json_encode([
+                        'name'      => $item->name,
+                        'image_url' => $item->imageUrl ?? null,
+                    ]),
+                ];
+            });
+        } else {
+            $data = $query->pluck('name', 'id')->toArray();
+        }
+
+        // Finally, add the data to the array.
+        $rewardLootData[$rewardKey] = $data;
+    }
+
+    return $rewardLootData;
+}
