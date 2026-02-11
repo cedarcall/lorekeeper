@@ -6,15 +6,13 @@ use Closure;
 
 class CheckAdmin
 {
-    /**
-     * Redirect non-admins to the home page.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
     public function handle($request, Closure $next)
     {
+        // Local dev bypass
+        if (app()->environment('local')) {
+            return $next($request);
+        }
+
         if (!$request->user()->isAdmin) {
             flash('You do not have the permission to access this page.')->error();
             return redirect('/');
