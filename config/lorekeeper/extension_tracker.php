@@ -33,5 +33,13 @@ return [
             ]),
             'version' => '2.0.0', // Big update with Cylunny's Theme manager + Moif's work merging the two!
         ],
+    'trade_listings' => [
+        'key' => 'Trade_Listings',
+        'wiki_key' => 'Trade_Listings',
+        'creators' => json_encode([
+            'Mercury' => 'https://github.com/itinerare/',
+        ]),
+        'version' => '1.0.1',
+    ],
 
 ];
