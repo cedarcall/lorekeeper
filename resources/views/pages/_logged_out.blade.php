@@ -14,19 +14,19 @@
         right: 0;
         bottom: 0;
         background-image: 
-            radial-gradient(circle at 15% 40%, rgba(0, 200, 180, 0.05) 0%, transparent 25%),
-            radial-gradient(circle at 85% 70%, rgba(0, 120, 150, 0.04) 0%, transparent 30%),
+            radial-gradient(circle at 15% 40%, rgba(0, 204, 255, 0.05) 0%, transparent 25%),
+            radial-gradient(circle at 85% 70%, rgba(0, 180, 220, 0.04) 0%, transparent 30%),
             repeating-linear-gradient(
                 0deg,
-                rgba(0, 150, 180, 0.015) 0px,
-                rgba(0, 150, 180, 0.015) 1px,
+                rgba(0, 204, 255, 0.015) 0px,
+                rgba(0, 204, 255, 0.015) 1px,
                 transparent 1px,
                 transparent 2px
             ),
             repeating-linear-gradient(
                 90deg,
-                rgba(0, 150, 180, 0.01) 0px,
-                rgba(0, 150, 180, 0.01) 1px,
+                rgba(0, 204, 255, 0.01) 0px,
+                rgba(0, 204, 255, 0.01) 1px,
                 transparent 1px,
                 transparent 2px
             );
@@ -41,7 +41,7 @@
         left: 0;
         width: 400px;
         height: 400px;
-        background: radial-gradient(circle, rgba(0, 255, 200, 0.15) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(0, 204, 255, 0.15) 0%, transparent 70%);
         filter: blur(40px);
         z-index: 0;
         pointer-events: none;
@@ -77,7 +77,7 @@
         top: 20%;
         width: 500px;
         height: 500px;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="150" r="80" stroke="%2300ffcc" stroke-width="2" fill="none" filter="url(%23glow)"/><path d="M 180 150 L 300 150 M 300 100 L 300 200" stroke="%2300ffcc" stroke-width="1.5" fill="none" opacity="0.8"/><circle cx="100" cy="280" r="40" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><path d="M 140 280 L 200 280 L 200 350" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><rect x="50" y="350" width="100" height="100" stroke="%2300ffcc" stroke-width="1" fill="none" opacity="0.5"/></svg>') no-repeat center;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="150" r="80" stroke="%2300ccff" stroke-width="2" fill="none" filter="url(%23glow)"/><path d="M 180 150 L 300 150 M 300 100 L 300 200" stroke="%2300ccff" stroke-width="1.5" fill="none" opacity="0.8"/><circle cx="100" cy="280" r="40" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><path d="M 140 280 L 200 280 L 200 350" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><rect x="50" y="350" width="100" height="100" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.5"/></svg>') no-repeat center;
         opacity: 0.25;
         z-index: 0;
     }
@@ -88,7 +88,7 @@
         bottom: -50px;
         width: 600px;
         height: 600px;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="100" r="4" fill="%2300ffcc" filter="url(%23glow)"/><line x1="100" y1="100" x2="180" y2="150" stroke="%2300ffcc" stroke-width="1.5"/><circle cx="180" cy="150" r="4" fill="%2300ffcc" filter="url(%23glow)"/><line x1="180" y1="150" x2="100" y2="220" stroke="%2300ffcc" stroke-width="1.5"/><circle cx="100" cy="220" r="4" fill="%2300ffcc" filter="url(%23glow)"/><line x1="100" y1="220" x2="250" y2="200" stroke="%2300ccff" stroke-width="1"/><circle cx="250" cy="200" r="6" fill="none" stroke="%2300ccff" stroke-width="1.5" filter="url(%23glow)"/><line x1="250" y1="200" x2="350" y2="280" stroke="%2300ccff" stroke-width="1"/><circle cx="350" cy="280" r="3" fill="%2300ccff" filter="url(%23glow)"/><path d="M 150 350 L 150 450 L 250 450 L 250 350" stroke="%2300ffcc" stroke-width="1" fill="none" opacity="0.7"/></svg>') no-repeat center;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="100" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="100" y1="100" x2="180" y2="150" stroke="%2300ccff" stroke-width="1.5"/><circle cx="180" cy="150" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="180" y1="150" x2="100" y2="220" stroke="%2300ccff" stroke-width="1.5"/><circle cx="100" cy="220" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="100" y1="220" x2="250" y2="200" stroke="%2300ccff" stroke-width="1"/><circle cx="250" cy="200" r="6" fill="none" stroke="%2300ccff" stroke-width="1.5" filter="url(%23glow)"/><line x1="250" y1="200" x2="350" y2="280" stroke="%2300ccff" stroke-width="1"/><circle cx="350" cy="280" r="3" fill="%2300ccff" filter="url(%23glow)"/><path d="M 150 350 L 150 450 L 250 450 L 250 350" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.7"/></svg>') no-repeat center;
         opacity: 0.3;
         z-index: 0;
     }
