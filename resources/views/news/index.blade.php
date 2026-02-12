@@ -18,26 +18,14 @@
         bottom: 0;
         background-image: repeating-linear-gradient(
             0deg,
-            rgba(0, 255, 200, 0.03) 0px,
-            rgba(0, 255, 200, 0.03) 1px,
+            rgba(0, 204, 255, 0.03) 0px,
+            rgba(0, 204, 255, 0.03) 1px,
             transparent 1px,
             transparent 2px
         );
         pointer-events: none;
         animation: scan-lines 8s linear infinite;
         z-index: 1;
-    }
-
-    .news-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(0, 255, 200, 0.6), transparent);
-        animation: line-sweep 4s ease-in-out infinite;
-        z-index: 2;
     }
 
     .news-card > * {
@@ -51,17 +39,6 @@
         }
         100% {
             transform: translateY(10px);
-        }
-    }
-
-    @keyframes line-sweep {
-        0%, 100% {
-            top: 0;
-            box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
-        }
-        50% {
-            top: 50%;
-            box-shadow: 0 0 20px rgba(0, 255, 200, 0.7);
         }
     }
 </style>
