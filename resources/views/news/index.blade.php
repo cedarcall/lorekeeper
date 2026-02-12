@@ -16,16 +16,24 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-image: repeating-linear-gradient(
-            0deg,
-            rgba(0, 204, 255, 0.03) 0px,
-            rgba(0, 204, 255, 0.03) 1px,
-            transparent 1px,
-            transparent 2px
-        );
+        background-image: 
+            repeating-linear-gradient(
+                0deg,
+                rgba(0, 204, 255, 0.08) 0px,
+                rgba(0, 204, 255, 0.08) 2px,
+                transparent 2px,
+                transparent 4px
+            ),
+            repeating-linear-gradient(
+                90deg,
+                rgba(0, 204, 255, 0.04) 0px,
+                rgba(0, 204, 255, 0.04) 1px,
+                transparent 1px,
+                transparent 2px
+            );
         pointer-events: none;
-        animation: scan-lines 8s linear infinite;
-        z-index: 1;
+        animation: scan-lines 6s linear infinite;
+        z-index: 2;
     }
 
     .news-card > * {
@@ -38,7 +46,7 @@
             transform: translateY(0);
         }
         100% {
-            transform: translateY(10px);
+            transform: translateY(4px);
         }
     }
 </style>
