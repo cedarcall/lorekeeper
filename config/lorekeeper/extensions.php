@@ -60,4 +60,7 @@ return [
         'character_featured'        => 1,   // Number of awards displayed prominently on the character page
     ],
 
+    //Forum Posts Editable by Author - Wych
+    'forum_author_edit' => 0,
+
 ];

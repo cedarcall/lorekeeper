@@ -144,6 +144,7 @@ class Notification extends Model
     const BOOKMARK_GIFT_WRITING             = 39;
     const SUBMISSION_CANCELLED              = 108;
     const CLAIM_CANCELLED                   = 109;
+    const THREAD_REPLY                      = 110; // URI - Forums
     const REPORT_ASSIGNED                   = 220;
     const REPORT_CLOSED                     = 221;
     const COMMENT_MADE                      = 239;

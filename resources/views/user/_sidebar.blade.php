@@ -27,6 +27,9 @@
         <div class="sidebar-item"><a href="{{ $user->url.'/currency-logs' }}" class="{{ set_active($user->url.'/currency-logs*') }}">Currency Logs</a></div>
         <div class="sidebar-item"><a href="{{ $user->url.'/'.__('awards.award').'-logs' }}" class="{{ set_active($user->url.'/award-logs*') }}">{{ucfirst(ucfirst(__('awards.award')))}} Logs</a></div>
         <div class="sidebar-item"><a href="{{ $user->url.'/submissions' }}" class="{{ set_active($user->url.'/submissions*') }}">Submissions</a></div>
+        @auth
+            <div class="sidebar-item"><a href="{{ $user->url.'/forum' }}" class="{{ $user->url.'/forum*' }}">Forum Posts</a></div>
+        @endauth
     </li>
 
     @if(Auth::check() && Auth::user()->hasPower('edit_user_info'))
