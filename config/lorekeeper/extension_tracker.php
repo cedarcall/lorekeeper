@@ -49,5 +49,13 @@ return [
         ]),
         'version' => '2.0.0',
     ],
+    'admin_notification' => [
+    'key' => 'admin_notification',
+    'wiki_key' => 'Admin_Notification',
+    'creators' => json_encode([
+        'Uri' => 'https://github.com/preimpression/',
+    ]),
+    'version' => '2.0.0',
+],
 
 ];
