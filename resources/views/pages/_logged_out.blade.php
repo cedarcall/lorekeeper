@@ -64,10 +64,10 @@
         background: linear-gradient(90deg, 
             transparent, 
             #00ccff, 
-            #00ffcc, 
+            #00ccff, 
             #00ccff, 
             transparent);
-        box-shadow: 0 0 30px rgba(0, 255, 200, 0.9);
+        box-shadow: 0 0 30px rgba(0, 204, 255, 0.9);
         z-index: 1;
     }
 
@@ -96,9 +96,9 @@
     .glowing-box {
         position: relative;
         background: rgba(10, 20, 40, 0.7);
-        border: 2px solid #00ffcc;
-        box-shadow: 0 0 25px rgba(0, 255, 200, 0.6), 
-                    inset 0 0 25px rgba(0, 255, 200, 0.08);
+        border: 2px solid #00ccff;
+        box-shadow: 0 0 25px rgba(0, 204, 255, 0.6), 
+                    inset 0 0 25px rgba(0, 204, 255, 0.08);
         padding: 50px 60px;
         margin: 40px 0;
         animation: pulse-glow 4s ease-in-out infinite;
@@ -108,9 +108,9 @@
     .wide-text-box {
         position: relative;
         background: rgba(10, 20, 40, 0.7);
-        border: 2px solid #00ffcc;
-        box-shadow: 0 0 25px rgba(0, 255, 200, 0.6), 
-                    inset 0 0 25px rgba(0, 255, 200, 0.08);
+        border: 2px solid #00ccff;
+        box-shadow: 0 0 25px rgba(0, 204, 255, 0.6), 
+                    inset 0 0 25px rgba(0, 204, 255, 0.08);
         padding: 40px 50px;
         margin: 40px 0;
         animation: pulse-glow 4s ease-in-out infinite;
@@ -119,12 +119,12 @@
 
     @keyframes pulse-glow {
         0%, 100% {
-            box-shadow: 0 0 25px rgba(0, 255, 200, 0.6), 
-                        inset 0 0 25px rgba(0, 255, 200, 0.08);
+            box-shadow: 0 0 25px rgba(0, 204, 255, 0.6), 
+                        inset 0 0 25px rgba(0, 204, 255, 0.08);
         }
         50% {
-            box-shadow: 0 0 40px rgba(0, 255, 200, 0.8), 
-                        inset 0 0 40px rgba(0, 255, 200, 0.15);
+            box-shadow: 0 0 40px rgba(0, 204, 255, 0.8), 
+                        inset 0 0 40px rgba(0, 204, 255, 0.15);
         }
     }
 
@@ -132,18 +132,18 @@
         font-size: 3.2em;
         font-weight: 300;
         letter-spacing: 3px;
-        color: #00ffcc;
-        text-shadow: 0 0 20px rgba(0, 255, 200, 0.9),
-                     0 0 40px rgba(0, 200, 255, 0.5);
+        color: #00ccff;
+        text-shadow: 0 0 20px rgba(0, 204, 255, 0.9),
+                     0 0 40px rgba(0, 180, 255, 0.5);
         margin-bottom: 30px;
         text-transform: uppercase;
-        border-bottom: 2px solid #00ffcc;
+        border-bottom: 2px solid #00ccff;
         padding-bottom: 25px;
     }
 
     .homepage-container h1::before {
         content: '> ';
-        color: #00ffcc;
+        color: #00ccff;
         animation: blink 1s infinite;
         margin-right: 10px;
     }
@@ -175,9 +175,9 @@
         left: 30px;
         width: 120px;
         height: 120px;
-        border-top: 3px solid #00ffcc;
-        border-left: 3px solid #00ffcc;
-        box-shadow: 0 0 20px rgba(0, 255, 200, 0.8);
+        border-top: 3px solid #00ccff;
+        border-left: 3px solid #00ccff;
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
     }
 
     .corner-tr {
@@ -185,9 +185,9 @@
         right: 30px;
         width: 120px;
         height: 120px;
-        border-top: 3px solid #00ffcc;
-        border-right: 3px solid #00ffcc;
-        box-shadow: 0 0 20px rgba(0, 255, 200, 0.8);
+        border-top: 3px solid #00ccff;
+        border-right: 3px solid #00ccff;
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
     }
 
     .corner-bl {
@@ -195,9 +195,9 @@
         left: 30px;
         width: 120px;
         height: 120px;
-        border-bottom: 3px solid #00ffcc;
-        border-left: 3px solid #00ffcc;
-        box-shadow: 0 0 20px rgba(0, 255, 200, 0.8);
+        border-bottom: 3px solid #00ccff;
+        border-left: 3px solid #00ccff;
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
     }
 
     .corner-br {
@@ -205,9 +205,9 @@
         right: 30px;
         width: 120px;
         height: 120px;
-        border-bottom: 3px solid #00ffcc;
-        border-right: 3px solid #00ffcc;
-        box-shadow: 0 0 20px rgba(0, 255, 200, 0.8);
+        border-bottom: 3px solid #00ccff;
+        border-right: 3px solid #00ccff;
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
     }
 </style>
 
@@ -223,7 +223,7 @@
 
     <div class="content-wrapper">
         <div class="glowing-box">
-            <h1>{{ config('lorekeeper.settings.site_name', 'Lorekeeper') }}</h1>
+            <h1>Dreadfarer</h1>
             <div class="content-text">
                 <p>Dreadfarer is a space-themed, semi-closed species ARPG set across countless worlds and fractured star systems.</p>
                 <p>Through monthly events and open-ended creative prompts, players can chart their own paths, develop characters, and uncover the histories of distant planets scattered throughout the galaxies.</p>
