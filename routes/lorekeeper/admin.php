@@ -271,8 +271,6 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('dailies/sort', 'DailyController@postSortDaily'); 
 });
 
-});
-
 # PAGES
 Route::group(['prefix' => 'pages', 'middleware' => 'power:edit_pages'], function() {
 
