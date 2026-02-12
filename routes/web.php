@@ -18,6 +18,15 @@ Auth::routes(['verify' => true]);
 # BROWSE
 require_once __DIR__.'/lorekeeper/browse.php';
 
+// Monthly event routes (specific) — place before general catch-all
+use App\Http\Controllers\MonthlyEventController;
+Route::get('monthly-event', [MonthlyEventController::class, 'index']);
+Route::get('monthly-event/{slug}', [MonthlyEventController::class, 'show']);
+
+// Public static pages (keyed). Examples: contracts, expeditions, featured-planet, current-galaxy
+Route::get('/{key}', [\App\Http\Controllers\PageController::class, 'show'])
+    ->where('key', '(contracts|expeditions|featured-planet|current-galaxy)');
+
 /**************************************************************************************************
     Routes that require login
 **************************************************************************************************/
