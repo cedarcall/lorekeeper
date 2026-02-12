@@ -4,45 +4,64 @@
 
 @section('content')
 <style>
-    .news-body hr {
-        border: none;
-        border-top: 1px solid #00ccff;
+    .news-card {
         position: relative;
-        margin: 2rem 0;
-        animation: pulse-line 2s ease-in-out infinite;
+        overflow: hidden;
     }
 
-    .news-body hr::after {
-        content: '•';
+    .news-card::before {
+        content: '';
         position: absolute;
-        left: 50%;
-        top: -10px;
-        transform: translateX(-50%);
-        font-size: 1.5rem;
-        color: #00ffcc;
-        text-shadow: 0 0 10px #00ffcc;
-        animation: pulse-dot 2s ease-in-out infinite;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: repeating-linear-gradient(
+            0deg,
+            rgba(0, 255, 200, 0.03) 0px,
+            rgba(0, 255, 200, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        animation: scan-lines 8s linear infinite;
+        z-index: 1;
     }
 
-    @keyframes pulse-line {
-        0%, 100% {
-            border-top-color: #00ccff;
-            box-shadow: 0 0 5px rgba(0, 51, 102, 0.5);
+    .news-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 200, 0.6), transparent);
+        animation: line-sweep 4s ease-in-out infinite;
+        z-index: 2;
+    }
+
+    .news-card > * {
+        position: relative;
+        z-index: 3;
+    }
+
+    @keyframes scan-lines {
+        0% {
+            transform: translateY(0);
         }
-        50% {
-            border-top-color: #00ffcc;
-            box-shadow: 0 0 15px rgba(0, 255, 200, 0.7);
+        100% {
+            transform: translateY(10px);
         }
     }
 
-    @keyframes pulse-dot {
+    @keyframes line-sweep {
         0%, 100% {
-            text-shadow: 0 0 10px #00ffcc;
-            opacity: 0.8;
+            top: 0;
+            box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
         }
         50% {
-            text-shadow: 0 0 20px #00ffcc, 0 0 30px rgba(0, 255, 200, 0.6);
-            opacity: 1;
+            top: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 200, 0.7);
         }
     }
 </style>
