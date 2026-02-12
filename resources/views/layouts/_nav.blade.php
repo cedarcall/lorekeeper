@@ -10,12 +10,17 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
+                <li class="nav-item dropdown">
                     @if(Auth::check() && Auth::user()->is_news_unread && Config::get('lorekeeper.extensions.navbar_news_notif'))
-                        <a class="nav-link d-flex text-warning" href="{{ url('news') }}"><strong>News</strong><i class="fas fa-bell"></i></a>
+                        <a id="newsDropdown" class="nav-link d-flex text-warning dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><strong>News</strong><i class="fas fa-bell"></i></a>
                     @else
-                        <a class="nav-link" href="{{ url('news') }}">News</a>
+                        <a id="newsDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">News</a>
                     @endif
+
+                    <div class="dropdown-menu" aria-labelledby="newsDropdown">
+                        <a class="dropdown-item" href="{{ url('news') }}">News</a>
+                        <a class="dropdown-item" href="{{ url('monthly-event') }}">Monthly Event</a>
+                    </div>
                 </li>
                 <li class="nav-item">
                     @if(Auth::check() && Auth::user()->is_sales_unread && Config::get('lorekeeper.extensions.navbar_news_notif'))
