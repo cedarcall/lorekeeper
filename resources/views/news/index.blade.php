@@ -6,7 +6,7 @@
 <style>
     .news-card {
         position: relative;
-        overflow: hidden;
+        background: rgba(10, 20, 40, 0.5);
     }
 
     .news-card::before {
@@ -16,29 +16,21 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-image: 
-            repeating-linear-gradient(
-                0deg,
-                rgba(0, 204, 255, 0.08) 0px,
-                rgba(0, 204, 255, 0.08) 2px,
-                transparent 2px,
-                transparent 4px
-            ),
-            repeating-linear-gradient(
-                90deg,
-                rgba(0, 204, 255, 0.04) 0px,
-                rgba(0, 204, 255, 0.04) 1px,
-                transparent 1px,
-                transparent 2px
-            );
+        background-image: repeating-linear-gradient(
+            0deg,
+            rgba(0, 204, 255, 0.25) 0px,
+            rgba(0, 204, 255, 0.25) 2px,
+            transparent 2px,
+            transparent 4px
+        );
         pointer-events: none;
-        animation: scan-lines 6s linear infinite;
-        z-index: 2;
+        animation: scan-lines 8s linear infinite;
+        z-index: 1;
     }
 
     .news-card > * {
         position: relative;
-        z-index: 3;
+        z-index: 2;
     }
 
     @keyframes scan-lines {
