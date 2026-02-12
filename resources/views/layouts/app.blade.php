@@ -36,6 +36,15 @@
     <meta name="robots" content="noai">
     <meta name="robots" content="noimageai">
 
+    @php
+        $faviconPath = public_path('favicon.ico');
+        $faviconUrl = file_exists($faviconPath)
+            ? asset('favicon.ico').'?v='.filemtime($faviconPath)
+            : asset('favicon.ico');
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="shortcut icon" href="{{ $faviconUrl }}">
+
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/site.js') }}"></script>
