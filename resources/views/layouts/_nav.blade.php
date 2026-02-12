@@ -20,6 +20,10 @@
                     <div class="dropdown-menu" aria-labelledby="newsDropdown">
                         <a class="dropdown-item" href="{{ url('news') }}">News</a>
                         <a class="dropdown-item" href="{{ url('monthly-event') }}">Monthly Event</a>
+                        <a class="dropdown-item" href="{{ url('contracts') }}">Contracts</a>
+                        <a class="dropdown-item" href="{{ url('expeditions') }}">Expeditions</a>
+                        <a class="dropdown-item" href="{{ url('featured-planet') }}">Featured Planet</a>
+                        <a class="dropdown-item" href="{{ url('current-galaxy') }}">Current Galaxy</a>
                     </div>
                 </li>
                 <li class="nav-item">
