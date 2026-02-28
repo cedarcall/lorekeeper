@@ -18,8 +18,8 @@ COPY . .
 # --no-scripts avoids running artisan during image build
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Install JS deps (optional; keep if your app uses built assets)
-RUN if [ -f package.json ]; then npm ci || npm install; fi
+# Install and build frontend assets for production
+RUN if [ -f package.json ]; then npm ci || npm install; npm run production; fi
 
 # Permissions for Laravel
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
@@ -29,4 +29,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 # Start web server (do NOT run migrations until DB is set)
-CMD ["sh", "-c", "php artisan package:discover --ansi || true && frankenphp run --config /app/Caddyfile --adapter caddyfile"]
+CMD ["sh", "-c", "php artisan package:discover --ansi || true; php artisan storage:link || true; frankenphp run --config /app/Caddyfile --adapter caddyfile"]
