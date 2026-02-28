@@ -29,4 +29,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 # Run Laravel setup at container start (safe to run repeatedly)
-CMD ["sh", "-c", "php artisan package:discover --ansi || true && php artisan migrate --force || true && frankenphp run --config /Caddyfile --adapter caddyfile"]
+CMD ["sh", "-c", "php artisan package:discover --ansi || true && php artisan migrate --force || true && frankenphp run --listen :8080"]
