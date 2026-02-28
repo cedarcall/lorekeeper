@@ -34,9 +34,9 @@
                         ?>
                         <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $stack->first()->pivot->id }}" data-name="{!! $canName && $stackName ? htmlentities($stackNameClean).' [' : null !!}{{ $character->name ? $character->name : $character->slug }}'s {{ $stack->first()->name }}{!! $canName && $stackName ? ']' : null !!}">
                             <div class="mb-1">
-                                <a href="#" class="inventory-stack"><img src="{{ $stack->first()->imageUrl }}" alt="{{ $stack->first()->name }}"/></a>
+                                <img src="{{ $stack->first()->imageUrl }}" alt="" title="{{ $stack->first()->name }}" style="max-width: 100%;"/>
                             </div>
-                            <div class="{{ $canName ? 'text-muted' : '' }}">
+                            <div>
                                 <a href="#" class="inventory-stack inventory-stack-name">{{ $stack->first()->name }} x{{ $stack->sum('pivot.count') }}</a>
                             </div>
                             @if($canName && $stackName)

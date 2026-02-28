@@ -23,3 +23,7 @@
     </tbody>
 </table>
 <p>Note: "None" results are not shown in this table.</p>
+
+<div class="text-right mt-3">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+</div>

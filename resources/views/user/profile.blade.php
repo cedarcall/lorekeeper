@@ -7,6 +7,8 @@
 @section('profile-content')
 {!! breadcrumbs(['Users' => 'users', $user->name => $user->url]) !!}
 
+@include('widgets._awardcase_feature', ['target' => $user, 'count' => Config::get('lorekeeper.extensions.awards.user_featured'), 'float' => false])
+
 @if($user->is_banned)
     <div class="alert alert-danger">This user has been banned.</div>
 @endif
@@ -22,21 +24,33 @@
 <div class="mb-4">
     <div class="row">
         <div class="row col-md-6">
-            <div class="col-md-2 col-4"><h5>Alias</h5></div>
-            <div class="col-md-10 col-8">{!! $user->displayAlias !!}</div>
+            <div class="col-md-4 col-4"><h5>Alias</h5></div>
+            <div class="col-md-8 col-8">{!! $user->displayAlias !!}</div>
         </div>
         <div class="row col-md-6">
-            <div class="col-md-2 col-4"><h5>Joined</h5></div>
-            <div class="col-md-10 col-8">{!! format_date($user->created_at, false) !!} ({{ $user->created_at->diffForHumans() }})</div>
+            <div class="col-md-4 col-4"><h5>Joined</h5></div>
+            <div class="col-md-8 col-8">{!! format_date($user->created_at, false) !!} ({{ $user->created_at->diffForHumans() }})</div>
         </div>
         <div class="row col-md-6">
-            <div class="col-md-2 col-4"><h5>Rank</h5></div>
-            <div class="col-md-10 col-8">{!! $user->rank->displayName !!} {!! add_help($user->rank->parsed_description) !!}</div>
+            <div class="col-md-4 col-4"><h5>Rank</h5></div>
+            <div class="col-md-8 col-8">{!! $user->rank->displayName !!} {!! add_help($user->rank->parsed_description) !!}</div>
         </div>
         @if($user->birthdayDisplay && isset($user->birthday))
             <div class="row col-md-6">
-                <div class="col-md-2 col-4"><h5>Birthday</h5></div>
-                <div class="col-md-10 col-8">{!! $user->birthdayDisplay !!}</div>
+                <div class="col-md-4 col-4"><h5>Birthday</h5></div>
+                <div class="col-md-8 col-8">{!! $user->birthdayDisplay !!}</div>
+            </div>
+        @endif
+        @if($user_enabled && isset($user->home_id))
+            <div class="row col-md-6">
+                <div class="col-md-4 col-4"><h5>Home</h5></div>
+                <div class="col-md-8 col-8">{!! $user->home ? $user->home->fullDisplayName : '-Deleted Location-' !!}</div>
+            </div>
+        @endif
+        @if($user_factions_enabled && isset($user->faction_id))
+            <div class="row col-md-6">
+                <div class="col-md-4 col-4"><h5>Faction</h5></div>
+                <div class="col-md-8 col-8">{!! $user->faction ? $user->faction->fullDisplayName : '-Deleted Faction-' !!}{!! $user->factionRank ? ' ('.$user->factionRank->name.')' : null !!}</div>
             </div>
         @endif
     </div>
@@ -49,6 +63,7 @@
         </div>
     </div>
 @endif
+
 
 <div class="card-deck mb-4 profile-assets" style="clear:both;">
     <div class="card profile-currencies profile-assets-card">
@@ -86,6 +101,29 @@
         </div>
     </div>
 </div>
+    <div class="card mb-3">
+        <div class="card-body text-center">
+            <h5 class="card-title">{{ ucfirst(__('awards.awards')) }}</h5>
+            <div class="card-body">
+                @if(count($awards))
+                    <div class="row">
+                        @foreach($awards as $award)
+                            <div class="col-md-3 col-6 profile-inventory-item">
+                                @if($award->imageUrl)
+                                    <img src="{{ $award->imageUrl }}" data-toggle="tooltip" title="{{ $award->name }}" />
+                                @else
+                                    <p>{{ $award->name }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div>No {{ __('awards.awards') }} earned.</div>
+                @endif
+            </div>
+            <div class="text-right"><a href="{{ $user->url.'/'.__('awards.awardcase') }}">View all...</a></div>
+        </div>
+    </div>
 
 <h2>
     <a href="{{ $user->url.'/characters' }}">Characters</a>

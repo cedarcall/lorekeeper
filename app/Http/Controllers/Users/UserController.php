@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use DB;
 use Auth;
 use Route;
+use Settings;
+
 use App\Models\User\User;
 
 use App\Models\User\UserCurrency;
@@ -18,14 +20,26 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\User\UserItem;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
+use App\Models\Item\ItemLog;
+
+use App\Models\User\UserAward;
+use App\Models\Award\Award;
+use App\Models\Award\AwardCategory;
+use App\Models\Award\AwardLog;
+
 use App\Models\Gallery\GalleryFavorite;
 use App\Models\Gallery\GalleryCharacter;
-use App\Models\Item\ItemLog;
 
 use App\Models\Character\CharacterCategory;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\Character;
 use App\Models\Character\Sublist;
+
+use App\Models\Comment;
+use App\Models\Forum;
+use App\Models\UserContract;
+use App\Models\ExpeditionSubmission;
+use App\Models\EventSubmission;
 
 use App\Http\Controllers\Controller;
 
@@ -47,7 +61,17 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $name = Route::current()->parameter('name');
+        parent::__construct();
+        $route = Route::current();
+        if(!$route) {
+            return;
+        }
+
+        $name = $route->parameter('name');
+        if(!$name) {
+            return;
+        }
+
         $this->user = User::where('name', $name)->first();
         if(!$this->user) abort(404);
 
@@ -69,8 +93,11 @@ class UserController extends Controller
         return view('user.profile', [
             'user' => $this->user,
             'items' => $this->user->items()->where('count', '>', 0)->orderBy('user_items.updated_at', 'DESC')->take(4)->get(),
+            'awards' => $this->user->awards()->orderBy('user_awards.updated_at', 'DESC')->whereNull('deleted_at')->where('count','>',0)->take(4)->get(),
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
             'characters' => $characters,
+            'user_enabled' => Settings::get('WE_user_locations'),
+            'user_factions_enabled' => Settings::get('WE_user_factions')
         ]);
     }
 
@@ -209,6 +236,40 @@ class UserController extends Controller
     }
 
     /**
+     * Shows a user's awardcase.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserAwardCase($name)
+    {
+        $categories = AwardCategory::orderBy('sort', 'DESC')->get();
+        $awards = count($categories) ?
+            $this->user->awards()
+                ->where('count', '>', 0)
+                ->orderByRaw('FIELD(award_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                ->orderBy('name')
+                ->orderBy('updated_at')
+                ->get()
+                ->groupBy(['award_category_id', 'id']) :
+            $this->user->awards()
+                ->where('count', '>', 0)
+                ->orderBy('name')
+                ->orderBy('updated_at')
+                ->get()
+                ->groupBy(['award_category_id', 'id']);
+        return view('user.awardcase', [
+            'user' => $this->user,
+            'categories' => $categories->keyBy('id'),
+            'awards' => $awards,
+            'userOptions' => User::where('id', '!=', $this->user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
+            'user' => $this->user,
+            'logs' => $this->user->getAwardLogs(),
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get()
+        ]);
+    }
+
+    /**
      * Shows a user's profile.
      *
      * @param  string  $name
@@ -260,6 +321,21 @@ class UserController extends Controller
     }
 
     /**
+     * Shows a user's award logs.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserAwardLogs($name)
+    {
+        $user = $this->user;
+        return view('user.award_logs', [
+            'user' => $this->user,
+            'logs' => $this->user->getAwardLogs(0)
+        ]);
+    }
+
+    /**
      * Shows a user's character ownership logs.
      *
      * @param  string  $name
@@ -282,9 +358,52 @@ class UserController extends Controller
      */
     public function getUserSubmissions($name)
     {
+        $user = $this->user;
+        
+        // Prompt submissions (existing functionality)
+        $promptSubmissions = $user->getSubmissions(Auth::check() ? Auth::user() : null);
+        
+        // Completed contracts
+        $completedContracts = UserContract::with('contract')
+            ->where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->orderBy('completed_at', 'desc')
+            ->paginate(20, ['*'], 'contracts_page');
+        
+        // Expedition submissions
+        $expeditionSubmissions = ExpeditionSubmission::with('planet')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20, ['*'], 'expeditions_page');
+        
+        // Event submissions
+        $eventSubmissions = EventSubmission::with('event')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20, ['*'], 'events_page');
+        
         return view('user.submission_logs', [
+            'user' => $user,
+            'logs' => $promptSubmissions,
+            'completedContracts' => $completedContracts,
+            'expeditionSubmissions' => $expeditionSubmissions,
+            'eventSubmissions' => $eventSubmissions,
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get()
+        ]);
+    }
+
+    /**
+     * Shows a user's recipe logs.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserRecipeLogs($name)
+    {
+        $user = $this->user;
+        return view('user.recipe_logs', [
             'user' => $this->user,
-            'logs' => $this->user->getSubmissions(Auth::check() ? Auth::user() : null),
+            'logs' => $this->user->getRecipeLogs(0),
             'sublists' => Sublist::orderBy('sort', 'DESC')->get()
         ]);
     }
@@ -338,5 +457,64 @@ class UserController extends Controller
             'favorites' => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->orderBy('created_at', 'DESC')->paginate(20) : null,
             'sublists' => Sublist::orderBy('sort', 'DESC')->get()
         ]);
+    }
+
+    /**
+     * Shows a user's gallery submission favorites that contain characters they own.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserForumPosts($name)
+    {
+        $user = $this->user;
+
+        $forums = Forum::all();
+        $public = [];
+        $posts = collect();
+
+        foreach($forums as $key => $forum)
+        {
+            if(Auth::user()->canVisitForum($forum->id) && ($forum->parent ? (Auth::user()->canVisitForum($forum->parent->id) && ($forum->parent->parent ? Auth::user()->canVisitForum($forum->parent->parent->id) : true) ) : true)) $public[] = $forum->id;
+        }
+        $posts = Comment::with('parent')->where('commentable_type','App\Models\Forum')->where('commenter_id',$user->id)->orderBy('created_at', 'DESC')->get()->whereIn('commentable_id',$public);
+
+        return view('user.forum_posts', [
+            'user' => $this->user,
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
+            'posts' => $posts->paginate(20)
+        ]);
+    }
+
+    /**
+     * Completely reset a user's information (progress, awards, inventory, bank, etc).
+     */
+    public function postResetUser(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+        // Reset progress
+        $user->expeditions()->delete();
+        $user->awards()->delete();
+        $user->items()->delete();
+        $user->currencies()->delete();
+        $user->bank()->delete();
+        // Add more resets as needed for your app
+        // ...
+        // Optionally log this action
+        // ...
+        return redirect()->back()->with('success', 'Player information has been reset.');
+    }
+
+    /**
+     * Delete a user's character.
+     */
+    public function postDeleteCharacter(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+        // Delete all characters owned by this user
+        $user->characters()->delete();
+        // Optionally log this action
+        // ...
+        return redirect()->back()->with('success', 'Character(s) deleted successfully.');
     }
 }

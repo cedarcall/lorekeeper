@@ -28,6 +28,10 @@ return [
         'title' => 'Credits',
         'text' => 'This page will contain credits for code, art, ect that has been used on your site!'
     ],
+    'rules' => [
+        'title' => 'ARPG Rules',
+        'text' => 'This page contains the rules and guidelines for participating in the ARPG. You can add images, formatted text, and detailed explanations here.'
+    ],
 
 
 ];

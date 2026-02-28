@@ -20,7 +20,7 @@ class Report extends Model
     protected $fillable = [
         'user_id', 'staff_id', 'url',
         'comments', 'staff_comments', 'parsed_staff_comments',
-        'status', 'data', 'error_type', 'is_br'
+        'status', 'data', 'error_type', 'is_br', 'report_type'
     ];
 
     /**

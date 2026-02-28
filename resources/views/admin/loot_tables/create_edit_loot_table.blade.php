@@ -148,7 +148,9 @@ $( document ).ready(function() {
     var $noneSelect = $('#lootRowData').find('.none-select');
 
     refreshChances();
-    $('#lootTableBody .selectize').selectize();
+    $('#lootTableBody .selectize').selectize({
+        dropdownParent: 'body'
+    });
     attachRemoveListener($('#lootTableBody .remove-loot-button'));
 
     $('.delete-table-button').on('click', function(e) {
@@ -204,7 +206,11 @@ $( document ).ready(function() {
 
             $cell.html('');
             $cell.append($clone);
-            if (val != 'ItemCategoryRarity' && val != 'ItemRarity') $clone.selectize();
+            if (val != 'ItemCategoryRarity' && val != 'ItemRarity') {
+                $clone.selectize({
+                    dropdownParent: 'body'
+                });
+            }
         });
     }
 

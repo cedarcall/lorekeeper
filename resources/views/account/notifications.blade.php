@@ -40,7 +40,25 @@
                 <tbody>
                     @foreach($notifications->where('notification_type_id', $type) as $notification)
                         <tr class="{{ $notification->is_unread ? 'unread' : '' }}">
-                            <td>{!! $notification->message !!}</td>
+                            <td>
+                                {!! $notification->message !!}
+                                @if($notification->notification_type_id == \App\Models\Notification::CONTRACT_REPUTATION_CLAIM)
+                                    <div class="mt-2">
+                                        {!! Form::open(['url' => 'notifications/claim-contract-reputation/'.$notification->id, 'class' => 'form-inline']) !!}
+                                            {!! Form::select('character_id', ['' => 'Select Character'] + $notificationCharacterOptions, null, ['class' => 'form-control mr-2']) !!}
+                                            {!! Form::submit('Claim Reputation', ['class' => 'btn btn-primary btn-sm']) !!}
+                                        {!! Form::close() !!}
+                                    </div>
+                                @endif
+                                @if($notification->notification_type_id == \App\Models\Notification::EXPEDITION_REWARD_REROLL)
+                                    <div class="mt-2">
+                                        {!! Form::open(['url' => 'notifications/expedition-reward-reroll/'.$notification->id, 'class' => 'form-inline']) !!}
+                                            {!! Form::select('reroll_choice', ['no' => 'No, keep original reward', 'yes' => 'Yes, reroll (consumes Emergency Fabricator Charge)'], 'no', ['class' => 'form-control mr-2']) !!}
+                                            {!! Form::submit('Submit', ['class' => 'btn btn-primary btn-sm']) !!}
+                                        {!! Form::close() !!}
+                                    </div>
+                                @endif
+                            </td>
                             <td>{!! format_date($notification->created_at) !!}</td>
                             <td class="text-right"><a href="#" data-id="{{ $notification->id }}" class="clear-notification"><i class="fas fa-times" aria-hidden="true"></i></a></td>
                         </tr>

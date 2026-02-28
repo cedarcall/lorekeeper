@@ -9,35 +9,70 @@
     Report Queue
 </h1>
 
-<ul class="nav nav-tabs mb-3">
+@php
+    $currentStatus = Request::segment(3) ?: 'pending';
+    $currentType = Request::get('type');
+@endphp
+
+<ul class="nav nav-tabs mb-2">
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/reports/pending*') }} {{ set_active('admin/reports') }}" href="{{ url('admin/reports/pending') }}">Pending</a>
+    <a class="nav-link {{ $currentStatus == 'pending' && !$currentType ? 'active' : '' }}" href="{{ url('admin/reports/pending') }}">Pending</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/reports/assigned-to-me*') }} {{ set_active('admin/reports') }}" href="{{ url('admin/reports/assigned-to-me') }}">Assigned To Me</a>
+    <a class="nav-link {{ $currentStatus == 'assigned-to-me' && !$currentType ? 'active' : '' }}" href="{{ url('admin/reports/assigned-to-me') }}">Assigned To Me</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/reports/assigned') }} {{ set_active('admin/reports') }}" href="{{ url('admin/reports/assigned') }}">Assigned</a>
+    <a class="nav-link {{ $currentStatus == 'assigned' && !$currentType ? 'active' : '' }}" href="{{ url('admin/reports/assigned') }}">Assigned</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/reports/closed*') }} {{ set_active('admin/reports') }}" href="{{ url('admin/reports/closed') }}">Closed</a>
+    <a class="nav-link {{ $currentStatus == 'closed' && !$currentType ? 'active' : '' }}" href="{{ url('admin/reports/closed') }}">Closed</a>
   </li>
 </ul>
+
+<div class="card mb-3">
+    <div class="card-body p-2">
+        <span class="mr-2 font-weight-bold">Filter by Type:</span>
+        <div class="btn-group" role="group">
+            <a href="{{ url('admin/reports/' . $currentStatus) }}" class="btn btn-sm {{ !$currentType ? 'btn-primary' : 'btn-outline-primary' }}">All</a>
+            <a href="{{ url('admin/reports/' . $currentStatus . '?type=user') }}" class="btn btn-sm {{ $currentType == 'user' ? 'btn-primary' : 'btn-outline-primary' }}">Report User</a>
+            <a href="{{ url('admin/reports/' . $currentStatus . '?type=submission') }}" class="btn btn-sm {{ $currentType == 'submission' ? 'btn-primary' : 'btn-outline-primary' }}">Report Submission</a>
+            <a href="{{ url('admin/reports/' . $currentStatus . '?type=question') }}" class="btn btn-sm {{ $currentType == 'question' ? 'btn-primary' : 'btn-outline-primary' }}">Questions</a>
+            @if(Auth::user()->isAdmin)
+                <a href="{{ url('admin/reports/' . $currentStatus . '?type=owner') }}" class="btn btn-sm {{ $currentType == 'owner' ? 'btn-warning' : 'btn-outline-warning' }}">Owner Only</a>
+                <a href="{{ url('admin/reports/' . $currentStatus . '?type=bug') }}" class="btn btn-sm {{ $currentType == 'bug' ? 'btn-warning' : 'btn-outline-warning' }}">Bug Reports</a>
+            @endif
+        </div>
+    </div>
+</div>
 
 {!! $reports->render() !!}
 
 <div class="row ml-md-2">
   <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-bottom">
-    <div class="col-6 col-md-3 font-weight-bold">User</div>
-    <div class="col-6 col-md-4 font-weight-bold">Url/Title</div>
+    <div class="col-6 col-md-2 font-weight-bold">User</div>
+    <div class="col-6 col-md-2 font-weight-bold">Type</div>
+    <div class="col-6 col-md-3 font-weight-bold">Url/Title</div>
     <div class="col-6 col-md-2 font-weight-bold">Submitted</div>
     <div class="col-6 col-md-2 font-weight-bold">Status</div>
   </div>
 
   @foreach($reports as $report)
     <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-top">
-      <div class="col-6 col-md-3">{!! $report->user->displayName !!}</div>
-      <div class="col-6 col-md-4">
+      <div class="col-6 col-md-2">{!! $report->user->displayName !!}</div>
+      <div class="col-6 col-md-2">
+        @if($report->report_type == 'owner')
+          <span class="badge badge-warning">Owner</span>
+        @elseif($report->report_type == 'bug')
+          <span class="badge badge-warning">Bug</span>
+        @elseif($report->report_type == 'user')
+          <span class="badge badge-danger">User Report</span>
+        @elseif($report->report_type == 'question')
+          <span class="badge badge-info">Question</span>
+        @else
+          <span class="badge badge-secondary">Submission</span>
+        @endif
+      </div>
+      <div class="col-6 col-md-3">
         <span class="ubt-texthide">@if(!$report->is_br)<a href="{{ $report->url }}">@endif {{ $report->url }} @if(!$report->is_br)</a>@endif</span>
       </div>
       <div class="col-6 col-md-2">{!! pretty_date($report->created_at) !!}</div>

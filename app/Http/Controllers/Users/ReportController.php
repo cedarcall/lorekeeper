@@ -107,7 +107,7 @@ class ReportController extends Controller
         $request->validate(Report::$createRules);
         $request['url'] = strip_tags($request['url']);
 
-        if($service->createReport($request->only(['url', 'comments', 'is_br', 'error']), Auth::user(), true)) {
+        if($service->createReport($request->only(['url', 'comments', 'is_br', 'error', 'report_type']), Auth::user(), true)) {
             flash('Report submitted successfully.')->success();
         }
         else {

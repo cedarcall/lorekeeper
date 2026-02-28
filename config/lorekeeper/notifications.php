@@ -24,7 +24,7 @@ return [
         'message' => 'You have received a staff grant of {item_name} (×{item_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Inventory</a>)',
         'url' => 'inventory'
     ],
-    
+
     // CURRENCY_REMOVAL
     2 => [
         'name' => 'Currency Removal',
@@ -73,21 +73,21 @@ return [
         'message' => '{character_name} has received a staff grant of {currency_quantity} {currency_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Bank</a>)',
         'url' => 'character/{character_slug}/bank'
     ],
-    
+
     // CHARACTER_CURRENCY_REMOVAL
     9 => [
         'name' => 'Character Currency Removal',
         'message' => '{currency_quantity} {currency_name} was removed from {character_name} by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Bank</a>)',
         'url' => 'character/{character_slug}/bank'
     ],
-    
+
     // CHARACTER_PROFILE_EDIT
     10 => [
         'name' => 'Character Profile Edited',
         'message' => '{character_name}\'s profile was edited by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Character</a>)',
         'url' => 'character/{character_slug}/profile'
     ],
-    
+
     // IMAGE_UPLOAD
     11 => [
         'name' => 'Image Upload',
@@ -284,11 +284,34 @@ return [
         'message' => 'The transfer for <a href="{character_url}">{character_name}</a> was approved by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Transfers</a>)',
         'url' => 'characters/transfers/incoming'
     ],
+
     // BOOKMARK_GIFT_WRITING
     39 => [
         'message' => 'A character you have bookmarked (<a href="{character_url}">{character_name}</a>) has had its Gift Writing Allowed status changed. (<a href="{url}">View Bookmarks</a>)',
         'url' => 'account/bookmarks'
     ],
+
+    // SUBMISSION_CANCELLED
+    108 => [
+        'name' => 'Submission Cancelled',
+        'message' => 'Your submission (#{submission_id}) was cancelled and sent back to drafts by <a href="{staff_url}">{staff_name}</a>. (<a href="{url}">View Submission</a>)',
+        'url' => 'submissions/view/{submission_id}'
+    ],
+
+    // CLAIM_CANCELLED
+    109 => [
+        'name' => 'Claim Cancelled',
+        'message' => 'Your claim (#{submission_id}) was cancelled and sent back to drafts by <a href="{staff_url}">{staff_name}</a>. (<a href="{url}">View Claim</a>)',
+        'url' => 'claims/view/{submission_id}'
+    ],
+
+    // THREAD_REPLY
+    110 => [
+        'name' => 'Thread Reply',
+        'message' => '<a href="{sender_url}">{sender}</a> has made a <a href="comment/{comment_url}">reply</a> to <a href="forum/{forum_url}/~{thread_url}">{thread_title}</a> in <a href="forum/{forum_url}">{forum_name}</a>',
+        'url' => ''
+    ],
+
     // REPORT_ASSIGNED
     220 => [
         'name' => 'Report Assigned',
@@ -302,6 +325,7 @@ return [
         'message' => 'Your report (#{report_id}) was closed by <a href="{staff_url}">{staff_name}</a>. (<a href="{url}">View Report</a>)',
         'url' => 'reports/view/{report_id}'
     ],
+
     // Comment made on user's model
     // COMMENT_MADE
     239 => [
@@ -315,6 +339,47 @@ return [
         'name' => 'Comment Reply',
         'message' => '<a href="{sender_url}">{sender}</a> has made a reply to your comment. <a href="comment/{comment_url}">See Reply.</a>',
         'url' => ''
+    ],
+    // AWARD_GRANT
+    341 => [
+        'name' => 'Award Grant',
+        'message' => 'You have earned the following award(s): {award_name} (×{award_quantity}). Congratulations! (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase'
+    ],
+
+    // AWARD_REMOVAL
+    342 => [
+        'name' => 'Award Removal',
+        'message' => '{award_name} (×{award_quantity}) was removed from your Awards by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase'
+    ],
+
+    // AWARD_TRANSFER
+    343 => [
+        'name' => 'Award Transfer',
+        'message' => 'You have received {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'awardcase'
+    ],
+
+    // FORCED_AWARD_TRANSFER
+    344 => [
+        'name' => 'Forced Award Transfer',
+        'message' => '{item_name} (×{item_quantity}) was removed from {character_name} by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Inventory</a>)',
+        'url' => 'character/{character_slug}/inventory'
+    ],
+
+    // CHARACTER_AWARD_GRANT
+    345 => [
+        'name' => 'Character Award Grant',
+        'message' => '{character_name} has received a staff grant of {award_name} (×{award_quantity}) from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'character/{character_slug}/awards'
+    ],
+
+    // CHARACTER_AWARD_REMOVAL
+    346 => [
+        'name' => 'Character Award Removal',
+        'message' => '{award_name} (×{award_quantity}) was removed from {character_name} by <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Awards</a>)',
+        'url' => 'character/{character_slug}/awards'
     ],
 
     // CHARACTER_ITEM_GRANT
@@ -406,5 +471,103 @@ return [
         'name' => 'Gallery Submission Participant',
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url' => 'gallery/view/{submission_id}'
+    ],
+
+    // RECIPE_GRANT
+    600 => [
+        'name' => 'Recipe Grant',
+        'message' => 'You have received a staff grant of the crafting recipe {recipe_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Unlocked Recipes</a>)',
+        'url' => 'crafting'
+    ],
+
+    // EXPEDITION_SUBMITTED
+    700 => [
+        'name' => 'Expedition Submitted',
+        'message' => 'A new expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been submitted by <a href="{user_url}">{user_name}</a>. (<a href="{url}">Review Submission</a>)',
+        'url' => 'admin/expeditions/submission/{submission_id}'
+    ],
+
+    // EXPEDITION_APPROVED
+    701 => [
+        'name' => 'Expedition Approved',
+        'message' => 'Your expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been approved by staff! {reward_text} Your visit count increased by {visit_gain}. (<a href="{url}">View Planet</a>)',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EXPEDITION_REJECTED
+    702 => [
+        'name' => 'Expedition Rejected',
+        'message' => 'Your expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> was rejected by staff. {notes_text} (<a href="{url}">View Planet</a>)',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EXPEDITION_REVOKED
+    703 => [
+        'name' => 'Expedition Revoked',
+        'message' => 'Your approved expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been taken down by staff. Your visit count has been decreased. {reason_text}',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EVENT_QUESTION_RECEIVED (for staff)
+    800 => [
+        'name' => 'Event Question Received',
+        'message' => '<a href="{user_url}">{user_name}</a> has asked a question about the monthly event "<strong>{event_name}</strong>". (<a href="{url}">View & Answer Question</a>)',
+        'url' => 'admin/event-questions/{question_id}'
+    ],
+
+    // EVENT_QUESTION_ANSWERED (for players)
+    801 => [
+        'name' => 'Event Question Answered',
+        'message' => 'Your question about "<strong>{event_name}</strong>" has been answered by <a href="{staff_url}">{staff_name}</a>! (<a href="{url}">View Answer</a>)',
+        'url' => 'monthly-event/{event_slug}#question-{question_id}'
+    ],
+
+    // EVENT_BADGE_EARNED
+    802 => [
+        'name' => 'Event Badge Earned',
+        'message' => 'Congratulations! You have earned the <strong>{award_name}</strong> badge for participating in "<strong>{event_name}</strong>"!',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_APPROVED
+    803 => [
+        'name' => 'Event Submission Approved',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" has been approved! {reward_text}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_REJECTED
+    804 => [
+        'name' => 'Event Submission Rejected',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" was not approved. {staff_notes}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_DELETED
+    805 => [
+        'name' => 'Event Submission Deleted',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" has been removed. {delete_reason}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EXPEDITION_REWARD_REROLL
+    807 => [
+        'name' => 'Expedition Reward Reroll',
+        'message' => 'You received <strong>{original_item_name} x{original_item_quantity}</strong> from your expedition to <strong>{planet_name}</strong>. Use Emergency Fabricator Charge to reroll this reward?',
+        'url' => 'notifications'
+    ],
+
+    // CONTRACT_REPUTATION_CLAIM
+    806 => [
+        'name' => 'Contract Reputation Reward',
+        'message' => 'You have {reputation_quantity} Reputation from contract "<strong>{contract_name}</strong>" ready to claim. Select a character below to receive it.',
+        'url' => 'notifications'
+    ],
+
+    // MODIFIER_ITEM_CONSUMED
+    808 => [
+        'name' => 'Modifier Item Used',
+        'message' => '1 Use consumed for <strong>{item_name}</strong>. {use_context}',
+        'url' => 'notifications'
     ],
 ];

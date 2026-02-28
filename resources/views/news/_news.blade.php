@@ -1,4 +1,4 @@
-<div class="card mb-3">
+<div class="card mb-3 news-card">
     <div class="card-header">
         <h2 class="card-title mb-0">{!! $news->displayName !!}</h2>
         <small>
@@ -6,8 +6,8 @@
         </small>
     </div>
     <div class="card-body">
-        <div class="parsed-text">
-            {!! $news->parsed_text !!}
+        <div class="parsed-text news-body">
+            {!! trim($news->parsed_text) !!}
         </div>
     </div>
     <?php $commentCount = App\Models\Comment::where('commentable_type', 'App\Models\News')->where('commentable_id', $news->id)->count(); ?>

@@ -29,6 +29,26 @@ class ReportController extends Controller
         if($status == 'assigned-to-me') $reports = Report::assignedToMe(Auth::user()); 
         else $reports = Report::where('status', $status ? ucfirst($status) : 'Pending');
 
+        // Only show 'owner' and 'bug' type reports to admins
+        if(!Auth::user()->isAdmin) {
+            $reports = $reports->where(function($query) {
+                $query->whereNull('report_type')
+                      ->orWhere(function($q) {
+                          $q->where('report_type', '!=', 'owner')
+                            ->where('report_type', '!=', 'bug');
+                      });
+            });
+        }
+        
+        // Filter by report type if specified
+        if($request->get('type')) {
+            if($request->get('type') == 'submission') {
+                $reports = $reports->whereNull('report_type');
+            } else {
+                $reports = $reports->where('report_type', $request->get('type'));
+            }
+        }
+
         return view('admin.reports.index', [
             'reports' => $reports->orderBy('id', 'DESC')->paginate(30)->appends($request->query()),
         ]);
@@ -44,6 +64,10 @@ class ReportController extends Controller
     {
         $report = Report::where('id', $id)->first();
         if(!$report) abort(404);
+        
+        // Only admins can view 'owner' and 'bug' type reports
+        if(in_array($report->report_type, ['owner', 'bug']) && !Auth::user()->isAdmin) abort(404);
+        
         return view('admin.reports.report', [
             'report' => $report,
         ]);

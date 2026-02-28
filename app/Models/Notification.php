@@ -32,21 +32,21 @@ class Notification extends Model
 
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
      * Get the user who owns notification.
      */
-    public function user() 
+    public function user()
     {
         return $this->belongsTo('App\Models\User\User');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -72,10 +72,10 @@ class Notification extends Model
 
         $message = $notification['message'];
 
-        // Replace the URL... 
+        // Replace the URL...
         $message = str_replace('{url}', url($notification['url']), $message);
 
-        // Replace any variables in data... 
+        // Replace any variables in data...
         $data = $this->data;
         if($data && count($data)) {
             foreach($data as $key => $value) {
@@ -97,7 +97,7 @@ class Notification extends Model
     }
 
     /**********************************************************************************************
-    
+
         CONSTANTS
 
     **********************************************************************************************/
@@ -142,10 +142,19 @@ class Notification extends Model
     const BOOKMARK_IMAGE                    = 37;
     const CHARACTER_TRANSFER_ACCEPTABLE     = 38;
     const BOOKMARK_GIFT_WRITING             = 39;
+    const SUBMISSION_CANCELLED              = 108;
+    const CLAIM_CANCELLED                   = 109;
+    const THREAD_REPLY                      = 110; // URI - Forums
     const REPORT_ASSIGNED                   = 220;
     const REPORT_CLOSED                     = 221;
     const COMMENT_MADE                      = 239;
     const COMMENT_REPLY                     = 240;
+    const AWARD_GRANT                       = 341;
+    const AWARD_REMOVAL                     = 342;
+    const AWARD_TRANSFER                    = 343;
+    const FORCED_AWARD_TRANSFER             = 344;
+    const CHARACTER_AWARD_GRANT             = 345;
+    const CHARACTER_AWARD_REMOVAL           = 346;
     const CHARACTER_ITEM_GRANT              = 501;
     const CHARACTER_ITEM_REMOVAL            = 502;
     const GALLERY_SUBMISSION_COLLABORATOR   = 505;
@@ -159,4 +168,18 @@ class Notification extends Model
     const GALLERY_SUBMISSION_STAFF_COMMENTS = 513;
     const GALLERY_SUBMISSION_EDITED         = 514;
     const GALLERY_SUBMISSION_PARTICIPANT    = 515;
+    const RECIPE_GRANT                      = 600; // Draginraptor - Crafting
+    const EXPEDITION_SUBMITTED              = 700; // Expedition submission created
+    const EXPEDITION_APPROVED               = 701; // Expedition submission approved
+    const EXPEDITION_REJECTED               = 702; // Expedition submission rejected
+    const EXPEDITION_REVOKED                = 703; // Expedition submission taken down
+    const EVENT_QUESTION_RECEIVED           = 800; // Staff receives event question
+    const EVENT_QUESTION_ANSWERED           = 801; // Player receives answer to question
+    const EVENT_BADGE_EARNED                = 802; // Player earns event badge
+    const EVENT_SUBMISSION_APPROVED         = 803; // Event submission approved
+    const EVENT_SUBMISSION_REJECTED         = 804; // Event submission rejected
+    const EVENT_SUBMISSION_DELETED          = 805; // Event submission deleted by staff
+    const CONTRACT_REPUTATION_CLAIM         = 806; // Contract reputation pending character selection
+    const EXPEDITION_REWARD_REROLL          = 807; // Expedition reward reroll prompt
+    const MODIFIER_ITEM_CONSUMED            = 808; // Modifier item use consumed notification
 }

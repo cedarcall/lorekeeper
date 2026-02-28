@@ -13,7 +13,9 @@
 
     <h1>
         {{ $submission->prompt_id ? 'Submission' : 'Claim' }} (#{{ $submission->id }})
-        <span class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Approved' ? 'success' : 'danger') }}">{{ $submission->status }}</span>
+        <span class="float-right badge badge-{{ ($submission->status == 'Pending' || $submission->status == 'Draft') ? 'secondary' : ($submission->status == 'Approved' ? 'success' : 'danger') }}">
+            {{ $submission->status }}
+        </span>
     </h1>
 
     <div class="mb-1">
@@ -66,7 +68,7 @@
         <h2>Characters</h2>
         <div id="characters" class="mb-3">
             @foreach($submission->characters as $character)
-                @include('widgets._character_select_entry', ['characterCurrencies' => $characterCurrencies, 'items' => $items, 'tables' => $tables, 'character' => $character, 'expanded_rewards' => $expanded_rewards])
+                @include('widgets._character_select_entry', ['characterCurrencies' => $characterCurrencies, 'items' => $items, 'tables' => $tables, 'character' => $character, 'characterAwards' => $characterAwards,'expanded_rewards' => $expanded_rewards])
             @endforeach
         </div>
         <div class="text-right mb-3">
@@ -120,11 +122,12 @@
 
 		<div class="form-group">
             {!! Form::label('staff_comments', 'Staff Comments (Optional)') !!}
-			{!! Form::textarea('staff_comments', $submission->staffComments, ['class' => 'form-control wysiwyg']) !!}
+			{!! Form::textarea('staff_comments', $submission->staff_comments, ['class' => 'form-control wysiwyg']) !!}
         </div>
 
         <div class="text-right">
             <a href="#" class="btn btn-danger mr-2" id="rejectionButton">Reject</a>
+            <a href="#" class="btn btn-secondary mr-2" id="cancelButton">Cancel</a>
             <a href="#" class="btn btn-success" id="approvalButton">Approve</a>
         </div>
 
@@ -177,11 +180,12 @@
 
                     @if($expanded_rewards)
                     <td>
-                        {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table'], null, ['class' => 'form-control character-rewardable-type', 'placeholder' => 'Select Reward Type']) !!}
+                        {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Award' => ucfirst(__('awards.award'))], null, ['class' => 'form-control character-rewardable-type', 'placeholder' => 'Select Reward Type']) !!}
                     </td>
                     <td class="lootDivs">
                         <div class="character-currencies hide">{!! Form::select('character_rewardable_id[]', $characterCurrencies, 0, ['class' => 'form-control character-currency-id', 'placeholder' => 'Select Currency']) !!}</div>
                         <div class="character-items hide">{!! Form::select('character_rewardable_id[]', $items, 0, ['class' => 'form-control character-item-id', 'placeholder' => 'Select Item']) !!}</div>
+                        <div class="character-awards hide">{!! Form::select('character_rewardable_id[]', $characterAwards, 0, ['class' => 'form-control character-award-id', 'placeholder' => 'Select '.ucfirst(__('awards.award'))]) !!}</div>
                         <div class="character-tables hide">{!! Form::select('character_rewardable_id[]', $tables, 0, ['class' => 'form-control character-table-id', 'placeholder' => 'Select Loot Table']) !!}</div>
                     </td>
                     @else
@@ -198,7 +202,7 @@
             </tr>
         </table>
     </div>
-    @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'showLootTables' => true, 'showRaffles' => true])
+    @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'awards' => $awards, 'showLootTables' => true, 'showRaffles' => true, 'showRecipes' => false])
 
     <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -211,6 +215,18 @@
                     <p>This will approve the {{ $submission->prompt_id ? 'submission' : 'claim' }} and distribute the above rewards to the user.</p>
                     <div class="text-right">
                         <a href="#" id="approvalSubmit" class="btn btn-success">Approve</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-content hide" id="cancelContent">
+                <div class="modal-header">
+                    <span class="modal-title h5 mb-0">Confirm Cancellation</span>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>This will cancel the {{ $submission->prompt_id ? 'submission' : 'claim' }} and send it back to drafts. Make sure to include a staff comment if you do this!</p>
+                    <div class="text-right">
+                        <a href="#" id="cancelSubmit" class="btn btn-secondary">Cancel</a>
                     </div>
                 </div>
             </div>
@@ -238,7 +254,7 @@
 @section('scripts')
 @parent
 @if($submission->status == 'Pending')
-    @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
+    @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'showRecipes' => false])
     @include('js._character_select_js')
 
     <script>
@@ -255,16 +271,30 @@
             var $rejectionContent = $('#rejectionContent');
             var $rejectionSubmit = $('#rejectionSubmit');
 
+            var $cancelButton = $('#cancelButton');
+            var $cancelContent = $('#cancelContent');
+            var $cancelSubmit = $('#cancelSubmit');
+
             $approvalButton.on('click', function(e) {
                 e.preventDefault();
                 $approvalContent.removeClass('hide');
                 $rejectionContent.addClass('hide');
+                $cancelContent.addClass('hide');
                 $confirmationModal.modal('show');
             });
 
             $rejectionButton.on('click', function(e) {
                 e.preventDefault();
                 $rejectionContent.removeClass('hide');
+                $approvalContent.addClass('hide');
+                $cancelContent.addClass('hide');
+                $confirmationModal.modal('show');
+            });
+
+            $cancelButton.on('click', function(e) {
+                e.preventDefault();
+                $cancelContent.removeClass('hide');
+                $rejectionContent.addClass('hide');
                 $approvalContent.addClass('hide');
                 $confirmationModal.modal('show');
             });
@@ -280,6 +310,13 @@
                 $submissionForm.attr('action', '{{ url()->current() }}/reject');
                 $submissionForm.submit();
             });
+
+            $cancelSubmit.on('click', function(e) {
+                e.preventDefault();
+                $submissionForm.attr('action', '{{ url()->current() }}/cancel');
+                $submissionForm.submit();
+            });
+
         });
 
     </script>

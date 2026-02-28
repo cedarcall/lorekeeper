@@ -16,6 +16,8 @@
 Route::group(['prefix' => 'notifications', 'namespace' => 'Users'], function() {
     Route::get('/', 'AccountController@getNotifications');
     Route::get('delete/{id}', 'AccountController@getDeleteNotification');
+    Route::post('claim-contract-reputation/{id}', 'AccountController@postClaimContractReputation');
+    Route::post('expedition-reward-reroll/{id}', 'AccountController@postExpeditionRewardReroll');
     Route::post('clear', 'AccountController@postClearNotifications');
     Route::post('clear/{type}', 'AccountController@postClearNotifications');
 });
@@ -23,9 +25,13 @@ Route::group(['prefix' => 'notifications', 'namespace' => 'Users'], function() {
 Route::group(['prefix' => 'account', 'namespace' => 'Users'], function() {
     Route::get('settings', 'AccountController@getSettings');
     Route::post('profile', 'AccountController@postProfile');
+    Route::post('theme', 'AccountController@postTheme');
     Route::post('password', 'AccountController@postPassword');
     Route::post('email', 'AccountController@postEmail');
+    Route::post('location', 'AccountController@postLocation');
+    Route::post('faction', 'AccountController@postFaction');
     Route::post('avatar', 'AccountController@postAvatar');
+    Route::post('theme', 'AccountController@postTheme');
     Route::get('aliases', 'AccountController@getAliases');
     Route::get('make-primary/{id}', 'AccountController@getMakePrimary');
     Route::post('make-primary/{id}', 'AccountController@postMakePrimary');
@@ -52,6 +58,14 @@ Route::group(['prefix' => 'inventory', 'namespace' => 'Users'], function() {
     Route::get('selector', 'InventoryController@getSelector');
 });
 
+Route::group(['prefix' => __('awards.awardcase'), 'namespace' => 'Users'], function() {
+    Route::get('/', 'AwardCaseController@getIndex');
+    Route::post('edit', 'AwardCaseController@postEdit');
+    Route::post('claim/{id}', 'AwardCaseController@postClaimAward');
+
+    Route::get('selector', 'AwardCaseController@getSelector');
+});
+
 Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function() {
     Route::get('/', 'CharacterController@getIndex');
     Route::post('sort', 'CharacterController@postSortCharacters');
@@ -68,6 +82,13 @@ Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function() {
 });
 
 Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function() {
+    Route::get('listings', 'TradeController@getListingIndex');
+    Route::get('listings/expired', 'TradeController@getExpiredListings');
+    Route::get('listings/create', 'TradeController@getCreateListing');
+    Route::post('listings/create', 'TradeController@postCreateListing');
+    Route::get('listings/{id}', 'TradeController@getListing')->where('id', '[0-9]+');
+    Route::post('listings/{id}/expire', 'TradeController@postExpireListing')->where('id', '[0-9]+');
+    
     Route::get('{status}', 'TradeController@getIndex')->where('status', 'open|pending|completed|rejected|canceled');
     Route::get('create', 'TradeController@getCreateTrade');
     Route::get('{id}/edit', 'TradeController@getEditTrade')->where('id', '[0-9]+');
@@ -83,13 +104,22 @@ Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function() {
     Route::post('{id}/cancel-trade', 'TradeController@postCancelTrade');
 });
 
+Route::group(['prefix' => 'crafting', 'namespace' => 'Users'], function() {
+    Route::get('/', 'CraftingController@getIndex');
+    Route::get('craft/{id}', 'CraftingController@getCraftRecipe');
+    Route::post('craft/{id}', 'CraftingController@postCraftRecipe');
+});
+
 /**************************************************************************************************
     Characters
 **************************************************************************************************/
 Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function() {
     Route::get('{slug}/profile/edit', 'CharacterController@getEditCharacterProfile');
     Route::post('{slug}/profile/edit', 'CharacterController@postEditCharacterProfile');
+    
+    Route::post('{slug}/faction', 'CharacterController@postSetFaction');
 
+    Route::post('{slug}/'.__('awards.awardcase').'/edit', 'CharacterController@postAwardEdit');
     Route::post('{slug}/inventory/edit', 'CharacterController@postInventoryEdit');
 
     Route::post('{slug}/bank/transfer', 'CharacterController@postCurrencyTransfer');
@@ -117,7 +147,7 @@ Route::group(['prefix' => 'myo', 'namespace' => 'Characters'], function() {
 **************************************************************************************************/
 
 Route::group(['prefix' => 'gallery'], function() {
-    Route::get('submissions/{type}', 'GalleryController@getUserSubmissions')->where('type', 'pending|accepted|rejected');
+    Route::get('submissions/{type}', 'GalleryController@getUserSubmissions')->where('type', 'draft|pending|accepted|rejected');
 
     Route::post('favorite/{id}', 'GalleryController@postFavoriteSubmission');
 
@@ -140,12 +170,24 @@ Route::group(['prefix' => 'submissions', 'namespace' => 'Users'], function() {
     Route::get('new/character/{slug}', 'SubmissionController@getCharacterInfo');
     Route::get('new/prompt/{id}', 'SubmissionController@getPromptInfo');
     Route::post('new', 'SubmissionController@postNewSubmission');
+    Route::post('new/{draft}', 'SubmissionController@postNewSubmission')->where('draft', 'draft');
+    Route::get('draft/{id}', 'SubmissionController@getEditSubmission');
+    Route::post('draft/{id}', 'SubmissionController@postEditSubmission');
+    Route::post('draft/{id}/{submit}', 'SubmissionController@postEditSubmission')->where('submit', 'submit');
+    Route::post('draft/{id}/delete', 'SubmissionController@postDeleteSubmission');
+    Route::post('draft/{id}/cancel', 'SubmissionController@postCancelSubmission');
 });
 
 Route::group(['prefix' => 'claims', 'namespace' => 'Users'], function() {
     Route::get('/', 'SubmissionController@getClaimsIndex');
     Route::get('new', 'SubmissionController@getNewClaim');
     Route::post('new', 'SubmissionController@postNewClaim');
+    Route::post('new/{draft}', 'SubmissionController@postNewClaim')->where('draft', 'draft');
+    Route::get('draft/{id}', 'SubmissionController@getEditClaim');
+    Route::post('draft/{id}', 'SubmissionController@postEditClaim');
+    Route::post('draft/{id}/{submit}', 'SubmissionController@postEditClaim')->where('submit', 'submit');
+    Route::post('draft/{id}/delete', 'SubmissionController@postDeleteClaim');
+    Route::post('draft/{id}/cancel', 'SubmissionController@postCancelClaim');
 });
 
 Route::group(['prefix' => 'reports', 'namespace' => 'Users'], function() {
@@ -156,7 +198,7 @@ Route::group(['prefix' => 'reports', 'namespace' => 'Users'], function() {
 });
 
 Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function() {
-    Route::get('{type?}', 'DesignController@getDesignUpdateIndex')->where('type', 'pending|approved|rejected');
+    Route::get('{type?}', 'DesignController@getDesignUpdateIndex')->where('type', 'draft|pending|approved|rejected');
     Route::get('{id}', 'DesignController@getDesignUpdate');
 
     Route::get('{id}/comments', 'DesignController@getComments');
@@ -180,13 +222,13 @@ Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function() {
 });
 
 /**************************************************************************************************
-    Shops
+    Dailies
 **************************************************************************************************/
 
-Route::group(['prefix' => 'shops'], function() {
-    Route::post('buy', 'ShopController@postBuy');
-    Route::get('history', 'ShopController@getPurchaseHistory');
+Route::group(['prefix' => __('dailies.dailies')], function() {
+    Route::post('{id}', 'DailyController@postRoll');
 });
+
 
 /**************************************************************************************************
     Comments
@@ -197,4 +239,19 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function() {
     Route::put('/{comment}', 'CommentController@update')->name('comments.update');
     Route::post('/{comment}', 'CommentController@reply')->name('comments.reply');
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
+    Route::post('/{id}/lock', 'CommentController@lock')->name('comments.lock');
+});
+
+
+/**************************************************************************************************
+    Forums
+**************************************************************************************************/
+Route::group(['prefix' => 'forum'], function() {
+    Route::get('{id}/new', 'ForumController@getCreateThread');
+    Route::get('{id}/~{thread_id}/edit', 'ForumController@getEditThread');
+});
+
+
+Route::group(['prefix' => 'user', 'namespace' => 'Users'], function() {
+    Route::get('{name}/forum', 'UserController@getUserForumPosts'); // Placed here so I don't have to mess with
 });

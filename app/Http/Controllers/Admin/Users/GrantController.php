@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User\User;
 use App\Models\Item\Item;
+use App\Models\Award\Award;
 use App\Models\Currency\Currency;
 
 use App\Models\User\UserItem;
@@ -19,6 +20,7 @@ use App\Models\Submission\Submission;
 use App\Models\Character\Character;
 use App\Services\CurrencyManager;
 use App\Services\InventoryManager;
+use App\Services\AwardCaseManager;
 
 use App\Http\Controllers\Controller;
 
@@ -89,6 +91,116 @@ class GrantController extends Controller
     }
 
     /**
+     * Show the award grant page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getAwards()
+    {
+        return view('admin.grants.awards', [
+            'userOptions'           => User::orderBy('id')->pluck('name', 'id'),
+            'userAwardOptions'      => Award::orderBy('name')->where('is_user_owned',1)->pluck('name', 'id'),
+            'characterOptions'      => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id'),
+            'characterAwardOptions' => Award::orderBy('name')->where('is_character_owned',1)->pluck('name', 'id')
+        ]);
+    }
+
+    /**
+     * Grants or removes awards from multiple users.
+     *
+     * @param  \Illuminate\Http\Request        $request
+     * @param  App\Services\AwardCaseManager  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postAwards(Request $request, AwardCaseManager $service)
+    {
+        $data = $request->only([
+            'names', 'award_ids', 'quantities', 'data', 'disallow_transfer', 'notes',
+            'character_names', 'character_award_ids', 'character_quantities',
+        ]);
+        if($service->grantAwards($data, Auth::user())) {
+            flash(ucfirst(__('awards.awards')).' granted successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Show the character reputation grant page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCharacterReputation()
+    {
+        return view('admin.grants.character_reputation', [
+            'characters' => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id')
+        ]);
+    }
+
+    /**
+     * Grants or removes reputation from multiple characters.
+     *
+     * @param  \Illuminate\Http\Request      $request
+     * @param  App\Services\CurrencyManager  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCharacterReputation(Request $request, CurrencyManager $service)
+    {
+        // Find the Reputation currency
+        $reputationCurrency = Currency::where('name', 'Reputation')->where('is_character_owned', 1)->first();
+        
+        if(!$reputationCurrency) {
+            flash('Reputation currency not found.')->error();
+            return redirect()->back();
+        }
+
+        // Get character IDs
+        $characterIds = $request->input('character_ids', []);
+        if (!is_array($characterIds)) {
+            $characterIds = [$characterIds];
+        }
+        $characterIds = array_filter($characterIds);
+        
+        if (empty($characterIds)) {
+            flash('Please select at least one character.')->error();
+            return redirect()->back();
+        }
+
+        $quantity = $request->input('quantity', 0);
+        if ($quantity == 0) {
+            flash('Please enter a non-zero quantity.')->error();
+            return redirect()->back();
+        }
+
+        $data = $request->only(['data']);
+        $successCount = 0;
+        
+        foreach ($characterIds as $characterId) {
+            $character = Character::find($characterId);
+            if ($character) {
+                $grantData = [
+                    'currency_id' => $reputationCurrency->id,
+                    'quantity' => $quantity,
+                    'data' => $data['data'] ?? null
+                ];
+                
+                if ($service->grantCharacterCurrencies($grantData, $character, Auth::user())) {
+                    $successCount++;
+                }
+            }
+        }
+        
+        if ($successCount > 0) {
+            flash('Reputation granted to ' . $successCount . ' character(s) successfully.')->success();
+        } else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /*
      * Show the item search page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
