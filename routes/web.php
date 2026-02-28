@@ -21,11 +21,30 @@ require_once __DIR__.'/lorekeeper/browse.php';
 // Monthly event routes (specific) — place before general catch-all
 use App\Http\Controllers\MonthlyEventController;
 Route::get('monthly-event', [MonthlyEventController::class, 'index']);
+Route::get('monthly-event/history', [MonthlyEventController::class, 'history']);
 Route::get('monthly-event/{slug}', [MonthlyEventController::class, 'show']);
+Route::post('monthly-event/{slug}/ask-question', [MonthlyEventController::class, 'postAskQuestion'])->middleware(['auth', 'verified']);
+Route::post('monthly-event/{slug}/submit', [MonthlyEventController::class, 'postSubmit'])->middleware(['auth', 'verified']);
+Route::post('monthly-event/submission/{id}/delete', [MonthlyEventController::class, 'postDeleteSubmission'])->middleware(['auth', 'verified']);
 
-// Public static pages (keyed). Examples: contracts, expeditions, featured-planet, current-galaxy
+// Contract routes
+use App\Http\Controllers\ContractController;
+Route::get('contracts', [ContractController::class, 'index']);
+Route::get('contracts/{id}', [ContractController::class, 'show']);
+Route::post('contracts/{id}/claim', [ContractController::class, 'postClaim'])->middleware(['auth', 'verified']);
+Route::post('contracts/complete/{id}', [ContractController::class, 'postComplete'])->middleware(['auth', 'verified']);
+
+// Expedition routes
+use App\Http\Controllers\ExpeditionController;
+Route::get('expeditions', [ExpeditionController::class, 'index']);
+Route::get('expeditions/{id}', [ExpeditionController::class, 'show']);
+Route::post('expeditions/{id}/submit', [ExpeditionController::class, 'postSubmit']);
+Route::post('expeditions/submission/{id}/delete', [ExpeditionController::class, 'postDeleteSubmission'])->middleware(['auth', 'verified']);
+Route::post('expeditions/{id}/name', [ExpeditionController::class, 'postName'])->middleware(['auth', 'verified']);
+
+// Public static pages (keyed). Examples: expeditions, featured-planet, current-galaxy
 Route::get('/{key}', [\App\Http\Controllers\PageController::class, 'show'])
-    ->where('key', '(contracts|expeditions|featured-planet|current-galaxy)');
+    ->where('key', '(expeditions|featured-planet|current-galaxy)');
 
 /**************************************************************************************************
     Routes that require login

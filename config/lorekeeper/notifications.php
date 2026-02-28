@@ -479,4 +479,95 @@ return [
         'message' => 'You have received a staff grant of the crafting recipe {recipe_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Unlocked Recipes</a>)',
         'url' => 'crafting'
     ],
+
+    // EXPEDITION_SUBMITTED
+    700 => [
+        'name' => 'Expedition Submitted',
+        'message' => 'A new expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been submitted by <a href="{user_url}">{user_name}</a>. (<a href="{url}">Review Submission</a>)',
+        'url' => 'admin/expeditions/submission/{submission_id}'
+    ],
+
+    // EXPEDITION_APPROVED
+    701 => [
+        'name' => 'Expedition Approved',
+        'message' => 'Your expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been approved by staff! {reward_text} Your visit count increased by {visit_gain}. (<a href="{url}">View Planet</a>)',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EXPEDITION_REJECTED
+    702 => [
+        'name' => 'Expedition Rejected',
+        'message' => 'Your expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> was rejected by staff. {notes_text} (<a href="{url}">View Planet</a>)',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EXPEDITION_REVOKED
+    703 => [
+        'name' => 'Expedition Revoked',
+        'message' => 'Your approved expedition submission titled <strong>{submission_title}</strong> for <strong>{planet_name}</strong> has been taken down by staff. Your visit count has been decreased. {reason_text}',
+        'url' => 'expeditions/{planet_id}'
+    ],
+
+    // EVENT_QUESTION_RECEIVED (for staff)
+    800 => [
+        'name' => 'Event Question Received',
+        'message' => '<a href="{user_url}">{user_name}</a> has asked a question about the monthly event "<strong>{event_name}</strong>". (<a href="{url}">View & Answer Question</a>)',
+        'url' => 'admin/event-questions/{question_id}'
+    ],
+
+    // EVENT_QUESTION_ANSWERED (for players)
+    801 => [
+        'name' => 'Event Question Answered',
+        'message' => 'Your question about "<strong>{event_name}</strong>" has been answered by <a href="{staff_url}">{staff_name}</a>! (<a href="{url}">View Answer</a>)',
+        'url' => 'monthly-event/{event_slug}#question-{question_id}'
+    ],
+
+    // EVENT_BADGE_EARNED
+    802 => [
+        'name' => 'Event Badge Earned',
+        'message' => 'Congratulations! You have earned the <strong>{award_name}</strong> badge for participating in "<strong>{event_name}</strong>"!',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_APPROVED
+    803 => [
+        'name' => 'Event Submission Approved',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" has been approved! {reward_text}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_REJECTED
+    804 => [
+        'name' => 'Event Submission Rejected',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" was not approved. {staff_notes}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EVENT_SUBMISSION_DELETED
+    805 => [
+        'name' => 'Event Submission Deleted',
+        'message' => 'Your submission "<strong>{submission_title}</strong>" for "<strong>{event_name}</strong>" has been removed. {delete_reason}',
+        'url' => 'monthly-event/{event_slug}'
+    ],
+
+    // EXPEDITION_REWARD_REROLL
+    807 => [
+        'name' => 'Expedition Reward Reroll',
+        'message' => 'You received <strong>{original_item_name} x{original_item_quantity}</strong> from your expedition to <strong>{planet_name}</strong>. Use Emergency Fabricator Charge to reroll this reward?',
+        'url' => 'notifications'
+    ],
+
+    // CONTRACT_REPUTATION_CLAIM
+    806 => [
+        'name' => 'Contract Reputation Reward',
+        'message' => 'You have {reputation_quantity} Reputation from contract "<strong>{contract_name}</strong>" ready to claim. Select a character below to receive it.',
+        'url' => 'notifications'
+    ],
+
+    // MODIFIER_ITEM_CONSUMED
+    808 => [
+        'name' => 'Modifier Item Used',
+        'message' => '1 Use consumed for <strong>{item_name}</strong>. {use_context}',
+        'url' => 'notifications'
+    ],
 ];

@@ -384,11 +384,17 @@ class EventService extends Service
 
         $saveData['description'] = isset($data['description']) ? $data['description'] : null;
         if(isset($data['description']) && $data['description']) $saveData['parsed_description'] = parse($data['description']);
+        $saveData['qna_content'] = isset($data['qna_content']) ? $data['qna_content'] : null;
+        if(isset($data['qna_content']) && $data['qna_content']) $saveData['qna_parsed_text'] = parse($data['qna_content']);
         $saveData['summary'] = isset($data['summary']) ? $data['summary'] : null;
 
         if(isset($data['name']) && $data['name']) $saveData['name'] = parse($data['name']);
-        $saveData['is_active'] = isset($data['is_active']);
+        $isActiveInput = isset($data['is_active']) ? $data['is_active'] : 0;
+        if(is_array($isActiveInput)) $isActiveInput = end($isActiveInput);
+        $saveData['is_active'] = filter_var($isActiveInput, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $saveData['category_id'] = isset($data['category_id']) && $data['category_id'] ? $data['category_id'] : null;
+        $saveData['loot_table_id'] = isset($data['loot_table_id']) && $data['loot_table_id'] ? $data['loot_table_id'] : null;
+        $saveData['award_id'] = isset($data['award_id']) && $data['award_id'] ? $data['award_id'] : null;
 
         $saveData['image'] = isset($data['image']) ? $data['image'] : null;
         $saveData['image_th'] = isset($data['image_th']) ? $data['image_th'] : null;
@@ -416,6 +422,45 @@ class EventService extends Service
             }
             unset($data['remove_image_th']);
         }
+
+        // Handle inspiration images
+        $inspirationDir = public_path('images/events/inspiration');
+        if(!file_exists($inspirationDir)) mkdir($inspirationDir, 0755, true);
+        
+        // Get existing images from the event
+        $existingImages = [];
+        if($event) {
+            $existingImages = $event->inspiration_images ?? [];
+        }
+        
+        // Handle image removals
+        if(isset($data['remove_inspiration']) && is_array($data['remove_inspiration'])) {
+            foreach($data['remove_inspiration'] as $imgToRemove) {
+                $key = array_search($imgToRemove, $existingImages);
+                if($key !== false) {
+                    $filePath = $inspirationDir . '/' . $imgToRemove;
+                    if(file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                    unset($existingImages[$key]);
+                }
+            }
+            $existingImages = array_values($existingImages);
+        }
+        
+        // Handle new uploads
+        if(isset($data['inspiration_images']) && is_array($data['inspiration_images'])) {
+            foreach($data['inspiration_images'] as $file) {
+                if(count($existingImages) >= 10) break;
+                if($file && $file->isValid()) {
+                    $filename = time().'_'.uniqid().'_'.preg_replace('/[^a-z0-9\.\-]/i', '_', $file->getClientOriginalName());
+                    $file->move($inspirationDir, $filename);
+                    $existingImages[] = $filename;
+                }
+            }
+        }
+        
+        $saveData['inspiration_images'] = $existingImages;
 
         return $saveData;
     }

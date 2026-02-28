@@ -11,7 +11,8 @@
 
 <h3>
     @if(Auth::check() && Auth::user()->hasPower('edit_inventories'))
-        <a href="#" class="float-right btn btn-outline-info btn-sm" id="grantButton" data-toggle="modal" data-target="#grantModal"><i class="fas fa-cog"></i> Admin</a>
+        <a href="#" class="float-right btn btn-outline-info btn-sm" id="grantReputationButton" data-toggle="modal" data-target="#grantReputationModal"><i class="fas fa-star"></i> Grant Reputation</a>
+        <a href="#" class="float-right btn btn-outline-info btn-sm mr-2" id="grantButton" data-toggle="modal" data-target="#grantModal"><i class="fas fa-cog"></i> Admin</a>
     @endif
     Currencies
 </h3>
@@ -122,6 +123,35 @@
                                     {!! Form::text('quantity', null, ['class' => 'form-control']) !!}
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            {!! Form::label('data', 'Reason (Optional)') !!} {!! add_help('A reason for the grant. This will be noted in the logs.') !!}
+                            {!! Form::text('data', null, ['class' => 'form-control']) !!}
+                        </div>
+                        <div class="text-right">
+                            {!! Form::submit('Submit', ['class' => 'btn btn-primary']) !!}
+                        </div>
+                    {!! Form::close() !!}
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if(Auth::check() && Auth::user()->hasPower('edit_inventories'))
+    <div class="modal fade" id="grantReputationModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title h5 mb-0">[ADMIN] Grant Reputation</span>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    {!! Form::open(['url' => 'admin/character/'.$character->slug.'/grant-reputation']) !!}
+                        <div class="form-group">
+                            {!! Form::label('quantity', 'Reputation Amount') !!} {!! add_help('If the value given is less than 0, this will be deducted from the character.') !!}
+                            {!! Form::text('quantity', null, ['class' => 'form-control']) !!}
                         </div>
 
                         <div class="form-group">

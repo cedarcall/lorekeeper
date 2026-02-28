@@ -371,7 +371,7 @@ class InventoryManager extends Service
      * @param  int                                                    $quantity
      * @return bool
      */
-    public function creditItem($sender, $recipient, $type, $data, $item, $quantity)
+    public function creditItem($sender, $recipient, $type, $data, $item, $quantity, $applyModifiers = true)
     {
         DB::beginTransaction();
 
@@ -379,15 +379,20 @@ class InventoryManager extends Service
             $encoded_data = \json_encode($data);
 
             if($recipient->logType == 'User') {
-                $recipient_stack = UserItem::where([
-                    ['user_id', '=', $recipient->id],
-                    ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data]
-                ])->first();
+                $normalizedData = $this->normalizeUserStackData($data);
+                $candidateStacks = UserItem::where('user_id', $recipient->id)
+                    ->where('item_id', $item->id)
+                    ->whereNull('deleted_at')
+                    ->get();
+
+                $recipient_stack = $candidateStacks->first(function($stack) use ($normalizedData) {
+                    return $this->normalizeUserStackData($stack->data) == $normalizedData;
+                });
 
                 if(!$recipient_stack)
-                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => json_encode($normalizedData)]);
                 $recipient_stack->count += $quantity;
+                if($recipient_stack->data != $normalizedData) $recipient_stack->data = json_encode($normalizedData);
                 $recipient_stack->save();
             }
             else {
@@ -404,11 +409,40 @@ class InventoryManager extends Service
             }
             if($type && !$this->createLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, null, $type, $data['data'], $item->id, $quantity)) throw new \Exception("Failed to create log.");
 
+            if($applyModifiers && $recipient->logType == 'User' && strtolower($item->name) == 'salvaged metal') {
+                $modifierService = new ModifierItemService();
+                if($modifierService->consumeModifierCharge($recipient, 'Modular Salvage Kit', 1, 'Modifier Item Use', 'Modular Salvage Kit triggered on Salvaged Metal gain')) {
+                    Notifications::create('MODIFIER_ITEM_CONSUMED', $recipient, [
+                        'item_name' => 'Modular Salvage Kit',
+                        'use_context' => 'Triggered on Salvaged Metal gain and granted +1 Salvaged Metal.',
+                    ]);
+
+                    if(!$this->creditItem($sender, $recipient, 'Modular Salvage Kit Bonus', ['data' => 'Modular Salvage Kit granted +1 Salvaged Metal'], $item, 1, false)) {
+                        throw new \Exception("Failed to grant Modular Salvage Kit bonus reward.");
+                    }
+                }
+            }
+
             return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
+    }
+
+    private function normalizeUserStackData($data)
+    {
+        if(!is_array($data)) $data = [];
+
+        if(isset($data['data'])) unset($data['data']);
+
+        foreach($data as $key => $value) {
+            if($value === null || $value === '') unset($data[$key]);
+        }
+
+        ksort($data);
+
+        return $data;
     }
 
     /**

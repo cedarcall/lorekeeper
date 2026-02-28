@@ -80,17 +80,19 @@
     {!! Form::textarea('description', $item->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
-@if(Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields'))
-    <div class="form-group">
-        {!! Form::label('Uses (Optional)') !!} {!! add_help('A short description of the item\'s use(s). Supports raw HTML if need be, but keep it brief.') !!}
-        {!! Form::text('uses', $item && $item->uses ? $item->uses : '', ['class' => 'form-control']) !!}
-    </div>
-@endif
+<div class="form-group">
+    {!! Form::label('Uses (Optional)') !!} {!! add_help('Number of uses per item. Leave blank for single-use behavior.') !!}
+    {!! Form::number('uses', $item && $item->uses ? $item->uses : '', ['class' => 'form-control', 'min' => 1, 'max' => 250, 'step' => 1]) !!}
+</div>
 
 <div class="row">
     <div class="col-md form-group">
         {!! Form::checkbox('allow_transfer', 1, $item->id ? $item->allow_transfer : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
         {!! Form::label('allow_transfer', 'Allow User → User Transfer', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is off, users will not be able to transfer this item to other users. Non-account-bound items can be account-bound when granted to users directly.') !!}
+    </div>
+    <div class="col-md form-group">
+        {!! Form::checkbox('can_only_roll_once', 1, $item->id ? $item->can_only_roll_once : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+        {!! Form::label('can_only_roll_once', 'Can Only Roll Once', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is on, each user can only receive this item once per monthly event from loot table rolls.') !!}
     </div>
     @if(Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields'))
         <div class="col-md form-group">

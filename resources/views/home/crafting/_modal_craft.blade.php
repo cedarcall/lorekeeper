@@ -48,17 +48,23 @@
             </div>
         </div>
     </div>
-    @if($selected || $recipe->onlyCurrency)
-        {{-- Check if sufficient ingredients have been selected? --}}
-        {!! Form::open(['url' => 'crafting/craft/'.$recipe->id]) !!}
-            @include('widgets._inventory_select', ['user' => Auth::user(), 'inventory' => $inventory, 'categories' => $categories, 'selected' => $selected, 'page' => $page])
-            <div class="text-right">
-                {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
+    {!! Form::open(['url' => 'crafting/craft/'.$recipe->id]) !!}
+        @if(isset($catalystOptions) && count($catalystOptions))
+            <div class="alert alert-info">
+                <p class="mb-2"><strong>Shinevine Catalyst</strong> (optional): reduce one ingredient cost by 1 (minimum 2).</p>
+                {!! Form::select('catalyst_ingredient_id', [null => 'Do not use catalyst'] + $catalystOptions, null, ['class' => 'form-control']) !!}
             </div>
-        {!! Form::close() !!}
-    @else
-        <div class="alert alert-danger">You do not have all of the required recipe ingredients.</div>
-    @endif
+        @endif
+
+        @if(isset($hasSufficientIngredients) && !$hasSufficientIngredients)
+            <div class="alert alert-danger">You do not currently have all of the required recipe ingredients, but you can still select inventory and try crafting.</div>
+        @endif
+
+        @include('widgets._inventory_select', ['user' => Auth::user(), 'inventory' => $inventory, 'categories' => $categories, 'selected' => $selected, 'page' => $page])
+        <div class="text-right">
+            {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
+        </div>
+    {!! Form::close() !!}
 @endif
 
 @include('widgets._inventory_select_js')

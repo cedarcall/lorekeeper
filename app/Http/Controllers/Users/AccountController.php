@@ -10,6 +10,12 @@ use Image;
 use App\Models\Theme;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
+use App\Models\Character\Character;
+use App\Models\Currency\Currency;
+use App\Models\ExpeditionSubmission;
+use App\Models\FeaturedPlanet;
+use App\Models\Item\Item;
+use App\Models\User\UserItem;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +26,8 @@ use App\Models\WorldExpansion\Faction;
 
 use App\Services\UserService;
 use App\Services\LinkService;
+use App\Services\CurrencyManager;
+use App\Services\ModifierItemService;
 
 use App\Http\Controllers\Controller;
 
@@ -228,13 +236,173 @@ class AccountController extends Controller {
      */
     public function getNotifications() {
         $notifications = Auth::user()->notifications()->orderBy('id', 'DESC')->paginate(30);
+        $notificationCharacterOptions = Character::visible()->myo(0)->where('user_id', Auth::id())->orderBy('sort', 'DESC')->get()->pluck('fullName', 'id')->toArray();
         Auth::user()->notifications()->update(['is_unread' => 0]);
         Auth::user()->notifications_unread = 0;
         Auth::user()->save();
 
         return view('account.notifications', [
-            'notifications' => $notifications
+            'notifications' => $notifications,
+            'notificationCharacterOptions' => $notificationCharacterOptions,
         ]);
+    }
+
+    /**
+     * Claims pending contract reputation reward to the selected character.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postClaimContractReputation(Request $request, CurrencyManager $service, $id) {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('notification_type_id', Notification::CONTRACT_REPUTATION_CLAIM)
+            ->first();
+
+        if(!$notification) {
+            flash('Invalid contract reputation notification.')->error();
+            return redirect()->back();
+        }
+
+        $character = Character::visible()->myo(0)
+            ->where('id', $request->input('character_id'))
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if(!$character) {
+            flash('Please select one of your characters.')->error();
+            return redirect()->back();
+        }
+
+        $data = $notification->data;
+        $reputationQuantity = isset($data['reputation_quantity']) ? (int) $data['reputation_quantity'] : 0;
+        if($reputationQuantity <= 0) {
+            flash('This contract reputation notification is no longer valid.')->error();
+            $notification->delete();
+            return redirect()->back();
+        }
+
+        $reputationCurrency = Currency::where('name', 'Reputation')->where('is_character_owned', 1)->first();
+        if(!$reputationCurrency) {
+            flash('Reputation currency not found.')->error();
+            return redirect()->back();
+        }
+
+        $contractName = isset($data['contract_name']) ? $data['contract_name'] : 'Unknown Contract';
+        if($service->creditCurrency(null, $character, 'Contract Reputation Reward', 'Completed contract: '.$contractName, $reputationCurrency, $reputationQuantity)) {
+            $notification->delete();
+            flash('Reputation has been granted to '.$character->fullName.'.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Handles expedition reward reroll prompt decision.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postExpeditionRewardReroll(Request $request, $id) {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('notification_type_id', Notification::EXPEDITION_REWARD_REROLL)
+            ->first();
+
+        if(!$notification) {
+            flash('Invalid expedition reroll notification.')->error();
+            return redirect()->back();
+        }
+
+        $choice = $request->input('reroll_choice');
+        if($choice !== 'yes') {
+            $notification->delete();
+            flash('Expedition reroll skipped.')->success();
+            return redirect()->back();
+        }
+
+        $modifierService = new ModifierItemService();
+        if(!$modifierService->consumeModifierCharge(Auth::user(), 'Emergency Fabricator Charge', 1, 'Expedition Modifier Use', 'Emergency reroll used for expedition reward')) {
+            foreach($modifierService->errors()->getMessages()['error'] as $error) flash($error)->error();
+            return redirect()->back();
+        }
+
+        $data = $notification->data;
+        $submission = ExpeditionSubmission::where('id', $data['submission_id'] ?? null)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if(!$submission || !$submission->planet_id) {
+            flash('Could not locate the original expedition reward.')->error();
+            $notification->delete();
+            return redirect()->back();
+        }
+
+        $originalItemId = isset($data['original_item_id']) ? (int) $data['original_item_id'] : 0;
+        $originalQty = isset($data['original_item_quantity']) ? (int) $data['original_item_quantity'] : 0;
+        if($originalItemId > 0 && $originalQty > 0) {
+            $remaining = $originalQty;
+            $service = new \App\Services\InventoryManager();
+            $stacks = UserItem::where('user_id', Auth::id())
+                ->where('item_id', $originalItemId)
+                ->where('count', '>', 0)
+                ->orderBy('count', 'desc')
+                ->get();
+
+            foreach($stacks as $stack) {
+                if($remaining <= 0) break;
+                $debit = min($remaining, $stack->count);
+                if(!$service->debitStack(Auth::user(), 'Expedition Reward Reroll', ['data' => 'Removed original expedition reward before reroll'], $stack, $debit)) {
+                    flash('Could not remove the original reward item.')->error();
+                    return redirect()->back();
+                }
+                $remaining -= $debit;
+            }
+
+            if($remaining > 0) {
+                flash('Could not remove the original reward item quantity for reroll.')->error();
+                return redirect()->back();
+            }
+        }
+
+        $featuredPlanet = FeaturedPlanet::with('lootTable')
+            ->where('is_active', 1)
+            ->where('planet_id', $submission->planet_id)
+            ->first();
+
+        if(!$featuredPlanet || !$featuredPlanet->lootTable) {
+            flash('No active expedition loot table is available for reroll.')->error();
+            return redirect()->back();
+        }
+
+        $assets = createAssetsArray();
+        $rerolledItem = null;
+        for($i = 0; $i < 30; $i++) {
+            $rolled = $featuredPlanet->lootTable->roll(1, Auth::id());
+            if(isset($rolled['items']) && count($rolled['items'])) {
+                foreach($rolled['items'] as $asset) {
+                    $rerolledItem = $asset;
+                    break 2;
+                }
+            }
+        }
+
+        if(!$rerolledItem) {
+            flash('Failed to reroll a valid item reward.')->error();
+            return redirect()->back();
+        }
+
+        addAsset($assets, $rerolledItem['asset'], $rerolledItem['quantity']);
+        if(!fillUserAssets($assets, null, Auth::user(), 'Expedition Reward Reroll', ['data' => 'Emergency Fabricator reroll'])) {
+            flash('Failed to grant rerolled reward.')->error();
+            return redirect()->back();
+        }
+
+        $notification->delete();
+        flash('1 Use consumed for Emergency Fabricator Charge')->success();
+        flash('Expedition reward rerolled to '.$rerolledItem['asset']->name.' x'.$rerolledItem['quantity'].'.')->success();
+        return redirect()->back();
     }
 
     /**

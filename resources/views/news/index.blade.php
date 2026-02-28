@@ -6,39 +6,33 @@
 <style>
     .news-card {
         position: relative;
-        background: rgba(10, 20, 40, 0.5);
-    }
-
-    .news-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        overflow: hidden;
+        background-color: rgba(10, 20, 40, 0.6);
+        border: 2px solid #00ccff;
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.5), inset 0 0 20px rgba(0, 204, 255, 0.08);
         background-image: repeating-linear-gradient(
             0deg,
-            rgba(0, 204, 255, 0.25) 0px,
-            rgba(0, 204, 255, 0.25) 2px,
+            rgba(0, 204, 255, 0.35) 0px,
+            rgba(0, 204, 255, 0.35) 2px,
             transparent 2px,
             transparent 4px
         );
-        pointer-events: none;
-        animation: scan-lines 8s linear infinite;
-        z-index: 1;
+        background-size: 100% 4px;
+        background-position: 0 0;
+        animation: scan-lines 6s linear infinite;
     }
 
-    .news-card > * {
-        position: relative;
-        z-index: 2;
+    .news-card .card-header,
+    .news-card .card-body {
+        background-color: transparent;
     }
 
     @keyframes scan-lines {
         0% {
-            transform: translateY(0);
+            background-position: 0 0;
         }
         100% {
-            transform: translateY(4px);
+            background-position: 0 8px;
         }
     }
 </style>

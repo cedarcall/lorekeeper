@@ -134,6 +134,49 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Shows a gallery of events (event history/archive).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEventHistory(Request $request)
+    {
+        $query = Event::where('is_active', 0)->with('category')->orderBy('sort', 'DESC');
+        $data = $request->only(['category_id', 'name', 'sort']);
+        if(isset($data['category_id']) && $data['category_id'] != 'none')
+            $query->where('category_id', $data['category_id']);
+        if(isset($data['name']))
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+
+        if(isset($data['sort']))
+        {
+            switch($data['sort']) {
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'category':
+                    $query->sortCategory();
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortOldest();
+                    break;
+            }
+        }
+        else $query->sortCategory();
+
+        return view('worldexpansion.event_history', [
+            'events' => $query->paginate(12)->appends($request->query()),
+            'categories' => ['none' => 'Any Category'] + EventCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
+        ]);
+    }
+
 
 
 }

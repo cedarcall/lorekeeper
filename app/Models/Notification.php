@@ -169,4 +169,17 @@ class Notification extends Model
     const GALLERY_SUBMISSION_EDITED         = 514;
     const GALLERY_SUBMISSION_PARTICIPANT    = 515;
     const RECIPE_GRANT                      = 600; // Draginraptor - Crafting
+    const EXPEDITION_SUBMITTED              = 700; // Expedition submission created
+    const EXPEDITION_APPROVED               = 701; // Expedition submission approved
+    const EXPEDITION_REJECTED               = 702; // Expedition submission rejected
+    const EXPEDITION_REVOKED                = 703; // Expedition submission taken down
+    const EVENT_QUESTION_RECEIVED           = 800; // Staff receives event question
+    const EVENT_QUESTION_ANSWERED           = 801; // Player receives answer to question
+    const EVENT_BADGE_EARNED                = 802; // Player earns event badge
+    const EVENT_SUBMISSION_APPROVED         = 803; // Event submission approved
+    const EVENT_SUBMISSION_REJECTED         = 804; // Event submission rejected
+    const EVENT_SUBMISSION_DELETED          = 805; // Event submission deleted by staff
+    const CONTRACT_REPUTATION_CLAIM         = 806; // Contract reputation pending character selection
+    const EXPEDITION_REWARD_REROLL          = 807; // Expedition reward reroll prompt
+    const MODIFIER_ITEM_CONSUMED            = 808; // Modifier item use consumed notification
 }

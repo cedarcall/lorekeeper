@@ -25,8 +25,8 @@ class Faction extends Model
      * @var array
      */
     protected $fillable = [
-        'name','description', 'summary', 'parsed_description', 'sort', 'image_extension', 'thumb_extension',
-        'parent_id', 'type_id', 'is_active', 'display_style', 'is_character_faction', 'is_user_faction',
+        'name', 'slug', 'description', 'summary', 'parsed_description', 'sort', 'image_extension', 'thumb_extension',
+        'parent_id', 'type_id', 'is_active', 'display_style', 'is_character_faction', 'is_user_faction', 'bonus_key',
 
     ];
 
@@ -339,8 +339,8 @@ class Faction extends Model
     public function getFactionMembersAttribute()
     {
         $figures = $this->members()->get();
-        $users = Settings::get('WE_user_factions') > 0 && $this->is_user_faction ? User::visible()->where('faction_id', $this->id)->get() : null;
-        $characters = Settings::get('WE_character_factions') > 0 && $this->is_character_faction ? Character::visible()->where('faction_id', $this->id)->get() : null;
+        $users = $this->is_user_faction ? User::visible()->where('faction_id', $this->id)->get() : null;
+        $characters = $this->is_character_faction ? Character::visible()->where('faction_id', $this->id)->get() : null;
 
         if($users && $characters) return $users->concat($characters);
         elseif($users || $characters) {

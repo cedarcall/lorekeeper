@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
 use App\Models\Rank\Rank;
+use App\Models\Character\Character;
 use App\Models\User\UserUpdateLog;
 use App\Models\WorldExpansion\Location;
 use App\Models\WorldExpansion\Faction;
@@ -95,13 +96,13 @@ class UserController extends Controller
         return view('admin.users.user', [
             'user' => $user,
             'ranks' => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
-            'locations' => Location::all()->where('is_user_home')->pluck('style','id')->toArray(),
-            'factions' => Faction::all()->where('is_user_faction')->pluck('style','id')->toArray(),
+            'locations' => Location::where('is_user_home', true)->get()->pluck('name','id')->all(),
+            'factions' => Faction::where('is_user_faction', true)->get()->pluck('name','id')->all(),
             'user_enabled' => Settings::get('WE_user_locations'),
             'user_faction_enabled' => Settings::get('WE_user_factions'),
             'char_enabled' => Settings::get('WE_character_locations'),
             'char_faction_enabled' => Settings::get('WE_character_factions'),
-            'location_interval' => $interval[Settings::get('WE_change_timelimit')]
+            'location_interval' => $interval[Settings::get('WE_change_timelimit') ?? 0]
         ]);
     }
 
@@ -354,6 +355,96 @@ class UserController extends Controller
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
+        return redirect()->back();
+    }
+
+    /**
+     * Completely reset a user's information (progress, awards, inventory, bank, etc).
+     */
+    public function postResetUser(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+
+        DB::beginTransaction();
+
+        try {
+            // Inventory / awards / currencies / bank
+            DB::table('user_items')->where('user_id', $user->id)->delete();
+            DB::table('user_awards')->where('user_id', $user->id)->delete();
+            DB::table('user_currencies')->where('user_id', $user->id)->delete();
+            DB::table('user_storage')->where('user_id', $user->id)->delete();
+
+            // Logs
+            DB::table('items_log')->where(function($query) use ($user) {
+                $query->where('sender_type', 'User')->where('sender_id', $user->id)
+                    ->orWhere(function($q) use ($user) {
+                        $q->where('recipient_type', 'User')->where('recipient_id', $user->id);
+                    });
+            })->delete();
+
+            DB::table('awards_log')->where(function($query) use ($user) {
+                $query->where('sender_type', 'User')->where('sender_id', $user->id)
+                    ->orWhere(function($q) use ($user) {
+                        $q->where('recipient_type', 'User')->where('recipient_id', $user->id);
+                    });
+            })->delete();
+
+            DB::table('currencies_log')->where(function($query) use ($user) {
+                $query->where('sender_type', 'User')->where('sender_id', $user->id)
+                    ->orWhere(function($q) use ($user) {
+                        $q->where('recipient_type', 'User')->where('recipient_id', $user->id);
+                    });
+            })->delete();
+
+            // Submissions / progression
+            $submissionIds = DB::table('submissions')->where('user_id', $user->id)->pluck('id')->toArray();
+            if(count($submissionIds)) {
+                DB::table('submission_characters')->whereIn('submission_id', $submissionIds)->delete();
+            }
+            DB::table('submissions')->where('user_id', $user->id)->delete();
+
+            $gallerySubmissionIds = DB::table('gallery_submissions')->where('user_id', $user->id)->pluck('id')->toArray();
+            if(count($gallerySubmissionIds)) {
+                DB::table('gallery_submission_characters')->whereIn('gallery_submission_id', $gallerySubmissionIds)->delete();
+                DB::table('gallery_submission_collaborators')->whereIn('gallery_submission_id', $gallerySubmissionIds)->delete();
+                DB::table('gallery_favorites')->whereIn('gallery_submission_id', $gallerySubmissionIds)->delete();
+            }
+            DB::table('gallery_submissions')->where('user_id', $user->id)->delete();
+
+            DB::table('event_submissions')->where('user_id', $user->id)->delete();
+            DB::table('expedition_submissions')->where('user_id', $user->id)->delete();
+            DB::table('user_planet_expeditions')->where('user_id', $user->id)->delete();
+
+            DB::commit();
+            flash('Player information has been reset.')->success();
+        }
+        catch(\Exception $e) {
+            DB::rollBack();
+            flash('Reset failed: '.$e->getMessage())->error();
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Delete all characters owned by a user.
+     */
+    public function postDeleteCharacter(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+
+        DB::beginTransaction();
+
+        try {
+            Character::where('user_id', $user->id)->delete();
+            DB::commit();
+            flash('Character(s) deleted successfully.')->success();
+        }
+        catch(\Exception $e) {
+            DB::rollBack();
+            flash('Character deletion failed: '.$e->getMessage())->error();
+        }
+
         return redirect()->back();
     }
 }

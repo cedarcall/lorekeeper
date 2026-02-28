@@ -56,6 +56,7 @@ class ReportManager extends Service
                 'comments' => $data['comments'],
                 'error_type' => $data['error'],
                 'is_br' => $data['is_br'],
+                'report_type' => $data['report_type'] ?? null,
                 ]);
             
             return $this->commitReturn($report);

@@ -32,6 +32,8 @@ class MonthlyEventSeeder extends Seeder
         ];
 
         foreach ($events as $e) {
+            // Ensure `name` is present to satisfy older schemas that require it
+            if (!isset($e['name'])) $e['name'] = $e['title'];
             Event::updateOrCreate(['slug' => $e['slug']], $e);
         }
     }

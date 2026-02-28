@@ -188,6 +188,8 @@ class EventController extends Controller
             'factions' => Faction::all()->pluck('name','id')->toArray(),
             'newses' => News::all()->pluck('title','id')->toArray(),
             'prompts' => Prompt::all()->pluck('name','id')->toArray(),
+            'lootTables' => \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id')->toArray(),
+            'awards' => \App\Models\Award\Award::where('is_user_owned', 1)->orderBy('name')->get(),
         ]);
     }
 
@@ -210,6 +212,8 @@ class EventController extends Controller
             'factions' => Faction::all()->pluck('name','id')->toArray(),
             'newses' => News::all()->pluck('title','id')->toArray(),
             'prompts' => Prompt::all()->pluck('name','id')->toArray(),
+            'lootTables' => \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id')->toArray(),
+            'awards' => \App\Models\Award\Award::where('is_user_owned', 1)->orderBy('name')->get(),
         ]);
     }
 
@@ -226,10 +230,11 @@ class EventController extends Controller
         $id ? $request->validate(Event::$updateRules) : $request->validate(Event::$createRules);
 
         $data = $request->only([
-            'name', 'description', 'image', 'image_th', 'remove_image', 'remove_image_th',
+            'name', 'description', 'qna_content', 'image', 'image_th', 'remove_image', 'remove_image_th',
             'is_active', 'summary', 'category_id', 'figure_id', 'location_id', 'faction_id', 'news_id', 'prompt_id',
-            'occur_start', 'occur_end',
+            'occur_start', 'occur_end', 'loot_table_id', 'award_id',
             'attachment_type', 'attachment_id', 'attachment_data',
+            'inspiration_images', 'remove_inspiration',
         ]);
         if($id && $service->updateEvent(Event::find($id), $data, Auth::user())) {
             flash('Event updated successfully.')->success();

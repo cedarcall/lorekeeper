@@ -4,6 +4,7 @@ namespace App\Models\Loot;
 
 use Config;
 use App\Models\Item\Item;
+use App\Models\User\UserEventItemRoll;
 
 use App\Models\Model;
 
@@ -94,10 +95,12 @@ class LootTable extends Model
     /**
      * Rolls on the loot table and consolidates the rewards.
      *
-     * @param  int  $quantity
+     * @param  int       $quantity
+     * @param  int|null  $userId   Optional user ID for once-only item tracking
+     * @param  int|null  $eventId  Optional event ID for once-only item tracking
      * @return \Illuminate\Support\Collection
      */
-    public function roll($quantity = 1)
+    public function roll($quantity = 1, $userId = null, $eventId = null)
     {
         $rewards = createAssetsArray();
 
@@ -126,10 +129,31 @@ class LootTable extends Model
 
             if($result) {
                 // If this is chained to another loot table, roll on that table
-                if($result->rewardable_type == 'LootTable') $rewards = mergeAssetsArrays($rewards, $result->reward->roll($result->quantity));
-                elseif($result->rewardable_type == 'ItemCategory' || $result->rewardable_type == 'ItemCategoryRarity') $rewards = mergeAssetsArrays($rewards, $this->rollCategory($result->rewardable_id, $result->quantity, (isset($result->data['criteria']) ? $result->data['criteria'] : null), (isset($result->data['rarity']) ? $result->data['rarity'] : null)));
-                elseif($result->rewardable_type == 'ItemRarity') $rewards = mergeAssetsArrays($rewards, $this->rollRarityItem($result->quantity, $result->data['criteria'], $result->data['rarity']));
-                else addAsset($rewards, $result->reward, $result->quantity);
+                if($result->rewardable_type == 'LootTable') {
+                    $rewards = mergeAssetsArrays($rewards, $result->reward->roll($result->quantity, $userId, $eventId));
+                }
+                elseif($result->rewardable_type == 'ItemCategory' || $result->rewardable_type == 'ItemCategoryRarity') {
+                    $rewards = mergeAssetsArrays($rewards, $this->rollCategory($result->rewardable_id, $result->quantity, (isset($result->data['criteria']) ? $result->data['criteria'] : null), (isset($result->data['rarity']) ? $result->data['rarity'] : null), $userId, $eventId));
+                }
+                elseif($result->rewardable_type == 'ItemRarity') {
+                    $rewards = mergeAssetsArrays($rewards, $this->rollRarityItem($result->quantity, $result->data['criteria'], $result->data['rarity'], $userId, $eventId));
+                }
+                else {
+                    // Check if this is an item with can_only_roll_once flag
+                    if($result->rewardable_type == 'Item' && $userId && $eventId) {
+                        $item = $result->reward;
+                        if($item && $item->can_only_roll_once) {
+                            // Check if user has already rolled this item for this event
+                            if(UserEventItemRoll::hasUserRolled($userId, $item->id, $eventId)) {
+                                // Skip this item - user already has it for this event
+                                continue;
+                            }
+                            // Record that user rolled this item
+                            UserEventItemRoll::recordRoll($userId, $item->id, $eventId);
+                        }
+                    }
+                    addAsset($rewards, $result->reward, $result->quantity);
+                }
             }
         }
         return $rewards;
@@ -138,13 +162,15 @@ class LootTable extends Model
     /**
      * Rolls on an item category.
      *
-     * @param  int    $id
-     * @param  int    $quantity
-     * @param  string $condition
-     * @param  string $rarity
+     * @param  int       $id
+     * @param  int       $quantity
+     * @param  string    $criteria
+     * @param  string    $rarity
+     * @param  int|null  $userId   Optional user ID for once-only item tracking
+     * @param  int|null  $eventId  Optional event ID for once-only item tracking
      * @return \Illuminate\Support\Collection
      */
-    public function rollCategory($id, $quantity = 1, $criteria = null, $rarity = null)
+    public function rollCategory($id, $quantity = 1, $criteria = null, $rarity = null, $userId = null, $eventId = null)
     {
         $rewards = createAssetsArray();
 
@@ -163,7 +189,14 @@ class LootTable extends Model
             $result = $loot[$roll];
 
             if($result) {
-                // If this is chained to another loot table, roll on that table
+                // Check if this is an item with can_only_roll_once flag
+                if($userId && $eventId && $result->can_only_roll_once) {
+                    if(UserEventItemRoll::hasUserRolled($userId, $result->id, $eventId)) {
+                        // Skip this item - user already has it for this event
+                        continue;
+                    }
+                    UserEventItemRoll::recordRoll($userId, $result->id, $eventId);
+                }
                 addAsset($rewards, $result, 1);
             }
         }
@@ -173,12 +206,14 @@ class LootTable extends Model
     /**
      * Rolls on an item rarity.
      *
-     * @param  int    $quantity
-     * @param  string $condition
-     * @param  string $rarity
+     * @param  int       $quantity
+     * @param  string    $criteria
+     * @param  string    $rarity
+     * @param  int|null  $userId   Optional user ID for once-only item tracking
+     * @param  int|null  $eventId  Optional event ID for once-only item tracking
      * @return \Illuminate\Support\Collection
      */
-    public function rollRarityItem($quantity = 1, $criteria, $rarity)
+    public function rollRarityItem($quantity = 1, $criteria, $rarity, $userId = null, $eventId = null)
     {
         $rewards = createAssetsArray();
 
@@ -194,7 +229,14 @@ class LootTable extends Model
             $result = $loot[$roll];
 
             if($result) {
-                // If this is chained to another loot table, roll on that table
+                // Check if this is an item with can_only_roll_once flag
+                if($userId && $eventId && $result->can_only_roll_once) {
+                    if(UserEventItemRoll::hasUserRolled($userId, $result->id, $eventId)) {
+                        // Skip this item - user already has it for this event
+                        continue;
+                    }
+                    UserEventItemRoll::recordRoll($userId, $result->id, $eventId);
+                }
                 addAsset($rewards, $result, 1);
             }
         }

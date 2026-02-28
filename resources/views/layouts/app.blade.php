@@ -61,6 +61,148 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        h1,
+        h2,
+        h3,
+        h4,
+        .card-title,
+        .page-title {
+            font-family: 'Orbitron', 'Nunito', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .global-sci-fi-bg {
+            position: fixed;
+            inset: 0;
+            background: #0a0e1a;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .global-sci-fi-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 40%, rgba(0, 204, 255, 0.05) 0%, transparent 25%),
+                radial-gradient(circle at 85% 70%, rgba(0, 180, 220, 0.04) 0%, transparent 30%),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 204, 255, 0.015) 0px,
+                    rgba(0, 204, 255, 0.015) 1.5px,
+                    transparent 1.5px,
+                    transparent 3px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 204, 255, 0.01) 0px,
+                    rgba(0, 204, 255, 0.01) 1.5px,
+                    transparent 1.5px,
+                    transparent 3px
+                );
+        }
+
+        .global-sci-fi-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 204, 255, 0.15) 0%, transparent 70%);
+            filter: blur(40px);
+        }
+
+        .global-sci-fi-line {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 150px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ccff, #00ccff, transparent);
+            box-shadow: 0 0 30px rgba(0, 204, 255, 0.9);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .global-circuit-left {
+            position: fixed;
+            left: -100px;
+            top: 20%;
+            width: 500px;
+            height: 500px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="150" r="80" stroke="%2300ccff" stroke-width="2" fill="none" filter="url(%23glow)"/><path d="M 180 150 L 300 150 M 300 100 L 300 200" stroke="%2300ccff" stroke-width="1.5" fill="none" opacity="0.8"/><circle cx="100" cy="280" r="40" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><path d="M 140 280 L 200 280 L 200 350" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.6"/><rect x="50" y="350" width="100" height="100" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.5"/></svg>') no-repeat center;
+            opacity: 0.25;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .global-circuit-right {
+            position: fixed;
+            right: -150px;
+            bottom: -50px;
+            width: 600px;
+            height: 600px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="100" cy="100" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="100" y1="100" x2="180" y2="150" stroke="%2300ccff" stroke-width="1.5"/><circle cx="180" cy="150" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="180" y1="150" x2="100" y2="220" stroke="%2300ccff" stroke-width="1.5"/><circle cx="100" cy="220" r="4" fill="%2300ccff" filter="url(%23glow)"/><line x1="100" y1="220" x2="250" y2="200" stroke="%2300ccff" stroke-width="1"/><circle cx="250" cy="200" r="6" fill="none" stroke="%2300ccff" stroke-width="1.5" filter="url(%23glow)"/><line x1="250" y1="200" x2="350" y2="280" stroke="%2300ccff" stroke-width="1"/><circle cx="350" cy="280" r="3" fill="%2300ccff" filter="url(%23glow)"/><path d="M 150 350 L 150 450 L 250 450 L 250 350" stroke="%2300ccff" stroke-width="1" fill="none" opacity="0.7"/></svg>') no-repeat center;
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .global-corner {
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .global-corner-tl {
+            top: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            border-top: 3px solid #00ccff;
+            border-left: 3px solid #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+        }
+
+        .global-corner-tr {
+            top: 30px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            border-top: 3px solid #00ccff;
+            border-right: 3px solid #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+        }
+
+        .global-corner-bl {
+            bottom: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            border-bottom: 3px solid #00ccff;
+            border-left: 3px solid #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+        }
+
+        .global-corner-br {
+            bottom: 30px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            border-bottom: 3px solid #00ccff;
+            border-right: 3px solid #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -132,6 +274,14 @@
 </head>
 
 <body>
+    <div class="global-sci-fi-bg"></div>
+    <div class="global-sci-fi-line"></div>
+    <div class="global-circuit-left"></div>
+    <div class="global-circuit-right"></div>
+    <div class="global-corner global-corner-tl"></div>
+    <div class="global-corner global-corner-tr"></div>
+    <div class="global-corner global-corner-bl"></div>
+    <div class="global-corner global-corner-br"></div>
     <div id="app">
 
         <div class="site-header-image" id="header" style="background-image: url('{{ $decoratorTheme?->headerImageUrl ?? ($conditionalTheme?->headerImageUrl ?? ($theme?->headerImageUrl ?? asset('images/header.png'))) }}');"></div>

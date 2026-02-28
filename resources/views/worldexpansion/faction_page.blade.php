@@ -116,8 +116,41 @@
         @if($faction->ranks()->where('is_open', 1)->count())
             <div class="col-md">
                 <h4><small>Member Ranks</small></h4>
-                @foreach($faction->ranks()->where('is_open', 1)->orderBy('sort')->get() as $rank)
-                    <h6>{{ $rank->name }}{{ $rank->description ? ': '.$rank->description : '' }}{!! $currency ? ' ('.$currency->display($rank->breakpoint).')' : ' ('.$rank->breakpoint.' Standing)' !!}</h6>
+                @php
+                    $openRanks = $faction->ranks()->where('is_open', 1)->orderBy('breakpoint', 'desc')->get();
+                    $factionCurrencyId = Settings::get('WE_faction_currency');
+                    $factionMembers = $faction->factionMembers;
+                    
+                    // Group users by their rank
+                    $usersByRank = [];
+                    foreach($openRanks as $rank) {
+                        $usersByRank[$rank->id] = [];
+                    }
+                    
+                    foreach($factionMembers as $member) {
+                        $standing = $member->getCurrencies(true)->where('id', $factionCurrencyId)->first();
+                        $standingAmount = $standing ? $standing->quantity : 0;
+                        
+                        // Find their rank (highest breakpoint they meet)
+                        $memberRank = $openRanks->where('breakpoint', '<=', $standingAmount)->first();
+                        if($memberRank && isset($usersByRank[$memberRank->id])) {
+                            $usersByRank[$memberRank->id][] = $member;
+                        }
+                    }
+                @endphp
+                @foreach($openRanks as $rank)
+                    <div class="mb-2">
+                        <h6 class="mb-1">{{ $rank->name }}{!! $currency ? ' ('.$currency->display($rank->breakpoint).')' : ' ('.$rank->breakpoint.' Standing)' !!}</h6>
+                        @if(count($usersByRank[$rank->id]) > 0)
+                            <p class="mb-0 ml-2">
+                                @foreach($usersByRank[$rank->id] as $member)
+                                    {!! $member->displayName !!}{{ !$loop->last ? ', ' : '' }}
+                                @endforeach
+                            </p>
+                        @else
+                            <p class="text-muted mb-0 ml-2"><small>No members at this rank</small></p>
+                        @endif
+                    </div>
                 @endforeach
             </div>
         @endif

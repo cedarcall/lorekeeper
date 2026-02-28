@@ -17,7 +17,7 @@ class SitePage extends Model
      * @var array
      */
     protected $fillable = [
-        'key', 'title', 'text', 'parsed_text', 'is_visible', 'can_comment'
+        'key', 'title', 'description', 'text', 'parsed_text', 'is_visible', 'can_comment'
     ];
 
     /**
@@ -42,6 +42,7 @@ class SitePage extends Model
     public static $createRules = [
         'key' => 'required|unique:site_pages|between:3,25|alpha_dash',
         'title' => 'required|between:3,100',
+        'description' => 'nullable|between:3,500',
         'text' => 'nullable',
     ];
     
@@ -53,6 +54,7 @@ class SitePage extends Model
     public static $updateRules = [
         'key' => 'required|between:3,25|alpha_dash',
         'title' => 'required|between:3,100',
+        'description' => 'nullable|between:3,500',
         'text' => 'nullable',
     ];
 

@@ -11,20 +11,37 @@ class EventController extends Controller
 {
     public function getIndex()
     {
+        Event::archiveExpiredVisibleEvents();
         $events = Event::orderBy('start_at', 'desc')->paginate(20);
         return view('admin.events.events', ['events' => $events]);
     }
 
     public function getCreateEvent()
     {
-        return view('admin.events.create_edit_event', ['event' => new Event]);
+        $lootTables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id')->toArray();
+        $awards = \App\Models\Award\Award::where('is_user_owned', 1)->orderBy('name')->get();
+        
+        return view('admin.events.create_edit_event', [
+            'event' => new Event,
+            'lootTables' => $lootTables ?? [],
+            'awards' => $awards
+        ]);
     }
 
     public function getEditEvent($id)
     {
+        Event::archiveExpiredVisibleEvents();
         $event = Event::find($id);
         if(!$event) abort(404);
-        return view('admin.events.create_edit_event', ['event' => $event]);
+        
+        $lootTables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id')->toArray();
+        $awards = \App\Models\Award\Award::where('is_user_owned', 1)->orderBy('name')->get();
+        
+        return view('admin.events.create_edit_event', [
+            'event' => $event,
+            'lootTables' => $lootTables ?? [],
+            'awards' => $awards
+        ]);
     }
 
     public function postCreateEditEvent(Request $request, $id = null)
@@ -34,13 +51,22 @@ class EventController extends Controller
             'title' => 'required|between:3,255',
             'start_at' => 'nullable|date_format:Y-m-d H:i:s',
             'end_at' => 'nullable|date_format:Y-m-d H:i:s',
-            'content' => 'nullable'
+            'content' => 'nullable',
+            'loot_table_id' => 'nullable|exists:loot_tables,id',
+            'award_id' => 'nullable|exists:awards,id'
         ];
 
         $request->validate($rules);
 
-        $data = $request->only(['slug','title','content','qna_content','start_at','end_at','is_visible']);
-        $data['is_visible'] = $request->has('is_visible') ? 1 : 0;
+        $data = $request->only(['slug','title','content','qna_content','start_at','end_at','is_visible','loot_table_id','award_id']);
+        $isVisibleInput = $request->input('is_visible', 0);
+        if(is_array($isVisibleInput)) $isVisibleInput = end($isVisibleInput);
+        $data['is_visible'] = filter_var($isVisibleInput, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        
+        // Set award_id to null if 0 selected
+        if(isset($data['award_id']) && $data['award_id'] == 0) {
+            $data['award_id'] = null;
+        }
         
         // Clean Cloudinary metadata that gets pasted from rich text editors
         if(isset($data['content']) && $data['content']) {
@@ -79,6 +105,46 @@ class EventController extends Controller
             $file->move($destination, $filename);
             $data['header_image'] = 'images/events/'.$filename;
         }
+
+        // Handle inspiration images (5-10 images)
+        $inspirationDir = public_path('images/events/inspiration');
+        if(!file_exists($inspirationDir)) mkdir($inspirationDir, 0755, true);
+        
+        // Get existing images
+        $existingImages = [];
+        if($id) {
+            $existingEvent = Event::find($id);
+            $existingImages = $existingEvent->inspiration_images ?? [];
+        }
+        
+        // Handle image removals
+        $removeImages = $request->input('remove_inspiration', []);
+        if(!empty($removeImages)) {
+            foreach($removeImages as $imgToRemove) {
+                $key = array_search($imgToRemove, $existingImages);
+                if($key !== false) {
+                    // Delete file
+                    $filePath = $inspirationDir . '/' . $imgToRemove;
+                    if(file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                    unset($existingImages[$key]);
+                }
+            }
+            $existingImages = array_values($existingImages); // Re-index
+        }
+        
+        // Handle new uploads
+        if($request->hasFile('inspiration_images')) {
+            foreach($request->file('inspiration_images') as $file) {
+                if(count($existingImages) >= 10) break; // Max 10 images
+                $filename = time().'_'.uniqid().'_'.preg_replace('/[^a-z0-9\.\-]/i', '_', $file->getClientOriginalName());
+                $file->move($inspirationDir, $filename);
+                $existingImages[] = $filename;
+            }
+        }
+        
+        $data['inspiration_images'] = $existingImages;
 
         if($id) {
             $event = Event::find($id);

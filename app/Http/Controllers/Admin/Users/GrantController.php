@@ -127,6 +127,79 @@ class GrantController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * Show the character reputation grant page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCharacterReputation()
+    {
+        return view('admin.grants.character_reputation', [
+            'characters' => Character::myo(0)->orderBy('name')->get()->pluck('fullName', 'id')
+        ]);
+    }
+
+    /**
+     * Grants or removes reputation from multiple characters.
+     *
+     * @param  \Illuminate\Http\Request      $request
+     * @param  App\Services\CurrencyManager  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCharacterReputation(Request $request, CurrencyManager $service)
+    {
+        // Find the Reputation currency
+        $reputationCurrency = Currency::where('name', 'Reputation')->where('is_character_owned', 1)->first();
+        
+        if(!$reputationCurrency) {
+            flash('Reputation currency not found.')->error();
+            return redirect()->back();
+        }
+
+        // Get character IDs
+        $characterIds = $request->input('character_ids', []);
+        if (!is_array($characterIds)) {
+            $characterIds = [$characterIds];
+        }
+        $characterIds = array_filter($characterIds);
+        
+        if (empty($characterIds)) {
+            flash('Please select at least one character.')->error();
+            return redirect()->back();
+        }
+
+        $quantity = $request->input('quantity', 0);
+        if ($quantity == 0) {
+            flash('Please enter a non-zero quantity.')->error();
+            return redirect()->back();
+        }
+
+        $data = $request->only(['data']);
+        $successCount = 0;
+        
+        foreach ($characterIds as $characterId) {
+            $character = Character::find($characterId);
+            if ($character) {
+                $grantData = [
+                    'currency_id' => $reputationCurrency->id,
+                    'quantity' => $quantity,
+                    'data' => $data['data'] ?? null
+                ];
+                
+                if ($service->grantCharacterCurrencies($grantData, $character, Auth::user())) {
+                    $successCount++;
+                }
+            }
+        }
+        
+        if ($successCount > 0) {
+            flash('Reputation granted to ' . $successCount . ' character(s) successfully.')->success();
+        } else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
     /*
      * Show the item search page.
      *

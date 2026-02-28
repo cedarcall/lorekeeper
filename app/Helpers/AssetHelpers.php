@@ -232,16 +232,19 @@ function parseAssetData($array)
  * @param  \App\Models\User\User  $recipient
  * @param  string                 $logType
  * @param  string                 $data
+ * @param  int|null               $eventId  Optional event ID for once-only item tracking
  * @return array
  */
-function fillUserAssets($assets, $sender, $recipient, $logType, $data)
+function fillUserAssets($assets, $sender, $recipient, $logType, $data, $eventId = null)
 {
     // Roll on any loot tables
     if(isset($assets['loot_tables']))
     {
         foreach($assets['loot_tables'] as $table)
         {
-            $assets = mergeAssetsArrays($assets, $table['asset']->roll($table['quantity']));
+            // Pass user and event ID for once-only item tracking
+            $userId = $recipient ? $recipient->id : null;
+            $assets = mergeAssetsArrays($assets, $table['asset']->roll($table['quantity'], $userId, $eventId));
         }
         unset($assets['loot_tables']);
     }

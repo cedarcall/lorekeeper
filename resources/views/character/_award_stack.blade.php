@@ -3,9 +3,10 @@
 @else
     <div class="text-center">
         @if($award->has_image)
-            <div class="mb-1"><a href="{{ $award->idUrl }}"><img src="{{ $award->imageUrl }}" alt="{{ $award->name }}"/></a></div>
+            <div class="mb-1"><a href="{{ $award->idUrl }}"><img src="{{ $award->imageUrl }}" alt="{{ $award->name }}" data-toggle="tooltip" title="{{ $award->name }}"/></a></div>
+        @else
+            <a href="{{ $award->idUrl }}">{{ $award->name }}</a>
         @endif
-        <a href="{{ $award->idUrl }}">{{ $award->name }}</a>
     </div>
 
     @if($award->is_featured)
@@ -21,10 +22,6 @@
         <table class="table table-sm">
             <thead class="thead">
                 <tr class="d-flex">
-                    @if($user && !$readOnly &&
-                    ($owner_id == $user->id || $has_power == TRUE))
-                        <th class="col-1"><input id="toggle-checks" type="checkbox" onclick="toggleChecks(this)"></th>
-                    @endif
                     <th class="col">Source</th>
                     <th class="col">Notes</th>
                     <th class="col-2">Quantity</th>
@@ -34,9 +31,6 @@
             <tbody>
                 @foreach($stack as $awardRow)
                     <tr id ="awardRow{{ $awardRow->id }}" class="d-flex {{ $awardRow->isTransferrable ? '' : 'accountbound' }}">
-                        @if($user && !$readOnly && ($owner_id == $user->id || $has_power == TRUE))
-                            <td class="col-1">{!! Form::checkbox('ids[]', $awardRow->id, false, ['class' => 'award-check', 'onclick' => 'updateQuantities(this)']) !!}</td>
-                        @endif
                         <td class="col">{!! array_key_exists('data', $awardRow->data) ? ($awardRow->data['data'] ? $awardRow->data['data'] : 'N/A') : 'N/A' !!}</td>
                         <td class="col">{!! array_key_exists('notes', $awardRow->data) ? ($awardRow->data['notes'] ? $awardRow->data['notes'] : 'N/A') : 'N/A' !!}</td>
                         @if($user && !$readOnly && ($owner_id == $user->id || $has_power == TRUE))

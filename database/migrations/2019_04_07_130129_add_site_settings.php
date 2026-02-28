@@ -18,7 +18,7 @@ class AddSiteSettings extends Migration
             $table->engine = 'InnoDB';
             $table->string('key', 50)->unique()->primary();
             $table->string('value');
-            $table->string('description', 1024);
+            $table->string('description', 1024)->nullable();
         });
         
         Schema::create('site_pages', function(Blueprint $table) {

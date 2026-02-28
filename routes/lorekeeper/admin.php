@@ -30,6 +30,8 @@ Route::group(['prefix' => 'users', 'namespace' => 'Users'], function() {
         Route::post('{name}/ban', 'UserController@postBan');
         Route::get('{name}/unban-confirm', 'UserController@getUnbanConfirmation');
         Route::post('{name}/unban', 'UserController@postUnban');
+        Route::post('{name}/reset', 'UserController@postResetUser')->middleware('admin');
+        Route::post('{name}/delete-character', 'UserController@postDeleteCharacter')->middleware('admin');
     });
 
     # RANKS
@@ -292,6 +294,20 @@ Route::group(['prefix' => 'pages', 'middleware' => 'power:edit_pages'], function
     Route::post('delete/{id}', 'PageController@postDeletePage');
 });
 
+# WORLD INFO
+Route::group(['prefix' => 'world-info', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'PageController@getWorldInfo');
+    Route::post('/', 'PageController@postWorldInfo');
+});
+
+# HOMEWORLD
+Route::group(['prefix' => 'homeworld', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'HomeworldController@getIndex');
+    Route::post('create', 'HomeworldController@postCreate');
+    Route::post('edit/{id}', 'HomeworldController@postEdit');
+    Route::post('delete/{id}', 'HomeworldController@postDelete');
+    Route::post('reorder', 'HomeworldController@postReorder');
+});
 
 # NEWS
 Route::group(['prefix' => 'news', 'middleware' => 'power:edit_pages'], function() {
@@ -303,6 +319,78 @@ Route::group(['prefix' => 'news', 'middleware' => 'power:edit_pages'], function(
     Route::post('create', 'NewsController@postCreateEditNews');
     Route::post('edit/{id?}', 'NewsController@postCreateEditNews');
     Route::post('delete/{id}', 'NewsController@postDeleteNews');
+});
+
+# ANNOUNCEMENTS
+Route::group(['prefix' => 'announcements', 'middleware' => 'power:edit_pages'], function() {
+
+    Route::get('/', 'AnnouncementController@getIndex');
+    Route::get('create', 'AnnouncementController@getCreateAnnouncement');
+    Route::get('edit/{id}', 'AnnouncementController@getEditAnnouncement');
+    Route::get('delete/{id}', 'AnnouncementController@getDeleteAnnouncement');
+    Route::post('create', 'AnnouncementController@postCreateEditAnnouncement');
+    Route::post('edit/{id?}', 'AnnouncementController@postCreateEditAnnouncement');
+    Route::post('delete/{id}', 'AnnouncementController@postDeleteAnnouncement');
+});
+
+# GALAXIES
+Route::group(['prefix' => 'galaxies', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'GalaxyController@getIndex');
+    Route::get('create', 'GalaxyController@getCreateGalaxy');
+    Route::get('edit/{id}', 'GalaxyController@getEditGalaxy');
+    Route::get('delete/{id}', 'GalaxyController@getDeleteGalaxy');
+    Route::post('create', 'GalaxyController@postCreateEditGalaxy');
+    Route::post('edit/{id?}', 'GalaxyController@postCreateEditGalaxy');
+    Route::post('delete/{id}', 'GalaxyController@postDeleteGalaxy');
+    Route::post('{id}/set-current', 'GalaxyController@postSetCurrent');
+});
+
+# PLANETS
+Route::group(['prefix' => 'planets', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'PlanetController@getIndex');
+    Route::get('create', 'PlanetController@getCreatePlanet');
+    Route::get('edit/{id}', 'PlanetController@getEditPlanet');
+    Route::post('create', 'PlanetController@postCreateEditPlanet');
+    Route::post('edit/{id?}', 'PlanetController@postCreateEditPlanet');
+    Route::post('delete/{id}', 'PlanetController@postDeletePlanet');
+    Route::post('{id}/add-tier', 'PlanetController@postAddTier');
+    Route::post('{planetId}/delete-tier/{tierId}', 'PlanetController@postDeleteTier');
+});
+
+# FEATURED PLANETS
+Route::group(['prefix' => 'featured-planets', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'FeaturedPlanetController@getIndex');
+    Route::get('create', 'FeaturedPlanetController@getCreateFeaturedPlanet');
+    Route::get('edit/{id}', 'FeaturedPlanetController@getEditFeaturedPlanet');
+    Route::post('create', 'FeaturedPlanetController@postCreateEditFeaturedPlanet');
+    Route::post('edit/{id?}', 'FeaturedPlanetController@postCreateEditFeaturedPlanet');
+    Route::post('delete/{id}', 'FeaturedPlanetController@postDeleteFeaturedPlanet');
+});
+
+# EXPEDITION SUBMISSIONS
+Route::group(['prefix' => 'expeditions', 'middleware' => 'power:edit_pages'], function() {
+    Route::get('/', 'ExpeditionSubmissionController@getIndex');
+    Route::get('submission/{id}', 'ExpeditionSubmissionController@getSubmission');
+    Route::post('{id}/approve', 'ExpeditionSubmissionController@postApprove');
+    Route::post('{id}/reject', 'ExpeditionSubmissionController@postReject');
+    Route::post('{id}/takedown', 'ExpeditionSubmissionController@postTakedown');
+    // Secure file download/view routes
+    Route::get('file/{id}/download', 'ExpeditionFileController@download');
+    Route::get('file/{id}/view', 'ExpeditionFileController@view');
+});
+
+# CONTRACTS
+Route::group(['prefix' => 'contracts', 'middleware' => 'power:edit_pages'], function() {
+
+    Route::get('/', 'ContractController@getIndex');
+    Route::post('settings', 'ContractController@postSettings');
+    Route::get('create', 'ContractController@getCreateContract');
+    Route::get('edit/{id}', 'ContractController@getEditContract');
+    Route::get('delete/{id}', 'ContractController@getDeleteContract');
+    Route::post('create', 'ContractController@postCreateEditContract');
+    Route::post('edit/{id?}', 'ContractController@postCreateEditContract');
+    Route::post('delete/{id}', 'ContractController@postDeleteContract');
+    Route::post('sort', 'ContractController@postSortContract');
 });
 
 # SALES
@@ -340,6 +428,9 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
 
     Route::get('awards', 'GrantController@getAwards');
     Route::post('awards', 'GrantController@postAwards');
+
+    Route::get('character-reputation', 'GrantController@getCharacterReputation');
+    Route::post('character-reputation', 'GrantController@postCharacterReputation');
 });
 
 # MASTERLIST
@@ -368,6 +459,7 @@ Route::group(['prefix' => 'character', 'namespace' => 'Characters', 'middleware'
     Route::post('{slug}/grant', 'GrantController@postCharacterCurrency');
     Route::post('{slug}/grant-items', 'GrantController@postCharacterItems');
     Route::post('{slug}/grant-awards', 'GrantController@postCharacterAwards');
+    Route::post('{slug}/grant-reputation', 'GrantController@postGrantReputation');
 });
 Route::group(['prefix' => 'character', 'namespace' => 'Characters', 'middleware' => 'power:manage_characters'], function() {
 
@@ -509,6 +601,18 @@ Route::group(['prefix' => 'forums', 'middleware' => 'power:edit_data'], function
     Route::post('delete/{id}', 'ForumController@postDeleteForum');
 });
 
+# MONTHLY EVENTS
+Route::group(['prefix' => 'events', 'middleware' => 'power:manage_world'], function() {
+    Route::get('/', 'EventController@getIndex');
+    Route::get('create', 'EventController@getCreateEvent');
+    Route::get('edit/{id}', 'EventController@getEditEvent');
+    Route::get('delete/{id}', 'EventController@getDeleteEvent');
+    Route::post('create', 'EventController@postCreateEditEvent');
+    Route::post('edit/{id?}', 'EventController@postCreateEditEvent');
+    Route::post('delete/{id}', 'EventController@postDeleteEvent');
+    Route::post('upload-image', 'EventController@postUploadImage');
+});
+
 # WORLD EXPANSION
 Route::group(['prefix' => 'world',  'namespace' => 'World', 'middleware' => 'power:manage_world'], function() {
 
@@ -568,25 +672,6 @@ Route::group(['prefix' => 'world',  'namespace' => 'World', 'middleware' => 'pow
     Route::post('floras/edit/{id?}', 'FloraController@postCreateEditFlora');
     Route::post('floras/delete/{id}', 'FloraController@postDeleteFlora');
     Route::post('floras/sort', 'FloraController@postSortFlora');
-
-    # HISTORY
-    Route::get('event-categories', 'EventController@getEventCategories');
-    Route::get('event-categories/create', 'EventController@getCreateEventCategory');
-    Route::get('event-categories/edit/{id}', 'EventController@getEditEventCategory');
-    Route::get('event-categories/delete/{id}', 'EventController@getDeleteEventCategory');
-    Route::post('event-categories/create', 'EventController@postCreateEditEventCategory');
-    Route::post('event-categories/edit/{id?}', 'EventController@postCreateEditEventCategory');
-    Route::post('event-categories/delete/{id}', 'EventController@postDeleteEventCategory');
-    Route::post('event-categories/sort', 'EventController@postSortEventCategory');
-
-    Route::get('events', 'EventController@getEventIndex');
-    Route::get('events/create', 'EventController@getCreateEvent');
-    Route::get('events/edit/{id}', 'EventController@getEditEvent');
-    Route::get('events/delete/{id}', 'EventController@getDeleteEvent');
-    Route::post('events/create', 'EventController@postCreateEditEvent');
-    Route::post('events/edit/{id?}', 'EventController@postCreateEditEvent');
-    Route::post('events/delete/{id}', 'EventController@postDeleteEvent');
-    Route::post('events/sort', 'EventController@postSortEvent');
 
     # HISTORY
     Route::get('figure-categories', 'FigureController@getFigureCategories');
@@ -655,4 +740,21 @@ Route::group(['prefix' => 'world',  'namespace' => 'World', 'middleware' => 'pow
     Route::get('glossary/delete/{id}', 'GlossaryController@getDeleteTerm');
     Route::post('glossary/delete/{id}', 'GlossaryController@postDeleteTerm');
 
+});
+
+# EVENT QUESTIONS
+Route::group(['prefix' => 'event-questions', 'middleware' => 'power:manage_submissions'], function() {
+    Route::get('/', 'EventQuestionController@getIndex');
+    Route::get('{id}', 'EventQuestionController@getQuestion');
+    Route::post('{id}/answer', 'EventQuestionController@postAnswer');
+    Route::post('{id}/delete', 'EventQuestionController@postDelete');
+});
+
+# EVENT SUBMISSIONS
+Route::group(['prefix' => 'event-submissions', 'middleware' => 'power:manage_submissions'], function() {
+    Route::get('/', 'EventSubmissionController@getIndex');
+    Route::get('{id}', 'EventSubmissionController@getSubmission');
+    Route::post('{id}/approve', 'EventSubmissionController@postApprove');
+    Route::post('{id}/reject', 'EventSubmissionController@postReject');
+    Route::post('{id}/delete', 'EventSubmissionController@postDelete');
 });

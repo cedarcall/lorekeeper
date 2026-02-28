@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -26,7 +27,11 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('check-news')
                 ->everyMinute();
-        $schedule->exec('rm public/images/avatars/*.tmp')
+        $schedule->call(function () {
+            foreach (glob(public_path('images/avatars/*.tmp')) as $tempAvatarPath) {
+                File::delete($tempAvatarPath);
+            }
+        })
                 ->daily();
         $schedule->command('check-sales')
                 ->everyMinute();

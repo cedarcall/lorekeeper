@@ -16,6 +16,8 @@
 Route::group(['prefix' => 'notifications', 'namespace' => 'Users'], function() {
     Route::get('/', 'AccountController@getNotifications');
     Route::get('delete/{id}', 'AccountController@getDeleteNotification');
+    Route::post('claim-contract-reputation/{id}', 'AccountController@postClaimContractReputation');
+    Route::post('expedition-reward-reroll/{id}', 'AccountController@postExpeditionRewardReroll');
     Route::post('clear', 'AccountController@postClearNotifications');
     Route::post('clear/{type}', 'AccountController@postClearNotifications');
 });
@@ -114,6 +116,8 @@ Route::group(['prefix' => 'crafting', 'namespace' => 'Users'], function() {
 Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function() {
     Route::get('{slug}/profile/edit', 'CharacterController@getEditCharacterProfile');
     Route::post('{slug}/profile/edit', 'CharacterController@postEditCharacterProfile');
+    
+    Route::post('{slug}/faction', 'CharacterController@postSetFaction');
 
     Route::post('{slug}/'.__('awards.awardcase').'/edit', 'CharacterController@postAwardEdit');
     Route::post('{slug}/inventory/edit', 'CharacterController@postInventoryEdit');
@@ -216,16 +220,6 @@ Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function() {
     Route::get('{id}/delete', 'DesignController@getDelete');
     Route::post('{id}/delete', 'DesignController@postDelete');
 });
-
-/**************************************************************************************************
-    Shops
-**************************************************************************************************/
-
-Route::group(['prefix' => 'shops'], function() {
-    Route::post('buy', 'ShopController@postBuy');
-    Route::get('history', 'ShopController@getPurchaseHistory');
-});
-
 
 /**************************************************************************************************
     Dailies

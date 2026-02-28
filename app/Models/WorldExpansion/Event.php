@@ -27,9 +27,17 @@ class Event extends Model
      * @var array
      */
     protected $fillable = [
-        'name','description', 'summary', 'parsed_description', 'sort', 'image_extension', 'thumb_extension',
-        'category_id', 'is_active', 'occur_start', 'occur_end'
+        'name','description', 'summary', 'parsed_description', 'qna_content', 'qna_parsed_text', 'sort', 'image_extension', 'thumb_extension',
+        'category_id', 'is_active', 'occur_start', 'occur_end', 'loot_table_id', 'award_id', 'inspiration_images'
+    ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'inspiration_images' => 'array',
     ];
 
 
@@ -83,6 +91,22 @@ class Event extends Model
     public function category()
     {
         return $this->belongsTo('App\Models\WorldExpansion\EventCategory', 'category_id');
+    }
+
+    /**
+     * Get the loot table attached to this event.
+     */
+    public function lootTable()
+    {
+        return $this->belongsTo('App\Models\Loot\LootTable', 'loot_table_id');
+    }
+
+    /**
+     * Get the award/badge attached to this event.
+     */
+    public function award()
+    {
+        return $this->belongsTo('App\Models\Award\Award', 'award_id');
     }
 
     /**
@@ -220,6 +244,21 @@ class Event extends Model
     {
         if (!$this->thumb_extension) return null;
         return asset($this->imageDirectory . '/' . $this->thumbFileName);
+    }
+
+    /**
+     * Gets the URLs of the model's inspiration images.
+     *
+     * @return array
+     */
+    public function getInspirationImageUrlsAttribute()
+    {
+        if (!$this->inspiration_images || !is_array($this->inspiration_images)) {
+            return [];
+        }
+        return array_map(function($img) {
+            return asset('images/events/inspiration/' . $img);
+        }, $this->inspiration_images);
     }
 
     /**

@@ -21,8 +21,8 @@
         @foreach($events as $event)
             <tr>
                 <td>{{ $event->title }}</td>
-                <td>@if($event->start_at){{ pretty_date($event->start_at) }}@else—@endif</td>
-                <td>@if($event->end_at){{ pretty_date($event->end_at) }}@else—@endif</td>
+                <td>@if($event->start_at){!! pretty_date($event->start_at) !!}@else—@endif</td>
+                <td>@if($event->end_at){!! pretty_date($event->end_at) !!}@else—@endif</td>
                 <td>{{ $event->is_visible ? 'Yes' : 'No' }}</td>
                 <td>
                     <a href="{{ url('admin/events/edit/'.$event->id) }}" class="btn btn-sm btn-secondary">Edit</a>

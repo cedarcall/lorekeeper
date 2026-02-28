@@ -77,4 +77,38 @@ class GrantController extends Controller
         }
         return redirect()->back();
     }
+
+    /**
+     * Grants reputation to a character.
+     *
+     * @param  string                        $slug
+     * @param  \Illuminate\Http\Request      $request
+     * @param  App\Services\CurrencyManager  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postGrantReputation($slug, Request $request, CurrencyManager $service)
+    {
+        // Find the Reputation currency
+        $reputationCurrency = Currency::where('name', 'Reputation')->where('is_character_owned', 1)->first();
+        
+        if(!$reputationCurrency) {
+            flash('Reputation currency not found.')->error();
+            return redirect()->back();
+        }
+
+        $character = Character::where('slug', $slug)->first();
+        $data = [
+            'currency_id' => $reputationCurrency->id,
+            'quantity' => $request->input('quantity', 0),
+            'data' => $request->input('data', null)
+        ];
+
+        if($service->grantCharacterCurrencies($data, $character, Auth::user())) {
+            flash('Reputation granted successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
 }

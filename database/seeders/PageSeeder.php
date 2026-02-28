@@ -15,6 +15,7 @@ class PageSeeder extends Seeder
             ['key' => 'expeditions', 'title' => 'Expeditions', 'content' => '<p>Coming soon.</p>'],
             ['key' => 'featured-planet', 'title' => 'Featured Planet', 'content' => '<p>Coming soon.</p>'],
             ['key' => 'current-galaxy', 'title' => 'Current Galaxy', 'content' => '<p>Coming soon.</p>'],
+            ['key' => 'rules', 'title' => 'ARPG Rules', 'content' => '<p>This page contains the rules and guidelines for participating in the ARPG.</p>'],
         ];
 
         foreach ($pages as $p) {

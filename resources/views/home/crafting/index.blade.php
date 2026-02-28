@@ -13,7 +13,7 @@
 <hr>
 
 <h3>Free Recipes</h3>
-@if($default->count())
+@if($default && $default->count())
     <div class="row mx-0">
         @foreach($default as $recipe)
             @include('home.crafting._smaller_recipe_card', ['recipe' => $recipe])
@@ -26,9 +26,12 @@
 <hr>
 
 <h3>Your Unlocked Recipes</h3>
-@if(Auth::user()->recipes->count())
+@php
+    $userRecipes = Auth::user() ? (Auth::user()->recipes ?? collect()) : collect();
+@endphp
+@if($userRecipes->count())
     <div class="row mx-0">
-        @foreach(Auth::user()->recipes as $recipe)
+        @foreach($userRecipes as $recipe)
             @include('home.crafting._smaller_recipe_card', ['recipe' => $recipe])
         @endforeach
     </div>

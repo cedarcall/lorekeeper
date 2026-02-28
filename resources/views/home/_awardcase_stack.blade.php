@@ -3,9 +3,10 @@
 @else
     <div class="text-center">
         @if($award->has_image)
-            <div class="mb-1"><a href="{{ $award->idUrl }}"><img src="{{ $award->imageUrl }}" alt="{{ $award->name }}"/></a></div>
+            <div class="mb-1"><a href="{{ $award->idUrl }}"><img src="{{ $award->imageUrl }}" alt="{{ $award->name }}" data-toggle="tooltip" title="{{ $award->name }}"/></a></div>
+        @else
+            <a href="{{ $award->idUrl }}">{{ $award->name }}</a>
         @endif
-        <a href="{{ $award->idUrl }}">{{ $award->name }}</a>
     </div>
 
     @if($award->is_featured)
@@ -21,12 +22,7 @@
         <table class="table table-sm">
             <thead class="thead">
                 <tr class="d-flex">
-                    @if($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
-                        <th class="col-1"><input id="toggle-checks" type="checkbox" onclick="toggleChecks(this)"></th>
-                        <th class="col-4">Source</th>
-                    @else
-                        <th class="col-5">Source</th>
-                    @endif
+                    <th class="col-5">Source</th>
                     <th class="col-3">Notes</th>
                     <th class="col-3">Quantity</th>
                     <th class="col-1"><i class="fas fa-lock invisible"></i></th>
@@ -35,12 +31,7 @@
             <tbody>
                 @foreach($stack as $awardRow)
                     <tr id ="awardRow{{ $awardRow->id }}" class="d-flex {{ $awardRow->isTransferrable ? '' : 'accountbound' }}">
-                        @if($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
-                            <td class="col-1">{!! Form::checkbox('ids[]', $awardRow->id, false, ['class' => 'award-check', 'onclick' => 'updateQuantities(this)']) !!}</td>
-                            <td class="col-4">{!! array_key_exists('data', $awardRow->data) ? ($awardRow->data['data'] ? $awardRow->data['data'] : 'N/A') : 'N/A' !!}</td>
-                        @else
-                            <td class="col-5">{!! array_key_exists('data', $awardRow->data) ? ($awardRow->data['data'] ? $awardRow->data['data'] : 'N/A') : 'N/A' !!}</td>
-                        @endif
+                        <td class="col-5">{!! array_key_exists('data', $awardRow->data) ? ($awardRow->data['data'] ? $awardRow->data['data'] : 'N/A') : 'N/A' !!}</td>
                         <td class="col-3">{!! array_key_exists('notes', $awardRow->data) ? ($awardRow->data['notes'] ? $awardRow->data['notes'] : 'N/A') : 'N/A' !!}</td>
                         @if($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
 

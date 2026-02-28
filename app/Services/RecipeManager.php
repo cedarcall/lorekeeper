@@ -19,9 +19,13 @@ use App\Models\Currency\Currency;
 
 use App\Services\InventoryManager;
 use App\Services\CurrencyManager;
+use App\Services\ModifierItemService;
 
 class RecipeManager extends Service
 {
+    private const CRAFTING_BLOCKED_ITEM_NAMES = [
+        'the resonance',
+    ];
 
 /**********************************************************************************************
 
@@ -65,25 +69,54 @@ class RecipeManager extends Service
                     if(!$check) throw new \Exception('You require ' . $limit->reward->name . ' x '. $limit->quantity . ' to craft this');
                 }
             }
+
+            $ingredientQuantityOverrides = [];
+            $catalystService = new ModifierItemService();
+            $canUseCatalyst = $catalystService->hasModifierItem($user, 'Shinevine Catalyst');
+            $selectedCatalystIngredientId = isset($data['catalyst_ingredient_id']) && $data['catalyst_ingredient_id'] ? (int)$data['catalyst_ingredient_id'] : null;
+            if($selectedCatalystIngredientId) {
+                if(!$canUseCatalyst) {
+                    throw new \Exception('You do not have a Shinevine Catalyst to use.');
+                }
+
+                $selectedIngredient = $recipe->ingredients->firstWhere('id', $selectedCatalystIngredientId);
+                if(!$selectedIngredient || $selectedIngredient->quantity <= 2) {
+                    throw new \Exception('Invalid ingredient selected for Shinevine Catalyst.');
+                }
+
+                $ingredientQuantityOverrides[$selectedIngredient->id] = max(2, $selectedIngredient->quantity - 1);
+                if(!$catalystService->consumeModifierCharge($user, 'Shinevine Catalyst', 1, 'Crafting Modifier Use', 'Shinevine Catalyst used on '.$recipe->name.' recipe')) {
+                    throw new \Exception('Failed to consume Shinevine Catalyst.');
+                }
+            }
+
             // Check for sufficient currencies
             $user_currencies = $user->getCurrencies(true);
             $currency_ingredients = $recipe->ingredients->where('ingredient_type', 'Currency');
             foreach($currency_ingredients as $ingredient) {
                 $currency = $user_currencies->where('id', $ingredient->data[0])->first();
-                if($currency->quantity < $ingredient->quantity) throw new \Exception('Insufficient currency.');
+                $requiredCurrency = isset($ingredientQuantityOverrides[$ingredient->id]) ? $ingredientQuantityOverrides[$ingredient->id] : $ingredient->quantity;
+                if($currency->quantity < $requiredCurrency) throw new \Exception('Insufficient currency.');
             }
 
             // If there are non-Currency ingredients.
             if(isset($data['stack_id']))
             {
                 // Fetch the stacks from DB
-                $stacks = UserItem::whereIn('id', $data['stack_id'])->get()->map(function($stack) use ($data) {
+                $stacks = UserItem::with('item')->whereIn('id', $data['stack_id'])->get()->map(function($stack) use ($data) {
                     $stack->count = (int)$data['stack_quantity'][$stack->id];
                     return $stack;
                 });
 
+                $blockedSelected = $stacks->first(function($stack) {
+                    return $this->isCraftingBlockedItemName(optional($stack->item)->name);
+                });
+                if($blockedSelected) {
+                    throw new \Exception($blockedSelected->item->name.' cannot be used for crafting.');
+                }
+
                 // Check for sufficient ingredients
-                $plucked = $this->pluckIngredients($user, $recipe, $stacks);
+                $plucked = $this->pluckIngredients($user, $recipe, $stacks, $ingredientQuantityOverrides);
                 if(!$plucked) throw new \Exception('Insufficient ingredients selected.');
 
                 // Debit the ingredients
@@ -100,7 +133,8 @@ class RecipeManager extends Service
             // Debit the currency
             $service = new CurrencyManager();
             foreach($currency_ingredients as $ingredient) {
-                if(!$service->debitCurrency($user, null, 'Crafting', 'Used in '.$recipe->name.' Recipe', Currency::find($ingredient->data[0]), $ingredient->quantity)) throw new \Exception('Currency could not be debited.');
+                $requiredCurrency = isset($ingredientQuantityOverrides[$ingredient->id]) ? $ingredientQuantityOverrides[$ingredient->id] : $ingredient->quantity;
+                if(!$service->debitCurrency($user, null, 'Crafting', 'Used in '.$recipe->name.' Recipe', Currency::find($ingredient->data[0]), $requiredCurrency)) throw new \Exception('Currency could not be debited.');
             }
 
             // Credit rewards
@@ -126,9 +160,12 @@ class RecipeManager extends Service
     * @param  \App\Models\Recipe\Recipe                    $recipe
     * @return array|null
     */
-    public function pluckIngredients($user, $recipe, $selectedStacks = null)
+    public function pluckIngredients($user, $recipe, $selectedStacks = null, $ingredientQuantityOverrides = [])
     {
-        $user_items = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', $user->id)->get();
+        $user_items = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', $user->id)->get()
+            ->filter(function($stack) {
+                return !$this->isCraftingBlockedItemName(optional($stack->item)->name);
+            })->values();
         $plucked = [];
         // foreach ingredient, search for a qualifying item, and select items up to the quantity, if insufficient continue onto the next entry
         foreach($recipe->ingredients->sortBy('ingredient_type') as $ingredient)
@@ -172,7 +209,11 @@ class RecipeManager extends Service
                 }
             }
 
-            $quantity_left = $ingredient->quantity;
+            $stacks = $stacks->filter(function($stack) {
+                return !$this->isCraftingBlockedItemName(optional($stack->item)->name);
+            })->values();
+
+            $quantity_left = isset($ingredientQuantityOverrides[$ingredient->id]) ? $ingredientQuantityOverrides[$ingredient->id] : $ingredient->quantity;
             while($quantity_left > 0 && count($stacks) > 0)
             {
                 $stack = $stacks->pop();
@@ -189,5 +230,11 @@ class RecipeManager extends Service
             if($quantity_left > 0) return null;
         }
         return $plucked;
+    }
+
+    private function isCraftingBlockedItemName($name)
+    {
+        if(!$name) return false;
+        return in_array(mb_strtolower(trim($name)), self::CRAFTING_BLOCKED_ITEM_NAMES, true);
     }
 }

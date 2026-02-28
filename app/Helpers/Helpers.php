@@ -67,10 +67,16 @@ function breadcrumbs($links) {
  * @return string
  */
 function format_date($timestamp, $showTime = true) {
+    if(!$timestamp) return '';
+    if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+
     return $timestamp->format('j F Y' . ($showTime ? ', H:i:s' : '')) . ($showTime ? ' <abbr data-toggle="tooltip" title="UTC'.$timestamp->timezone->toOffsetName().'">' . strtoupper($timestamp->timezone->getAbbreviatedName($timestamp->isDST())) . '</abbr>' : '');
 }
 
 function pretty_date($timestamp, $showTime = true) {
+   if(!$timestamp) return '';
+   if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+
    return '<abbr data-toggle="tooltip" title="' . $timestamp->format('F j Y' . ($showTime ? ', H:i:s' : '')) . ' ' . strtoupper($timestamp->timezone->getAbbreviatedName($timestamp->isDST())).'">' .$timestamp->diffForHumans() . '</abbr>';
 }
 
@@ -100,9 +106,38 @@ function parse($text, &$pings = null) {
     $config = HTMLPurifier_Config::createDefault();
     $config->set('Attr.EnableID', true);
     $config->set('HTML.DefinitionID', 'include');
-    $config->set('HTML.DefinitionRev', 2);
+    $config->set('HTML.DefinitionRev', 4);  // Incremented to force new cache
+    $config->set('CSS.AllowedProperties', [
+        'text-align',
+        'float',
+        'clear',
+        'margin',
+        'margin-left',
+        'margin-right',
+        'margin-top',
+        'margin-bottom',
+        'width',
+        'height',
+        'max-width',
+    ]);
+    // Allow data URIs for images (used by TinyMCE when pasting images)
+    $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'data' => true]);
     if ($def = $config->maybeGetRawHTMLDefinition()) {
         $def->addElement('include', 'Block', 'Empty', 'Common', array('file*' => 'URI', 'height' => 'Text', 'width' => 'Text'));
+        $def->addElement('figure', 'Block', 'Optional: (figcaption, Flow) | (Flow, figcaption) | Flow', 'Common', [
+            'class' => 'Text',
+            'style' => 'Text',
+            'data-alignment' => 'Text',
+        ]);
+        $def->addElement('figcaption', 'Inline', 'Flow', 'Common', [
+            'class' => 'Text',
+            'style' => 'Text',
+        ]);
+        $def->addAttribute('img', 'data-alignment', 'Text');
+        $def->addAttribute('img', 'class', 'Text');
+        $def->addAttribute('img', 'style', 'Text');
+        $def->addAttribute('p', 'style', 'Text');
+        $def->addAttribute('div', 'style', 'Text');
 		$def->addAttribute('a', 'data-toggle', 'Enum#collapse,tab');
 		$def->addAttribute('a', 'aria-expanded', 'Enum#true,false');
 		$def->addAttribute('a', 'data-target', 'Text');

@@ -4,7 +4,12 @@
 
 @section('content')
 {!! breadcrumbs(['World' => 'world', 'Events' => 'world/events']) !!}
-<h1>Events</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Events</h1>
+    <a href="{{ url('world/event-history') }}" class="btn btn-outline-primary">
+        <i class="fas fa-history mr-1"></i> View History
+    </a>
+</div>
 
 <div>
     {!! Form::open(['method' => 'GET', 'class' => '']) !!}

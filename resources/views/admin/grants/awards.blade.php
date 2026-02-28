@@ -97,12 +97,16 @@
 <script>
     $(document).ready(function() {
         $('#usernameList').selectize({
-            maxItems: 10
+            maxItems: 10,
+            dropdownParent: 'body'
         });
         $('#characterList').selectize({
-            maxItems: 10
+            maxItems: 10,
+            dropdownParent: 'body'
         });
-        $('.default.award-select').selectize();
+        $('.default.award-select').selectize({
+            dropdownParent: 'body'
+        });
         $('.add-award').on('click', function(e) {
             e.preventDefault();
             addAwardRow($(this));
@@ -123,7 +127,9 @@
                 e.preventDefault();
                 removeAwardRow($(this));
             })
-            $clone.find('.award-select').selectize();
+            $clone.find('.award-select').selectize({
+                dropdownParent: 'body'
+            });
         }
 
         function removeAwardRow($trigger) {

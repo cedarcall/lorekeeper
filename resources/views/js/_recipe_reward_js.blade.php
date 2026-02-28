@@ -8,7 +8,9 @@ $( document ).ready(function() {
     var $tableSelect = $('#rewardRowData').find('.table-select');
     var $raffleSelect = $('#rewardRowData').find('.raffle-select');
 
-    $('#rewardTableBody .selectize').selectize();
+    $('#rewardTableBody .selectize').selectize({
+        dropdownParent: 'body'
+    });
     attachRewardTypeListener($('#rewardTableBody .reward-type'));
     attachRemoveListener($('#rewardTableBody .remove-reward-button'));
 
@@ -16,7 +18,9 @@ $( document ).ready(function() {
         e.preventDefault();
         var $clone = $rewardRow.clone();
         $rewardTable.append($clone);
-        $clone.find('.selectize').selectize();
+        $clone.find('.selectize').selectize({
+            dropdownParent: 'body'
+        });
         attachRewardTypeListener($clone.find('.reward-type'));
         attachRemoveListener($clone.find('.remove-reward-button'));
     });
@@ -48,7 +52,9 @@ $( document ).ready(function() {
 
             $cell.html('');
             $cell.append($clone);
-            $clone.selectize();
+            $clone.selectize({
+                dropdownParent: 'body'
+            });
         });
     }
 

@@ -138,7 +138,7 @@
 </div>
 
 <div class="card p-3 mb-2">
-<h3>Aliases</h3>
+    <h3>Aliases</h3>
     <p>As users are supposed to verify that they own their account(s) themselves, aliases cannot be edited directly. If a user wants to change their alias, clear it here and ask them to go through the verification process again while logged into their new account. If the alias is the user's primary alias, their remaining aliases will be checked to see if they have a valid primary alias. If they do, it will become their new primary alias.</p>
     @if($user->aliases->count())
         @foreach($user->aliases as $alias)
@@ -158,6 +158,24 @@
         @endforeach
     @else
         <p>No aliases found.</p>
+    @endif
+</div>
+
+<div class="card p-3 mb-2">
+    <h3>Admin Actions</h3>
+    @if(Auth::user()->isAdmin)
+        {!! Form::open(['url' => 'admin/users/'.$user->name.'/reset', 'method' => 'POST', 'onsubmit' => "return confirm('Are you sure you want to completely reset this player? This cannot be undone.')"]) !!}
+            <button type="submit" class="btn btn-warning mb-2">Reset Player Information</button>
+        {!! Form::close() !!}
+    @endif
+</div>
+
+<div class="card p-3 mb-2">
+    <h3>Delete Character</h3>
+    @if(Auth::user()->isAdmin)
+        {!! Form::open(['url' => 'admin/users/'.$user->name.'/delete-character', 'method' => 'POST', 'onsubmit' => "return confirm('Are you sure you want to delete this character? This cannot be undone.')"]) !!}
+            <button type="submit" class="btn btn-danger">Delete Character</button>
+        {!! Form::close() !!}
     @endif
 </div>
 @endsection

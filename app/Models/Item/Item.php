@@ -21,7 +21,7 @@ class Item extends Model
      */
     protected $fillable = [
         'item_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
-        'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released'
+        'can_only_roll_once', 'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released'
     ];
 
     protected $appends = ['image_url'];
@@ -45,7 +45,7 @@ class Item extends Model
         'image' => 'mimes:png',
         'rarity' => 'nullable',
         'reference_url' => 'nullable|between:3,200',
-        'uses' => 'nullable|between:3,250',
+        'uses' => 'nullable|integer|min:1|max:250',
         'release' => 'nullable|between:3,100',
         'currency_quantity' => 'nullable|integer|min:1',
     ];
@@ -61,7 +61,7 @@ class Item extends Model
         'description' => 'nullable',
         'image' => 'mimes:png',
         'reference_url' => 'nullable|between:3,200',
-        'uses' => 'nullable|between:3,250',
+        'uses' => 'nullable|integer|min:1|max:250',
         'release' => 'nullable|between:3,100',
         'currency_quantity' => 'nullable|integer|min:1',
     ];

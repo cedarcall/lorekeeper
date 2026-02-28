@@ -131,12 +131,6 @@ Route::group(['prefix' => 'prompts'], function() {
     Route::get('prompts', 'PromptsController@getPrompts');
 });
 
-Route::group(['prefix' => 'shops'], function() {
-    Route::get('/', 'ShopController@getIndex');
-    Route::get('{id}', 'ShopController@getShop')->where(['id' => '[0-9]+']);
-    Route::get('{id}/{stockId}', 'ShopController@getShopStock')->where(['id' => '[0-9]+', 'stockId' => '[0-9]+']);
-});
-
 Route::group(['prefix' => __('dailies.dailies')], function() {
     Route::get('/', 'DailyController@getIndex');
     Route::get('{id}', 'DailyController@getDaily')->where(['id' => '[0-9]+']);
@@ -147,6 +141,7 @@ Route::group(['prefix' => __('dailies.dailies')], function() {
     Site Pages
 **************************************************************************************************/
 Route::get('credits', 'PageController@getCreditsPage');
+Route::get('info/history', [\App\Http\Controllers\MonthlyEventController::class, 'history']);
 Route::get('info/{key}', 'PageController@getPage');
 
 /**************************************************************************************************
@@ -204,8 +199,12 @@ Route::group(['prefix' => 'forum'], function() {
 
 Route::group(['prefix' => 'world', 'namespace' => 'WorldExpansion'], function() {
 
-    Route::get('info', 'WorldExpansionController@getIndex');
+    Route::get('gallery', 'WorldExpansionController@getGallery');
+    Route::get('gallery/{type}/{id}', 'WorldExpansionController@getSubmission');
     Route::get('glossary', 'WorldExpansionController@getGlossary');
+    Route::get('events', 'EventController@getEvents');
+    Route::get('events/{id}', 'EventController@getEvent');
+    Route::get('event-history', 'EventController@getEventHistory');
     
     Route::get('locations', 'LocationController@getLocations');
     Route::get('locations/{id}', 'LocationController@getLocation');
@@ -223,8 +222,6 @@ Route::group(['prefix' => 'world', 'namespace' => 'WorldExpansion'], function() 
     Route::get('flora-categories', 'NatureController@getFloraCategories');
     Route::get('flora-categories/{id}', 'NatureController@getFloraCategory');
 
-    Route::get('events', 'EventController@getEvents');
-    Route::get('events/{id}', 'EventController@getEvent');
     Route::get('event-categories', 'EventController@getEventCategories');
     Route::get('event-categories/{id}', 'EventController@getEventCategory');
 

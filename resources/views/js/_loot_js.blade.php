@@ -15,7 +15,9 @@ $( document ).ready(function() {
         var $recipeSelect = $('#lootRowData').find('.recipe-select');
     @endif
 
-    $('#lootTableBody .selectize').selectize();
+    $('#lootTableBody .selectize').selectize({
+        dropdownParent: 'body'
+    });
     attachRemoveListener($('#lootTableBody .remove-loot-button'));
 
     $('#addLoot').on('click', function(e) {
@@ -67,7 +69,9 @@ $( document ).ready(function() {
 
             $cell.html('');
             $cell.append($clone);
-            $clone.selectize();
+            $clone.selectize({
+                dropdownParent: 'body'
+            });
         });
     }
 

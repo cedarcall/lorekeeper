@@ -29,4 +29,3 @@ class PageSeeder extends Seeder
         }
     }
 }
-

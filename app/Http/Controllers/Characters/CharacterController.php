@@ -154,6 +154,46 @@ class CharacterController extends Controller
     }
 
     /**
+     * Sets a character's faction (one-time only).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string                    $slug
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSetFaction(Request $request, $slug)
+    {
+        if(!Auth::check()) abort(404);
+
+        $isOwner = ($this->character->user_id == Auth::user()->id);
+        if(!$isOwner) {
+            flash('You do not own this character.')->error();
+            return redirect()->back();
+        }
+
+        // Check if character already has a faction
+        if($this->character->faction_id) {
+            flash('This character has already chosen a faction and cannot change it.')->error();
+            return redirect()->back();
+        }
+
+        $request->validate(['faction_id' => 'required|exists:factions,id']);
+
+        // Verify the faction allows character members
+        $faction = Faction::where('id', $request->faction_id)->where('is_character_faction', 1)->where('is_active', 1)->first();
+        if(!$faction) {
+            flash('Invalid faction selected.')->error();
+            return redirect()->back();
+        }
+
+        $this->character->faction_id = $faction->id;
+        $this->character->faction_changed = now();
+        $this->character->save();
+
+        flash('Faction set successfully! This cannot be changed.')->success();
+        return redirect()->back();
+    }
+
+    /**
      * Shows a character's gallery.
      *
      * @param  string  $slug

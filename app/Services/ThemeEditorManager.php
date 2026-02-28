@@ -39,7 +39,6 @@ class ThemeEditorManager extends Service
 
             return $this->commitReturn($theme);
         } catch (\Exception $e) {
-            dd($e->getMessage());
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);

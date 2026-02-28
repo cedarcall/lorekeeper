@@ -3,6 +3,19 @@
 @section('title') {{ $current->title ?? $current->name ?? 'Monthly Event' }} @endsection
 
 @section('content')
+    <style>
+        .event-card {
+            background: rgba(10, 20, 40, 0.6);
+            border: 2px solid #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.5), inset 0 0 20px rgba(0, 204, 255, 0.08);
+        }
+
+        .event-card .card-header,
+        .event-card .card-body {
+            background-color: transparent;
+        }
+    </style>
+
     {!! breadcrumbs(['Monthly Event' => url('monthly-event')]) !!}
 
     @if($current)
@@ -14,7 +27,7 @@
             $currentBody = $current->parsed_description ?? $current->description ?? $current->parsed_text ?? $current->content;
             $currentFaq = $current->parsed_qna ?? $current->qna ?? $current->qna_parsed_text ?? $current->qna_content;
         @endphp
-        <div class="card mb-3">
+        <div class="card mb-3 event-card">
             <div class="card-header">
                 <h1 class="mb-0">{{ $currentTitle }}</h1>
                 <small class="text-muted">
@@ -36,7 +49,7 @@
         </div>
 
         @if($currentFaq)
-        <div class="card mb-3">
+        <div class="card mb-3 event-card">
             <div class="card-header">
                 <h3 class="mb-0">FAQ / Rewards</h3>
             </div>
@@ -48,7 +61,7 @@
         </div>
         @endif
     @else
-        <div class="card mb-3"><div class="card-body">No current event.</div></div>
+        <div class="card mb-3 event-card"><div class="card-body">No current event.</div></div>
     @endif
 
     @if($previous && $previous->count())
@@ -62,7 +75,7 @@
                         $prevBody = $ev->parsed_description ?? $ev->description ?? $ev->parsed_text ?? $ev->content;
                         $prevLink = $ev->url ?? url('monthly-event');
                     @endphp
-                    <a href="{{ $prevLink }}" class="card h-100 text-reset">
+                    <a href="{{ $prevLink }}" class="card h-100 text-reset event-card">
                         @if($prevHeader)
                             <img class="card-img-top" src="{{ asset($prevHeader) }}" alt="{{ $prevTitle }}">
                         @endif
@@ -82,5 +95,4 @@
             @endforeach
         </div>
     @endif
-
 @endsection

@@ -23,15 +23,6 @@ return [
             ]
         ]
     ],
-    'Reports' => [
-        'power' => 'manage_reports',
-        'links' => [
-            [
-                'name' => 'Report Queue',
-                'url' => 'admin/reports/pending'
-            ]
-        ]
-    ],
     'Site' => [
         'power' => 'edit_pages',
         'links' => [
@@ -40,12 +31,37 @@ return [
                 'url' => 'admin/news'
             ],
             [
+                'name' => 'Announcements',
+                'url' => 'admin/announcements'
+            ],
+            [
+                'name' => 'Contracts',
+                'url' => 'admin/contracts'
+            ],
+            [
                 'name' => 'Sales',
                 'url' => 'admin/sales'
             ],
             [
-                'name' => 'Pages',
-                'url' => 'admin/pages'
+                'name' => 'World Info',
+                'url' => 'admin/world-info'
+            ]
+        ]
+    ],
+    'Exploration' => [
+        'power' => 'edit_pages',
+        'links' => [
+            [
+                'name' => 'Galaxies',
+                'url' => 'admin/galaxies'
+            ],
+            [
+                'name' => 'Planets',
+                'url' => 'admin/planets'
+            ],
+            [
+                'name' => 'Featured Planets',
+                'url' => 'admin/featured-planets'
             ]
         ]
     ],
@@ -55,32 +71,7 @@ return [
             [
                 'name' => 'User Index',
                 'url' => 'admin/users'
-            ],
-            [
-                'name' => 'Invitation Keys',
-                'url' => 'admin/invitations'
-            ],
-        ]
-    ],
-    'Queues' => [
-        'power' => 'manage_submissions',
-        'links' => [
-            [
-                'name' => 'Gallery Submissions',
-                'url' => 'admin/gallery/submissions'
-            ],
-            [
-                'name' => 'Gallery Currency Awards',
-                'url' => 'admin/gallery/currency'
-            ],
-            [
-                'name' => 'Prompt Submissions',
-                'url' => 'admin/submissions'
-            ],
-            [
-                'name' => 'Claim Submissions',
-                'url' => 'admin/claims'
-            ],
+            ]
         ]
     ],
     'Grants' => [
@@ -92,7 +83,6 @@ return [
             ],
             [
                 'name' => 'Item Grants',
-                'name' => 'Item Grants',
                 'url' => 'admin/grants/items'
             ],
             [
@@ -103,6 +93,10 @@ return [
                 'name' => 'Recipe Grants',
                 'url' => 'admin/grants/recipes'
             ],
+            [
+                'name' => 'Character Reputation',
+                'url' => 'admin/grants/character-reputation'
+            ]
         ]
     ],
     'Masterlist' => [
@@ -131,7 +125,7 @@ return [
             [
                 'name' => 'MYO Approvals',
                 'url' => 'admin/myo-approvals/pending'
-            ],
+            ]
         ]
     ],
     'Data' => [
@@ -154,16 +148,8 @@ return [
                 'url' => 'admin/data/character-categories'
             ],
             [
-                'name' => 'Sub Masterlists',
-                'url' => 'admin/data/sublists'
-            ],
-            [
                 'name' => 'Rarities',
                 'url' => 'admin/data/rarities'
-            ],
-            [
-                'name' => 'Species',
-                'url' => 'admin/data/species'
             ],
             [
                 'name' => 'Subtypes',
@@ -186,10 +172,6 @@ return [
                 'url' => 'admin/data/currencies'
             ],
             [
-                'name' => 'Prompts',
-                'url' => 'admin/data/prompts'
-            ],
-            [
                 'name' => 'Loot Tables',
                 'url' => 'admin/data/loot-tables'
             ],
@@ -204,44 +186,7 @@ return [
             [
                 'name' => 'Forums',
                 'url' => 'admin/forums'
-            ],
-        ]
-    ],
-    'World_Expanded' => [
-        'power' => 'manage_world',
-        'links' => [
-            [
-                'name' => 'Glossary',
-                'url' => 'admin/world/glossary'
-            ],
-            [
-                'name' => 'Locations',
-                'url' => 'admin/world/locations'
-            ],
-            [
-                'name' => 'Fauna',
-                'url' => 'admin/world/faunas'
-            ],
-            [
-                'name' => 'Flora',
-                'url' => 'admin/world/floras'
-            ],
-            [
-                'name' => ' Events',
-                'url' => 'admin/world/events'
-            ],
-            [
-                'name' => ' Figures',
-                'url' => 'admin/world/figures'
-            ],
-            [
-                'name' => 'Factions',
-                'url' => 'admin/world/factions'
-            ],
-            [
-                'name' => 'Concepts',
-                'url' => 'admin/world/concepts'
-            ],
+            ]
         ]
     ],
     'Raffles' => [
@@ -250,7 +195,7 @@ return [
             [
                 'name' => 'Raffles',
                 'url' => 'admin/raffles'
-            ],
+            ]
         ]
     ],
     'Settings' => [
@@ -259,6 +204,10 @@ return [
             [
                 'name' => 'Site Settings',
                 'url' => 'admin/settings'
+            ],
+            [
+                'name' => 'Site Pages',
+                'url' => 'admin/pages'
             ],
             [
                 'name' => 'Site Images',
@@ -271,7 +220,7 @@ return [
             [
                 'name' => 'Theme Manager',
                 'url' => 'admin/themes'
-            ],
+            ]
         ]
-    ],
+    ]
 ];

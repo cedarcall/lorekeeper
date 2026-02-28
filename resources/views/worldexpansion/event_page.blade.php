@@ -30,6 +30,15 @@
 </div>
 @endisset
 
+@isset($event->qna_parsed_text)
+    <div class="card mt-3">
+        <div class="card-header h3">FAQ / Rewards</div>
+        <div class="card-body world-entry-text">
+            {!! $event->qna_parsed_text !!}
+        </div>
+    </div>
+@endisset
+
 <div class="row justify-content-center mx-0 px-0 mt-3">
 
     @if(count(allAttachments($event)))

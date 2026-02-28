@@ -37,6 +37,9 @@ use App\Models\Character\Sublist;
 
 use App\Models\Comment;
 use App\Models\Forum;
+use App\Models\UserContract;
+use App\Models\ExpeditionSubmission;
+use App\Models\EventSubmission;
 
 use App\Http\Controllers\Controller;
 
@@ -59,7 +62,16 @@ class UserController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $name = Route::current()->parameter('name');
+        $route = Route::current();
+        if(!$route) {
+            return;
+        }
+
+        $name = $route->parameter('name');
+        if(!$name) {
+            return;
+        }
+
         $this->user = User::where('name', $name)->first();
         if(!$this->user) abort(404);
 
@@ -346,9 +358,36 @@ class UserController extends Controller
      */
     public function getUserSubmissions($name)
     {
+        $user = $this->user;
+        
+        // Prompt submissions (existing functionality)
+        $promptSubmissions = $user->getSubmissions(Auth::check() ? Auth::user() : null);
+        
+        // Completed contracts
+        $completedContracts = UserContract::with('contract')
+            ->where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->orderBy('completed_at', 'desc')
+            ->paginate(20, ['*'], 'contracts_page');
+        
+        // Expedition submissions
+        $expeditionSubmissions = ExpeditionSubmission::with('planet')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20, ['*'], 'expeditions_page');
+        
+        // Event submissions
+        $eventSubmissions = EventSubmission::with('event')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20, ['*'], 'events_page');
+        
         return view('user.submission_logs', [
-            'user' => $this->user,
-            'logs' => $this->user->getSubmissions(Auth::check() ? Auth::user() : null),
+            'user' => $user,
+            'logs' => $promptSubmissions,
+            'completedContracts' => $completedContracts,
+            'expeditionSubmissions' => $expeditionSubmissions,
+            'eventSubmissions' => $eventSubmissions,
             'sublists' => Sublist::orderBy('sort', 'DESC')->get()
         ]);
     }
@@ -445,5 +484,37 @@ class UserController extends Controller
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
             'posts' => $posts->paginate(20)
         ]);
+    }
+
+    /**
+     * Completely reset a user's information (progress, awards, inventory, bank, etc).
+     */
+    public function postResetUser(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+        // Reset progress
+        $user->expeditions()->delete();
+        $user->awards()->delete();
+        $user->items()->delete();
+        $user->currencies()->delete();
+        $user->bank()->delete();
+        // Add more resets as needed for your app
+        // ...
+        // Optionally log this action
+        // ...
+        return redirect()->back()->with('success', 'Player information has been reset.');
+    }
+
+    /**
+     * Delete a user's character.
+     */
+    public function postDeleteCharacter(Request $request, $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+        // Delete all characters owned by this user
+        $user->characters()->delete();
+        // Optionally log this action
+        // ...
+        return redirect()->back()->with('success', 'Character(s) deleted successfully.');
     }
 }
