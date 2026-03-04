@@ -3,6 +3,7 @@
 }
 
 :{$PORT:8080} {
+  respond /health "ok" 200
   root * /app/public
   php_server
   file_server
