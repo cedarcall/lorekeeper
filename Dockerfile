@@ -29,4 +29,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 # Start web server (do NOT run migrations until DB is set)
-CMD ["sh", "-c", "php artisan package:discover --ansi || true && php artisan storage:link || true && exec frankenphp run"]
+CMD ["sh", "-c", "php artisan config:clear || true && php artisan cache:clear || true && php artisan package:discover --ansi || true && php artisan storage:link || true && exec frankenphp run"]
