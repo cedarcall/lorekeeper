@@ -14,7 +14,7 @@ class CreateAnnouncementUserTable extends Migration
     public function up()
     {
         Schema::create('announcement_user', function (Blueprint $table) {
-            $table->unsignedBigInteger('announcement_id');
+            $table->unsignedInteger('announcement_id');
             $table->unsignedInteger('user_id');
             $table->timestamp('dismissed_at')->useCurrent();
 
