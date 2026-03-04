@@ -26,5 +26,7 @@ RUN if [ -f package.json ]; then npm ci || npm install; npm run production; fi
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
   && chmod -R a+rw storage bootstrap/cache
 
+EXPOSE 8080
+
 # Start web server (do NOT run migrations until DB is set)
-CMD ["sh", "-c", "php artisan optimize:clear || true && php artisan storage:link || true && exec frankenphp run --config /etc/caddy/Caddyfile"]
+CMD ["sh", "-c", "php artisan storage:link || true && export PORT=${PORT:-8080} && exec frankenphp run --config /etc/caddy/Caddyfile"]
