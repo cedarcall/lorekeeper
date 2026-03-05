@@ -14,6 +14,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 COPY Caddyfile /etc/caddy/Caddyfile
+COPY docker/php.ini /usr/local/etc/php/conf.d/zz-custom.ini
 
 # Install PHP deps (creates /app/vendor)
 # --no-scripts avoids running artisan during image build
