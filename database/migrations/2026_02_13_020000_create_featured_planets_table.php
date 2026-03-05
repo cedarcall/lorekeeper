@@ -14,7 +14,7 @@ class CreateFeaturedPlanetsTable extends Migration
 
         Schema::create('featured_planets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('galaxy_id');
+            $table->foreignId('galaxy_id')->constrained('galaxies')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
             $table->enum('rarity', ['common', 'uncommon', 'rare', 'legendary']);
@@ -27,7 +27,6 @@ class CreateFeaturedPlanetsTable extends Migration
             $table->unsignedInteger('created_by')->nullable();
             $table->timestamps();
 
-            $table->foreign('galaxy_id')->references('id')->on('galaxies');
             $table->foreign('created_by')->references('id')->on('users');
         });
     }
