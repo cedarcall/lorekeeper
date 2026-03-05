@@ -30,4 +30,4 @@ RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs boots
 EXPOSE 8080
 
 # Start web server (do NOT run migrations until DB is set)
-CMD ["sh", "-c", "export PORT=${PORT:-8080}; php artisan config:clear || true; php artisan cache:clear || true; php artisan route:clear || true; php artisan view:clear || true; php artisan storage:link || true; exec frankenphp run --config /etc/caddy/Caddyfile"]
+CMD ["sh", "-c", "export PORT=${PORT:-8080} && php artisan config:clear || true && php artisan cache:clear || true && php artisan route:clear || true && php artisan view:clear || true && php artisan storage:link || true && php artisan migrate --force || true && exec frankenphp run --config /etc/caddy/Caddyfile"]
