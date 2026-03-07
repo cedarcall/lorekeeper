@@ -13,9 +13,9 @@ content_css: [
 '{{ asset('css/app.css') }}',
 '{{ asset('css/lorekeeper.css') }}',
 '{{ asset('css/custom.css') }}',
-'{{ asset($theme?->cssUrl) }}',
-'{{ asset($conditionalTheme?->cssUrl) }}',
-'{{ asset($decoratorTheme?->cssUrl) }}',
+@if($theme?->cssUrl) '{{ asset($theme->cssUrl) }}', @endif
+@if($conditionalTheme?->cssUrl) '{{ asset($conditionalTheme->cssUrl) }}', @endif
+@if($decoratorTheme?->cssUrl) '{{ asset($decoratorTheme->cssUrl) }}', @endif
 '{{ asset('css/all.min.css') }}' //fontawesome
 ],
 content_style: `
