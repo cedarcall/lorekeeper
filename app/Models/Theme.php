@@ -220,8 +220,14 @@ class Theme extends Model
      */
     public function getHeaderImageUrlAttribute()
     {
-        if (!$this->has_header && !$this->themeEditor?->header_image_url) return null;
-        return $this->extension ? asset($this->imageDirectory . '/' . $this->headerImageFileName . '?' . $this->hash) : $this->themeEditor?->header_image_url;
+        if(!$this->has_header && !$this->themeEditor?->header_image_url) return null;
+
+        $headerPath = public_path($this->imageDirectory . '/' . $this->headerImageFileName);
+        if($this->extension && file_exists($headerPath)) {
+            return asset($this->imageDirectory . '/' . $this->headerImageFileName . '?' . $this->hash);
+        }
+
+        return $this->themeEditor?->header_image_url;
     }
 
     /**
@@ -231,8 +237,14 @@ class Theme extends Model
      */
     public function getBackgroundImageUrlAttribute()
     {
-        if (!$this->has_background && !$this->themeEditor?->background_image_url) return '';
-        return $this->extension_background ? asset($this->imageDirectory . '/' . $this->backgroundImageFileName . '?' . $this->hash) : $this->themeEditor?->background_image_url;
+        if(!$this->has_background && !$this->themeEditor?->background_image_url) return '';
+
+        $backgroundPath = public_path($this->imageDirectory . '/' . $this->backgroundImageFileName);
+        if($this->extension_background && file_exists($backgroundPath)) {
+            return asset($this->imageDirectory . '/' . $this->backgroundImageFileName . '?' . $this->hash);
+        }
+
+        return $this->themeEditor?->background_image_url;
     }
 
     /**
@@ -253,6 +265,14 @@ class Theme extends Model
     public function getCSSUrlAttribute()
     {
         if (!$this->has_css) return null;
+
+        $cssPath = public_path($this->ImageDirectory . '/' . $this->CSSFileName);
+        if(!file_exists($cssPath)) return null;
+
+        // Ignore accidentally uploaded RTF files masquerading as CSS.
+        $head = @file_get_contents($cssPath, false, null, 0, 16);
+        if($head !== false && stripos(ltrim($head), '{\\rtf') === 0) return null;
+
         return $this->ImageDirectory . '/' . $this->CSSFileName;
     }
 

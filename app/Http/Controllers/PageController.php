@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use DB;
+use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,6 +35,9 @@ class PageController extends Controller
     public function getPage($key)
     {
         $page = SitePage::where('key', $key)->where('is_visible', 1)->first();
+        if(!$page) {
+            $page = $this->makeFallbackPage($key);
+        }
         if(!$page) abort(404);
         $data = ['page' => $page];
         if ($key === 'featured-planet') {
@@ -65,6 +69,67 @@ class PageController extends Controller
             $data['homeworldParsedText'] = $this->sanitizeHomeworldContent($page->parsed_text);
         }
         return view('pages.page', $data);
+    }
+
+    /**
+     * Build an in-memory fallback page for expected keys when DB content is missing.
+     * This keeps public routes functional on fresh deployments.
+     *
+     * @param  string  $key
+     * @return \App\Models\SitePage|null
+     */
+    protected function makeFallbackPage($key)
+    {
+        $defaultTextPages = config('lorekeeper.text_pages', []);
+
+        $knownFallbacks = [
+            'featured-planet' => [
+                'title' => 'Featured Planet',
+                'text' => '<p>The featured planet feed is available, but no active featured planet is configured yet.</p>',
+            ],
+            'current-galaxy' => [
+                'title' => 'Current Galaxy',
+                'text' => '<p>Galaxy data is available once galaxies and planets are configured in the admin panel.</p>',
+            ],
+            'expeditions' => [
+                'title' => 'Expeditions',
+                'text' => '<p>Expedition content is available once planets and expedition settings are configured.</p>',
+            ],
+            'getting-started' => [
+                'title' => 'Getting Started',
+                'text' => '<p>Welcome! This page will contain a guide to getting started. Content can be edited from the admin panel.</p>',
+            ],
+            'currency' => [
+                'title' => 'Credits & Reputation',
+                'text' => '<p>Information about the currency system will appear here once configured.</p>',
+            ],
+            'homeworld' => [
+                'title' => 'Homeworld',
+                'text' => '<p>Homeworld information will appear here once configured in the admin panel.</p>',
+            ],
+        ];
+
+        if(isset($defaultTextPages[$key])) {
+            $knownFallbacks[$key] = [
+                'title' => $defaultTextPages[$key]['title'] ?? ucfirst(str_replace('-', ' ', $key)),
+                'text' => $defaultTextPages[$key]['text'] ?? '',
+            ];
+        }
+
+        if(!isset($knownFallbacks[$key])) return null;
+
+        $fallback = new SitePage();
+        $fallback->key = $key;
+        $fallback->title = $knownFallbacks[$key]['title'];
+        $fallback->description = 'This page is using fallback content until seeded site pages are available.';
+        $fallback->text = $knownFallbacks[$key]['text'];
+        $fallback->parsed_text = $knownFallbacks[$key]['text'];
+        $fallback->is_visible = 1;
+        $fallback->can_comment = 0;
+        $fallback->created_at = Carbon::now();
+        $fallback->updated_at = Carbon::now();
+
+        return $fallback;
     }
 
     /**

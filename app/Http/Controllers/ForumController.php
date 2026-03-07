@@ -88,11 +88,11 @@ class ForumController extends Controller
             flash('You do not have permission to access this thread.')->error();
             return redirect(url('/'));
         }
-        elseif($thread->commentable->parent ? (($thread->commentable->parent->hasRestriction && !Auth::check()) || Auth::check() && !Auth::user()->canVisitForum($thread->commentable->parent->id)) : false) {
+        elseif($thread->commentable->parent ? (($thread->commentable->parent->hasRestrictions && !Auth::check()) || Auth::check() && !Auth::user()->canVisitForum($thread->commentable->parent->id)) : false) {
             flash('You do not have permission to access this thread.')->error();
             return redirect(url('/'));
         }
-        elseif($thread->commentable->parent && $thread->commentable->parent->parent ? (($thread->commentable->parent->parent->hasRestriction && !Auth::check()) || Auth::check() && !Auth::user()->canVisitForum($thread->commentable->parent->parent->id)) : false) {
+        elseif($thread->commentable->parent && $thread->commentable->parent->parent ? (($thread->commentable->parent->parent->hasRestrictions && !Auth::check()) || Auth::check() && !Auth::user()->canVisitForum($thread->commentable->parent->parent->id)) : false) {
             flash('You do not have permission to access this thread.')->error();
             return redirect(url('/'));
         }

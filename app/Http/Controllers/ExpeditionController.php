@@ -24,8 +24,10 @@ class ExpeditionController extends Controller
         
         if (!$currentGalaxy) {
             return view('expeditions.index', [
+                'currentGalaxy' => null,
                 'planets' => collect(),
                 'userExpeditions' => [],
+                'featuredPlanet' => null,
                 'message' => 'No galaxy is currently active.'
             ]);
         }
