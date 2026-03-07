@@ -19,6 +19,7 @@ php artisan add-site-settings
 php artisan add-text-pages
 php artisan add-world-expansion
 php artisan copy-default-images
+php artisan seed-production-data --force
 php artisan storage:link || true
 
 # Ensure FrankenPHP uses the configured public docroot so /css/* resolves.
