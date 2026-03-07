@@ -142,6 +142,7 @@ Route::group(['prefix' => __('dailies.dailies')], function() {
 **************************************************************************************************/
 Route::get('credits', 'PageController@getCreditsPage');
 Route::get('info/history', [\App\Http\Controllers\MonthlyEventController::class, 'history']);
+Route::redirect('info/species', 'world/species', 301);
 Route::get('info/{key}', 'PageController@getPage');
 
 /**************************************************************************************************

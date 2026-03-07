@@ -65,7 +65,7 @@
                         <a class="dropdown-item" href="{{ url('world/gallery') }}">Gallery</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('info/homeworld') }}">Homeworld</a>
-                        <a class="dropdown-item" href="{{ url('info/species') }}">Species Info</a>
+                        <a class="dropdown-item" href="{{ url('world/species') }}">Species Info</a>
                         <a class="dropdown-item" href="{{ url('info/history') }}">History</a>
                         <a class="dropdown-item" href="{{ url('world/factions') }}">Factions</a>
                         <a class="dropdown-item" href="{{ url('world/faunas') }}">Known Fauna</a>

@@ -231,9 +231,9 @@
     @if ($theme?->prioritize_css)
         @include('layouts.editable_theme')
     @endif
-    @if ($theme?->has_css)
+    @if ($theme?->has_css && $theme?->cssUrl)
         <style type="text/css" media="screen">
-            @php include_once($theme?->cssUrl)
+            @php include_once(public_path($theme?->cssUrl))
             @endphp
             {{-- css in style tag to so that order matters --}}
         </style>
@@ -246,9 +246,9 @@
     @if ($conditionalTheme?->prioritize_css)
         @include('layouts.editable_theme', ['theme' => $conditionalTheme])
     @endif
-    @if ($conditionalTheme?->has_css)
+    @if ($conditionalTheme?->has_css && $conditionalTheme?->cssUrl)
         <style type="text/css" media="screen">
-            @php include_once($conditionalTheme?->cssUrl)
+            @php include_once(public_path($conditionalTheme?->cssUrl))
             @endphp
             {{-- css in style tag to so that order matters --}}
         </style>
@@ -260,9 +260,9 @@
     @if ($decoratorTheme?->prioritize_css)
         @include('layouts.editable_theme', ['theme' => $decoratorTheme])
     @endif
-    @if ($decoratorTheme?->has_css)
+    @if ($decoratorTheme?->has_css && $decoratorTheme?->cssUrl)
         <style type="text/css" media="screen">
-            @php include_once($decoratorTheme?->cssUrl)
+            @php include_once(public_path($decoratorTheme?->cssUrl))
             @endphp
             {{-- css in style tag to so that order matters --}}
         </style>
@@ -391,9 +391,9 @@
                         '{{ asset('css/app.css') }}',
                         '{{ asset('css/lorekeeper.css') }}',
                         '{{ asset('css/custom.css') }}',
-                        '{{ asset($theme?->cssUrl) }}',
-                        '{{ asset($conditionalTheme?->cssUrl) }}',
-                        '{{ asset($decoratorTheme?->cssUrl) }}',
+                        @if($theme?->cssUrl) '{{ asset($theme->cssUrl) }}', @endif
+                        @if($conditionalTheme?->cssUrl) '{{ asset($conditionalTheme->cssUrl) }}', @endif
+                        @if($decoratorTheme?->cssUrl) '{{ asset($decoratorTheme->cssUrl) }}', @endif
                         '{{ asset('css/all.min.css') }}' //fontawesome
                     ],
                     content_style: `
