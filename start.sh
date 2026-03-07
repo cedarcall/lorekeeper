@@ -15,6 +15,11 @@ php artisan route:cache
 php artisan view:cache
 
 php artisan migrate --force
+php artisan add-site-settings
+php artisan add-text-pages
+php artisan add-world-expansion
+php artisan copy-default-images
+php artisan storage:link || true
 
 # Ensure FrankenPHP uses the configured public docroot so /css/* resolves.
 if [ -f /etc/caddy/Caddyfile ]; then
