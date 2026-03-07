@@ -48,32 +48,126 @@ class SeedProductionData extends Command
 
         $this->info('Importing production data from SQL dump...');
 
+        // Try mysql CLI first (most reliable for multi-statement SQL files)
+        if ($this->importViaMysqlCli($sqlFile)) {
+            $this->info('Done! Production data imported via mysql CLI.');
+            return 0;
+        }
+
+        // Fallback: use PDO with proper SQL splitting
+        $this->info('mysql CLI not available, using PDO fallback...');
         $sql = file_get_contents($sqlFile);
         
-        // Split into individual statements and execute
-        $statements = array_filter(
-            array_map('trim', explode(";\n", $sql)),
-            function ($s) {
-                return !empty($s) && strpos($s, '--') !== 0;
-            }
-        );
-
+        $pdo = DB::connection()->getPdo();
+        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+        
+        $statements = $this->splitSqlStatements($sql);
         $count = 0;
+        $failed = 0;
+        
         foreach ($statements as $statement) {
-            // Skip comments and empty lines
             $clean = trim($statement);
             if (empty($clean) || strpos($clean, '--') === 0) continue;
             
             try {
-                DB::unprepared($clean);
+                $pdo->exec($clean);
                 $count++;
             } catch (\Exception $e) {
-                $this->warn('Statement failed: ' . substr($clean, 0, 80) . '...');
-                $this->warn('Error: ' . $e->getMessage());
+                $failed++;
+                $this->warn('Failed (' . substr($clean, 0, 60) . '...): ' . $e->getMessage());
             }
         }
-
-        $this->info("Done! Executed $count SQL statements.");
+        
+        $this->info("Done! Executed $count statements" . ($failed ? " ($failed failed)" : "") . ".");
         return 0;
+    }
+
+    /**
+     * Try to import the SQL file using the mysql CLI tool.
+     * Returns true on success, false if mysql CLI is not available.
+     */
+    protected function importViaMysqlCli($sqlFile)
+    {
+        // Check if mysql CLI is available
+        $which = trim(shell_exec('which mysql 2>/dev/null') ?? '');
+        if (empty($which)) return false;
+
+        $host = config('database.connections.mysql.host', '127.0.0.1');
+        $port = config('database.connections.mysql.port', '3306');
+        $database = config('database.connections.mysql.database');
+        $username = config('database.connections.mysql.username');
+        $password = config('database.connections.mysql.password', '');
+
+        $cmd = sprintf(
+            'mysql -h %s -P %s -u %s %s %s < %s 2>&1',
+            escapeshellarg($host),
+            escapeshellarg($port),
+            escapeshellarg($username),
+            $password ? '-p' . escapeshellarg($password) : '',
+            escapeshellarg($database),
+            escapeshellarg($sqlFile)
+        );
+
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            $this->warn('mysql CLI import failed: ' . implode("\n", $output));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Split SQL into individual statements, respecting quoted strings.
+     */
+    protected function splitSqlStatements($sql)
+    {
+        $statements = [];
+        $current = '';
+        $inSingle = false;
+        $inDouble = false;
+        $escaped = false;
+        $len = strlen($sql);
+
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $sql[$i];
+
+            if ($escaped) {
+                $current .= $ch;
+                $escaped = false;
+                continue;
+            }
+
+            if ($ch === '\\') {
+                $current .= $ch;
+                $escaped = true;
+                continue;
+            }
+
+            if ($ch === "'" && !$inDouble) {
+                $inSingle = !$inSingle;
+            } elseif ($ch === '"' && !$inSingle) {
+                $inDouble = !$inDouble;
+            }
+
+            if ($ch === ';' && !$inSingle && !$inDouble) {
+                $trimmed = trim($current);
+                if (!empty($trimmed)) {
+                    $statements[] = $trimmed;
+                }
+                $current = '';
+                continue;
+            }
+
+            $current .= $ch;
+        }
+
+        $trimmed = trim($current);
+        if (!empty($trimmed)) {
+            $statements[] = $trimmed;
+        }
+
+        return $statements;
     }
 }

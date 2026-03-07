@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     git unzip zip \
     libzip-dev \
     nodejs npm \
+    default-mysql-client \
   && docker-php-ext-install pdo_mysql \
   && rm -rf /var/lib/apt/lists/*
 
