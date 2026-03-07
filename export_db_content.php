@@ -68,7 +68,7 @@ $contentTables = [
     'recipe_rewards',
     
     // Dailies
-    'dailies',
+    'daily',
     'daily_rewards',
     
     // News & announcements

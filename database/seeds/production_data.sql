@@ -1,5 +1,5 @@
 -- Auto-generated production data export
--- Generated: 2026-03-07 23:39:08
+-- Generated: 2026-03-07 23:40:50
 -- Source database: lorekeeper
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -2670,6 +2670,11 @@ INSERT INTO `recipe_ingredients` (`recipe_id`, `ingredient_type`, `ingredient_da
 ('6', 'Item', '[\"13\"]', '3'),
 ('6', 'Item', '[\"2\"]', '2'),
 ('6', 'Item', '[\"7\"]', '1');
+
+-- daily: 1 rows
+DELETE FROM `daily`;
+INSERT INTO `daily` (`id`, `name`, `has_image`, `description`, `parsed_description`, `sort`, `is_active`, `is_timed_daily`, `start_at`, `end_at`, `has_button_image`, `daily_timeframe`, `is_progressable`, `is_loop`, `progress_display`, `is_streak`) VALUES
+('1', 'Daily 1', '0', NULL, NULL, '0', '1', '0', NULL, NULL, '0', 'daily', '1', '1', 'hidden', '1');
 
 -- daily_rewards: 7 rows
 DELETE FROM `daily_rewards`;
