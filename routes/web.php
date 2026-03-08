@@ -12,7 +12,6 @@
 */
 
 Route::get('/', 'HomeController@getIndex')->name('home');
-Route::get('login', 'Auth\LoginController@getNewReply');
 Auth::routes(['verify' => true]);
 
 # BROWSE
