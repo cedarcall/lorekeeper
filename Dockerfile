@@ -30,5 +30,4 @@ RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs boots
 
 EXPOSE 8080
 
-# Start web server (runs cache clears, storage:link, then migrate before serving)
-CMD ["sh", "-c", "export PORT=${PORT:-8080}; php artisan config:clear || true; php artisan cache:clear || true; php artisan route:clear || true; php artisan view:clear || true; php artisan storage:link || true; php artisan migrate --force; php artisan add-site-settings; php artisan add-text-pages; php artisan add-world-expansion; php artisan copy-default-images; php artisan seed-production-data --force; exec frankenphp run --config /etc/caddy/Caddyfile"]
+CMD ["sh", "/app/start.sh"]

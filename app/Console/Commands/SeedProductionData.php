@@ -103,7 +103,7 @@ class SeedProductionData extends Command
             escapeshellarg($host),
             escapeshellarg($port),
             escapeshellarg($username),
-            $password ? '-p' . escapeshellarg($password) : '',
+            $password !== '' ? '--password=' . escapeshellarg($password) : '',
             escapeshellarg($database),
             escapeshellarg($sqlFile)
         );
