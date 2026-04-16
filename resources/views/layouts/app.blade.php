@@ -224,10 +224,6 @@
     <link href="{{ asset('css/croppie.css') }}" rel="stylesheet">
     <link href="{{ asset('css/selectize.bootstrap4.css') }}" rel="stylesheet">
 
-    @if (file_exists(public_path() . '/css/custom.css'))
-        <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
-    @endif
-
     @if ($theme?->prioritize_css)
         @include('layouts.editable_theme')
     @endif
@@ -269,6 +265,11 @@
     @endif
     @if (!$decoratorTheme?->prioritize_css)
         @include('layouts.editable_theme', ['theme' => $decoratorTheme])
+    @endif
+
+    {{-- Keep custom.css last so site-specific theme overrides editor/theme generated CSS. --}}
+    @if (file_exists(public_path() . '/css/custom.css'))
+        <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
     @endif
 
 </head>
