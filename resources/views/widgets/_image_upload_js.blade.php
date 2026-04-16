@@ -30,7 +30,13 @@ $( document ).ready(function() {
 
     // Designers and artists //////////////////////////////////////////////////////////////////////
 
-    $('.selectize').selectize();
+    function initSelectize($elements) {
+        $elements.selectize({
+            dropdownParent: 'body'
+        });
+    }
+
+    initSelectize($('.selectize'));
     $('.add-designer').on('click', function(e) {
         e.preventDefault();
         addDesignerRow($(this));
@@ -45,7 +51,7 @@ $( document ).ready(function() {
             addDesignerRow($(this));
         })
         $trigger.css({ visibility: 'hidden' });
-        $clone.find('.designer-select').selectize();
+        initSelectize($clone.find('.designer-select'));
     }
     
     $('.add-artist').on('click', function(e) {
@@ -62,7 +68,7 @@ $( document ).ready(function() {
             addArtistRow($(this));
         })
         $trigger.css({ visibility: 'hidden' });
-        $clone.find('.artist-select').selectize();
+        initSelectize($clone.find('.artist-select'));
     }
 
     // Traits /////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +90,7 @@ $( document ).ready(function() {
             e.preventDefault();
             removeFeatureRow($(this));
         })
-        $clone.find('.feature-select').selectize();
+        initSelectize($clone.find('.feature-select'));
     }
     function removeFeatureRow($trigger) {
         $trigger.parent().remove();

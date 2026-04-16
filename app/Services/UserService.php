@@ -198,8 +198,6 @@ class UserService extends Service
         $user->email_verified_at = null;
         $user->save();
 
-        $user->sendEmailVerificationNotification();
-
         return true;
     }
 

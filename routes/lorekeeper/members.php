@@ -28,6 +28,8 @@ Route::group(['prefix' => 'account', 'namespace' => 'Users'], function() {
     Route::post('theme', 'AccountController@postTheme');
     Route::post('password', 'AccountController@postPassword');
     Route::post('email', 'AccountController@postEmail');
+    Route::post('email/send-code', 'AccountController@postSendEmailVerificationCode');
+    Route::post('email/verify-code', 'AccountController@postVerifyEmailCode');
     Route::post('location', 'AccountController@postLocation');
     Route::post('faction', 'AccountController@postFaction');
     Route::post('avatar', 'AccountController@postAvatar');

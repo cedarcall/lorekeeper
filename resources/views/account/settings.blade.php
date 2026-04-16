@@ -140,6 +140,12 @@
 <div class="card p-3 mb-2">
     <h3>Email Address</h3>
     <p>Changing your email address will require you to re-verify your email address.</p>
+    @if(Auth::user()->hasVerifiedEmail())
+        <div class="alert alert-success">Your current email is verified.</div>
+    @else
+        <div class="alert alert-warning">Your current email is not verified yet.</div>
+    @endif
+
     {!! Form::open(['url' => 'account/email']) !!}
         <div class="form-group row">
             <label class="col-md-2 col-form-label">Email Address</label>
@@ -151,6 +157,28 @@
             {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
         </div>
     {!! Form::close() !!}
+
+    @if(!Auth::user()->hasVerifiedEmail())
+        <hr>
+        <p>Send a code to your email, then enter it below to verify your account.</p>
+        {!! Form::open(['url' => 'account/email/send-code']) !!}
+            <div class="text-right mb-3">
+                {!! Form::submit('Send Verification Code', ['class' => 'btn btn-outline-primary']) !!}
+            </div>
+        {!! Form::close() !!}
+
+        {!! Form::open(['url' => 'account/email/verify-code']) !!}
+            <div class="form-group row">
+                <label class="col-md-2 col-form-label">Code</label>
+                <div class="col-md-10">
+                    {!! Form::text('verification_code', null, ['class' => 'form-control', 'maxlength' => 6, 'placeholder' => 'Enter 6-digit code']) !!}
+                </div>
+            </div>
+            <div class="text-right">
+                {!! Form::submit('Verify Email', ['class' => 'btn btn-success']) !!}
+            </div>
+        {!! Form::close() !!}
+    @endif
 </div>
 
 <div class="card p-3 mb-2">

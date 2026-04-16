@@ -1,12 +1,16 @@
 FROM dunglas/frankenphp:php8.4.18-bookworm
 
-# System deps + PHP extensions needed for MySQL (pdo_mysql)
+# System deps + PHP extensions needed for MySQL (pdo_mysql) and image generation (gd)
 RUN apt-get update && apt-get install -y \
     git unzip zip \
     libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     nodejs npm \
     default-mysql-client \
-  && docker-php-ext-install pdo_mysql \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install pdo_mysql gd \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Composer

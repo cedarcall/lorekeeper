@@ -1,6 +1,8 @@
 <script>
     $(document).ready(function() {
-        $('#userSelect').selectize();
+        $('#userSelect').selectize({
+            dropdownParent: 'body'
+        });
         $( "#datepicker" ).datetimepicker({
             dateFormat: "yy-mm-dd",
             timeFormat: 'HH:mm:ss',

@@ -187,6 +187,14 @@ a:hover {
   z-index: 3000;
 }
 
+.selectize-control .selectize-input.dropdown-active {
+  z-index: 5000 !important;
+}
+
 .selectize-dropdown {
-  z-index: 3500 !important;
+  z-index: 5001 !important;
+}
+
+.navbar .dropdown-menu {
+  z-index: 5002 !important;
 }

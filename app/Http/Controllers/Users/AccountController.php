@@ -19,6 +19,10 @@ use App\Models\User\UserItem;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use App\Models\Notification;
 use App\Models\ThemeEditor;
 use App\Models\WorldExpansion\Location;
@@ -195,7 +199,7 @@ class AccountController extends Controller {
     }
 
     /**
-     * Changes the user's email address and sends a verification email.
+     * Changes the user's email address and resets verification.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  App\Services\UserService  $service
@@ -205,12 +209,106 @@ class AccountController extends Controller {
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users'
         ]);
-        if ($service->updateEmail($request->only(['email']), Auth::user())) {
-            flash('Email updated successfully. A verification email has been sent to your new email address.')->success();
+
+        $user = Auth::user();
+        if ($service->updateEmail($request->only(['email']), $user)) {
+            $this->sendVerificationCode($user);
+            flash('Email updated successfully. We sent a 6-digit verification code to your email.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->back();
+    }
+
+    /**
+     * Sends a 6-digit email verification code.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSendEmailVerificationCode()
+    {
+        $user = Auth::user();
+        if($user->hasVerifiedEmail()) {
+            flash('Your email is already verified.')->success();
+            return redirect()->back();
+        }
+
+        if($this->sendVerificationCode($user)) {
+            flash('A verification code has been sent to your email.')->success();
+        }
+        else {
+            flash('Could not send verification code right now. Please try again later.')->error();
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Verifies email using a 6-digit code.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postVerifyEmailCode(Request $request)
+    {
+        $request->validate([
+            'verification_code' => 'required|string|size:6'
+        ]);
+
+        $user = Auth::user();
+        if($user->hasVerifiedEmail()) {
+            flash('Your email is already verified.')->success();
+            return redirect()->back();
+        }
+
+        if(!$user->email_verification_code || !$user->email_verification_code_expires_at) {
+            flash('No verification code is active. Please request a new code.')->error();
+            return redirect()->back();
+        }
+
+        if(Carbon::now()->gt($user->email_verification_code_expires_at)) {
+            flash('That verification code has expired. Please request a new code.')->error();
+            return redirect()->back();
+        }
+
+        if(!Hash::check($request->input('verification_code'), $user->email_verification_code)) {
+            flash('Invalid verification code.')->error();
+            return redirect()->back();
+        }
+
+        $user->email_verified_at = Carbon::now();
+        $user->email_verification_code = null;
+        $user->email_verification_code_expires_at = null;
+        $user->save();
+
+        flash('Email verified successfully.')->success();
+        return redirect()->back();
+    }
+
+    /**
+     * Generates and emails a verification code for the given user.
+     */
+    private function sendVerificationCode(User $user): bool
+    {
+        $plainCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $user->email_verification_code = Hash::make($plainCode);
+        $user->email_verification_code_expires_at = Carbon::now()->addMinutes(15);
+        $user->save();
+
+        try {
+            Mail::raw("Your Dreadfarer verification code is: {$plainCode}\n\nThis code expires in 15 minutes.", function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Dreadfarer Email Verification Code');
+            });
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Failed to send verification code email.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
     }
 
     /**
