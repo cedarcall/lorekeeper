@@ -60,7 +60,7 @@ class ForceCreateAdmin extends Command
                 'rank_id' => $adminRankId,
                 'password' => Hash::make($password),
                 'birthday' => '1970-01-01',
-                'has_alias' => 0,
+                'has_alias' => 1,
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
