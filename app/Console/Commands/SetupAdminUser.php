@@ -85,23 +85,29 @@ class SetupAdminUser extends Command
                     return 1;
                 }
 
-                $service = new UserService;
-                $user = $service->createUser([
-                    'name' => $name,
-                    'email' => $email,
-                    'rank_id' => $adminRank->id,
-                    'password' => $password,
-                    'dob' => [
-                        'day' => '01',
-                        'month' => '01',
-                        'year' => '1970'
-                    ],
-                    'has_alias' => 0
-                ]);
-                $user->email_verified_at = Carbon::now();
-                $user->save();
+                try {
+                    $service = new UserService;
+                    $user = $service->createUser([
+                        'name' => $name,
+                        'email' => $email,
+                        'rank_id' => $adminRank->id,
+                        'password' => $password,
+                        'dob' => [
+                            'day' => '01',
+                            'month' => '01',
+                            'year' => '1970'
+                        ],
+                        'has_alias' => 0
+                    ]);
+                    $user->email_verified_at = Carbon::now();
+                    $user->save();
 
-                $this->info('Admin account created automatically via --auto mode.');
+                    $this->info('Admin account created automatically via --auto mode. User: ' . $name . ', Email: ' . $email);
+                } catch (\Exception $e) {
+                    $this->error('Failed to create admin user: ' . $e->getMessage());
+                    \Log::error('setup-admin-user --auto failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    return 1;
+                }
                 return 0;
             }
 
