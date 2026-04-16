@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 export PORT=${PORT:-8080}
 
@@ -24,6 +25,7 @@ php artisan migrate --force
 php artisan add-site-settings
 php artisan add-text-pages
 php artisan add-world-expansion
+php artisan seed-production-data
 php artisan copy-default-images
 
 # Create admin user automatically if env vars are set and no users exist

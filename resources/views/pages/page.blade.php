@@ -111,7 +111,13 @@
 
 @if($page->key !== 'featured-planet')
     @php
-        $pageBody = ($page->key === 'homeworld' && isset($homeworldParsedText)) ? $homeworldParsedText : $page->parsed_text;
+        $pageBody = $page->parsed_text;
+        if($page->key === 'homeworld' && isset($homeworldParsedText)) {
+            $pageBody = $homeworldParsedText;
+        }
+        if($page->key === 'getting-started' && isset($gettingStartedParsedText)) {
+            $pageBody = $gettingStartedParsedText;
+        }
     @endphp
     <div class="site-page-content parsed-text" id="currency-rules">
         {!! $pageBody !!}

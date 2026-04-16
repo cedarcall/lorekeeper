@@ -71,6 +71,9 @@ class PageController extends Controller
             $data['homeworldImages'] = HomeworldImage::orderBy('sort_order')->get();
             $data['homeworldParsedText'] = $this->sanitizeHomeworldContent($page->parsed_text);
         }
+        if ($key === 'getting-started') {
+            $data['gettingStartedParsedText'] = $this->sanitizeCorruptedPageContent($page->parsed_text ?: $page->text);
+        }
         return view('pages.page', $data);
     }
 
@@ -159,6 +162,39 @@ class PageController extends Controller
         }
 
         $content = preg_replace('/(?:<br\\s*\\/?>(?:\\s|&nbsp;)*){3,}/i', '<br><br>', $content);
+        return $content;
+    }
+
+    /**
+     * Removes malformed embed metadata fragments from imported page content.
+     *
+     * @param  string|null  $content
+     * @return string|null
+     */
+    protected function sanitizeCorruptedPageContent($content)
+    {
+        if(!$content) {
+            return $content;
+        }
+
+        $patterns = [
+            '/data-deviation="\{">.*?\}"/is',
+            '/\{\\"t\\":\\"(?:preview|social_preview|fullview|\\d+[A-Z])\\".*?\}(?:,|\\s|<)/is',
+            '/(?:^|>)\\s*\\(\\"t\\":\\".*?(?=<|$)/im',
+            '/(?:^|>)\\s*\\{\\"t\\":\\".*?(?=<|$)/im',
+        ];
+
+        foreach($patterns as $pattern) {
+            $content = preg_replace($pattern, '', $content);
+        }
+
+        // Reuse existing broad image-metadata cleanup pass.
+        $content = $this->sanitizeHomeworldContent($content);
+
+        // Remove empty wrapper nodes left behind by metadata stripping.
+        $content = preg_replace('/<figure[^>]*>\\s*<\\/figure>/i', '', $content);
+        $content = preg_replace('/<div[^>]*>\\s*<\\/div>/i', '', $content);
+
         return $content;
     }
 

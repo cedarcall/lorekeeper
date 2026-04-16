@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 
 use App;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 use App\Services\UserService;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
@@ -76,9 +77,9 @@ class SetupAdminUser extends Command
 
             // Non-interactive mode for automated deployments (e.g. Railway)
             if ($this->option('auto')) {
-                $name = env('ADMIN_USER', 'Admin');
-                $email = env('ADMIN_EMAIL');
-                $password = env('ADMIN_PASSWORD');
+                $name = config('app.admin_user', env('ADMIN_USER', 'Admin'));
+                $email = config('app.admin_email', env('ADMIN_EMAIL'));
+                $password = config('app.admin_password', env('ADMIN_PASSWORD'));
 
                 if (!$email || !$password) {
                     $this->error('ADMIN_EMAIL and ADMIN_PASSWORD env vars are required for --auto mode.');
@@ -86,19 +87,31 @@ class SetupAdminUser extends Command
                 }
 
                 try {
-                    $service = new UserService;
-                    $user = $service->createUser([
+                    $existing = User::where('email', $email)->first();
+                    if($existing) {
+                        $existing->update([
+                            'password' => Hash::make($password),
+                            'rank_id' => $existing->rank_id ?: $adminRank->id,
+                        ]);
+                        if(!$existing->email_verified_at) {
+                            $existing->email_verified_at = Carbon::now();
+                            $existing->save();
+                        }
+                        $this->info('Admin email already exists. Password refreshed via --auto mode.');
+                        return 0;
+                    }
+
+                    // Use direct model creation in auto mode to reduce service-layer failure points.
+                    $user = User::create([
                         'name' => $name,
                         'email' => $email,
                         'rank_id' => $adminRank->id,
-                        'password' => $password,
-                        'dob' => [
-                            'day' => '01',
-                            'month' => '01',
-                            'year' => '1970'
-                        ],
-                        'has_alias' => 0
+                        'password' => Hash::make($password),
+                        'birthday' => Carbon::create(1970, 1, 1),
+                        'has_alias' => 0,
                     ]);
+                    $user->settings()->firstOrCreate(['user_id' => $user->id]);
+                    $user->profile()->firstOrCreate(['user_id' => $user->id]);
                     $user->email_verified_at = Carbon::now();
                     $user->save();
 
