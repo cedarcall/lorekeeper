@@ -8,8 +8,11 @@ use Carbon\Carbon;
 
 use App\Models\User\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Arr;
 
@@ -38,6 +41,44 @@ class RegisterController extends Controller
      * @var string
      */
     protected $redirectTo = '/';
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * We intentionally catch verification email failures so a mail transport
+     * issue does not present a 500 after the account has already been created.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        $user = $this->create($request->all());
+
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            Log::error('Registration verification email failed.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            session()->flash('warning', 'Your account was created successfully, but we could not send a verification email right now. Please contact staff if this persists.');
+        }
+
+        $this->guard()->login($user);
+
+        if ($response = $this->registered($request, $user)) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+                    ? response('', 201)
+                    : redirect($this->redirectPath());
+    }
 
     /**
      * Create a new controller instance.
