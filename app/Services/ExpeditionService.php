@@ -62,6 +62,9 @@ class ExpeditionService extends Service
                 $featuredPlanet = FeaturedPlanet::with('lootTable.loot')
                     ->where('is_active', 1)
                     ->where('planet_id', $planet->id)
+                    ->where(function ($q) {
+                        $q->whereNull('end_at')->orWhere('end_at', '>', \Carbon\Carbon::now());
+                    })
                     ->first();
                 if(!$featuredPlanet || !$featuredPlanet->lootTable) {
                     throw new \Exception('Survey Beacon cannot be used on this planet right now.');

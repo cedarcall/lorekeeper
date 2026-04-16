@@ -479,6 +479,35 @@ a:hover {
   background-color: transparent !important;
 }
 
+.sidebar ul li {
+  background-color: var(--bg-panel) !important;
+  box-shadow: 0 0 12px rgba(79, 209, 232, 0.08);
+  border: 1px solid var(--border) !important;
+}
+
+.sidebar .sidebar-header {
+  background-color: rgba(5, 20, 25, 0.95) !important;
+}
+
+.sidebar a {
+  color: var(--text-muted) !important;
+}
+
+.sidebar a:hover {
+  color: var(--accent) !important;
+  background-color: var(--accent-soft) !important;
+}
+
+.sidebar a.active,
+.sidebar a.active:hover {
+  color: var(--text-main) !important;
+  background-color: rgba(5, 20, 25, 0.95) !important;
+}
+
+.sidebar .sidebar-section-header {
+  color: var(--accent) !important;
+}
+
 .breadcrumb-item,
 .breadcrumb-item a,
 .breadcrumb-item.active {
