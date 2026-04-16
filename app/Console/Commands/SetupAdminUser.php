@@ -18,7 +18,7 @@ class SetupAdminUser extends Command
      *
      * @var string
      */
-    protected $signature = 'setup-admin-user';
+    protected $signature = 'setup-admin-user {--auto : Run non-interactively using ADMIN_USER, ADMIN_EMAIL, ADMIN_PASSWORD env vars}';
 
     /**
      * The console command description.
@@ -73,6 +73,37 @@ class SetupAdminUser extends Command
         // Check if the admin user exists...
         $user = User::where('rank_id', $adminRank->id)->first();
         if(!$user) {
+
+            // Non-interactive mode for automated deployments (e.g. Railway)
+            if ($this->option('auto')) {
+                $name = env('ADMIN_USER', 'Admin');
+                $email = env('ADMIN_EMAIL');
+                $password = env('ADMIN_PASSWORD');
+
+                if (!$email || !$password) {
+                    $this->error('ADMIN_EMAIL and ADMIN_PASSWORD env vars are required for --auto mode.');
+                    return 1;
+                }
+
+                $service = new UserService;
+                $user = $service->createUser([
+                    'name' => $name,
+                    'email' => $email,
+                    'rank_id' => $adminRank->id,
+                    'password' => $password,
+                    'dob' => [
+                        'day' => '01',
+                        'month' => '01',
+                        'year' => '1970'
+                    ],
+                    'has_alias' => 0
+                ]);
+                $user->email_verified_at = Carbon::now();
+                $user->save();
+
+                $this->info('Admin account created automatically via --auto mode.');
+                return 0;
+            }
 
             $this->line('Setting up admin account. This account will have access to all site data, please make sure to keep the email and password secret!');
             $name = $this->anticipate('Username', ['Admin', 'System']);
