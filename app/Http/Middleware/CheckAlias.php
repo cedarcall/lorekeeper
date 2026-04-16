@@ -16,12 +16,6 @@ class CheckAlias
      */
     public function handle($request, Closure $next)
     {
-        if (app()->environment('local')) {
-    return $next($request);
-        }
-        if(!$request->user()->has_alias) {
-            return redirect('/link');
-        }
         if(!$request->user()->birthday) {
             return redirect('/birthday');
         }
