@@ -43,6 +43,9 @@ class PageController extends Controller
         if ($key === 'featured-planet') {
             $data['featuredPlanet'] = FeaturedPlanet::with('galaxy', 'materials')
                 ->where('is_active', 1)
+                ->where(function ($q) {
+                    $q->whereNull('end_at')->orWhere('end_at', '>', Carbon::now());
+                })
                 ->orderBy('updated_at', 'desc')
                 ->first();
         }

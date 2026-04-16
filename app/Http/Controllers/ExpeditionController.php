@@ -12,6 +12,7 @@ use App\Models\Item\Item;
 use App\Models\User\UserItem;
 use App\Services\ExpeditionService;
 use Auth;
+use Carbon\Carbon;
 
 class ExpeditionController extends Controller
 {
@@ -35,6 +36,9 @@ class ExpeditionController extends Controller
         $planets = $currentGalaxy->planets()->where('is_active', true)->paginate(12);
         $featuredPlanet = FeaturedPlanet::with('planet')
             ->where('is_active', 1)
+            ->where(function ($q) {
+                $q->whereNull('end_at')->orWhere('end_at', '>', Carbon::now());
+            })
             ->orderBy('updated_at', 'desc')
             ->first();
         
