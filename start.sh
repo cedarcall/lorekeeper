@@ -28,7 +28,9 @@ php artisan copy-default-images
 
 # Create admin user automatically if env vars are set and no users exist
 if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
-  php artisan setup-admin-user --auto || true
+  echo ">>> Running setup-admin-user --auto..."
+  php artisan setup-admin-user --auto
+  echo ">>> setup-admin-user exit code: $?"
 fi
 
 # Start the web server
