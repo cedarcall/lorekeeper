@@ -460,13 +460,57 @@ a:hover {
 }
 
 /* =========================
-   MAIN CONTENT SCAN LINES
+   MAIN CONTENT AREA
    ========================= */
 
+#main {
+  background-color: var(--bg-main) !important;
+  background-image: none !important;
+}
+
 .main-content {
+  background-color: transparent !important;
+  color: var(--text-main) !important;
   position: relative;
   overflow: hidden;
 }
+
+.sidebar {
+  background-color: transparent !important;
+}
+
+.breadcrumb-item,
+.breadcrumb-item a,
+.breadcrumb-item.active {
+  color: var(--text-muted) !important;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--text-muted) !important;
+}
+
+.modal-content {
+  background-color: var(--bg-panel) !important;
+  color: var(--text-main) !important;
+}
+
+.form-control,
+.selectize-input,
+.selectize-dropdown,
+.dropdown-menu,
+.dropdown-item {
+  background-color: var(--bg-panel-2) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-panel) !important;
+}
+
+/* =========================
+   MAIN CONTENT SCAN LINES
+   ========================= */
 
 .main-content::after {
   content: "";

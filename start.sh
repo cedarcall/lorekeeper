@@ -26,6 +26,11 @@ php artisan add-text-pages
 php artisan add-world-expansion
 php artisan copy-default-images
 
+# Create admin user automatically if env vars are set and no users exist
+if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
+  php artisan setup-admin-user --auto || true
+fi
+
 # Start the web server
 if [ -f /etc/caddy/Caddyfile ]; then
   exec frankenphp run --config /etc/caddy/Caddyfile
