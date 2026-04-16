@@ -13,7 +13,7 @@ class Species extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'masterlist_sub_id'
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'page_text', 'parsed_page_text', 'masterlist_sub_id'
     ];
 
     /**
@@ -32,6 +32,7 @@ class Species extends Model
     public static $createRules = [
         'name' => 'required|unique:specieses|between:3,100',
         'description' => 'nullable',
+        'page_text' => 'nullable',
         'image' => 'mimes:png',
     ];
     
@@ -44,6 +45,7 @@ class Species extends Model
     public static $updateRules = [
         'name' => 'required|between:3,100',
         'description' => 'nullable',
+        'page_text' => 'nullable',
         'image' => 'mimes:png',
     ];
 
@@ -141,7 +143,7 @@ class Species extends Model
      */
     public function getUrlAttribute()
     {
-        return url('world/species?name='.$this->name);
+        return url('world/species/'.$this->id.'.'.strtolower(str_replace(' ', '-', $this->name)));
     }
 
     /**

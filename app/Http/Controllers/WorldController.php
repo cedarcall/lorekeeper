@@ -99,6 +99,24 @@ class WorldController extends Controller
     }
 
     /**
+     * Shows an individual species page.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getSpecies($id)
+    {
+        $species = Species::with(['subtypes' => function($query) {
+            $query->orderBy('sort', 'DESC');
+        }])->where('id', $id)->first();
+        if(!$species) abort(404);
+
+        return view('world.species_page', [
+            'species' => $species,
+        ]);
+    }
+
+    /**
      * Shows the subtypes page.
      *
      * @param  \Illuminate\Http\Request  $request

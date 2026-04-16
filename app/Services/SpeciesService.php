@@ -98,7 +98,8 @@ class SpeciesService extends Service
      */
     private function populateData($data, $species = null)
     {
-        if(isset($data['description']) && $data['description']) $data['parsed_description'] = parse($data['description']);
+        if(isset($data['description'])) $data['parsed_description'] = $data['description'] ? parse($data['description']) : null;
+        if(isset($data['page_text'])) $data['parsed_page_text'] = $data['page_text'] ? parse($data['page_text']) : null;
 
         if(isset($data['remove_image']))
         {

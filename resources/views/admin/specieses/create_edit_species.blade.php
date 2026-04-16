@@ -42,6 +42,11 @@
     {!! Form::textarea('description', $species->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="form-group">
+    {!! Form::label('Species Info Page Text (Optional)') !!} {!! add_help('This is the full species information shown on the dedicated species page.') !!}
+    {!! Form::textarea('page_text', $species->page_text, ['class' => 'form-control wysiwyg']) !!}
+</div>
+
 <div class="text-right">
     {!! Form::submit($species->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

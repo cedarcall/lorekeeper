@@ -78,7 +78,7 @@ class SpeciesController extends Controller
     {
         $id ? $request->validate(Species::$updateRules) : $request->validate(Species::$createRules);
         $data = $request->only([
-            'name', 'description', 'image', 'remove_image', 'masterlist_sub_id'
+            'name', 'description', 'page_text', 'image', 'remove_image', 'masterlist_sub_id'
         ]);
         if($id && $service->updateSpecies(Species::find($id), $data, Auth::user())) {
             flash(ucfirst(__('lorekeeper.species')).' updated successfully.')->success();
