@@ -150,3 +150,26 @@ a:hover {
   border-bottom: 1px solid var(--border) !important;
   font-weight: 600;
 }
+
+/* ======================
+   DROPDOWN OVERLAY FIX
+   ====================== */
+
+/* Keep Selectize dropdowns above footer/nav text when forms are near the page bottom. */
+.main-content,
+.site-footer {
+  position: relative;
+}
+
+.site-footer {
+  z-index: 1;
+}
+
+.selectize-control {
+  position: relative;
+  z-index: 3000;
+}
+
+.selectize-dropdown {
+  z-index: 3500 !important;
+}
