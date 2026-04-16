@@ -1,6 +1,7 @@
 #!/bin/sh
 # Do NOT use set -e: individual command failures are handled inline
 export PORT=${PORT:-8080}
+echo ">>> start.sh v2 running at $(date)"
 
 # Skip composer/npm in Docker (already done at build time)
 if [ ! -d vendor ]; then
@@ -27,11 +28,10 @@ php artisan add-world-expansion
 php artisan seed-production-data
 php artisan copy-default-images
 
-# Create admin user automatically if env vars are set and no users exist
-if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
-  echo ">>> Running force-create-admin..."
-  php artisan force-create-admin || echo ">>> force-create-admin exited with error (check logs above)"
-fi
+# Create admin user automatically (command handles env var checks internally)
+echo ">>> About to run force-create-admin..."
+php artisan force-create-admin 2>&1 || echo ">>> force-create-admin exited with error code $?"
+echo ">>> force-create-admin block finished."
 
 # Start the web server
 if [ -f /etc/caddy/Caddyfile ]; then
