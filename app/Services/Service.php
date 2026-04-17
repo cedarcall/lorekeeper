@@ -246,7 +246,11 @@ abstract class Service {
 
     private function resolveImageDirectory($dir)
     {
-        if(preg_match('/^[A-Za-z]:[\\\/]/', $dir) || str_starts_with($dir, DIRECTORY_SEPARATOR) || str_starts_with($dir, '\\\\')) {
+        // Already absolute: Windows drive letter, Unix root, or UNC path
+        if(strlen($dir) >= 3 && ctype_alpha($dir[0]) && $dir[1] === ':' && ($dir[2] === '\\' || $dir[2] === '/')) {
+            return $dir;
+        }
+        if(str_starts_with($dir, DIRECTORY_SEPARATOR) || str_starts_with($dir, '\\\\')) {
             return $dir;
         }
 
