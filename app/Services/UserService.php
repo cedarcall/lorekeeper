@@ -253,23 +253,34 @@ class UserService extends Service
             if(!$avatar) throw new \Exception ("Please upload a file.");
             $filename = $user->id . '.' . $avatar->getClientOriginalExtension();
 
+            $avatarDir = public_path('images/avatars');
+            if(!file_exists($avatarDir)) {
+                mkdir($avatarDir, 0755, true);
+            }
+
             if ($user->avatar !== 'default.jpg') {
-                $file = public_path('images/avatars/' . $user->avatar);
+                $file = $avatarDir . '/' . $user->avatar;
 
                 if (File::exists($file)) {
                     if(!unlink($file)) throw new \Exception("Failed to unlink old avatar.");
                 }
             }
 
+            // Get the real path of the uploaded file
+            $tempPath = $avatar->getRealPath();
+            if(!$tempPath || !file_exists($tempPath)) {
+                throw new \Exception("Upload failed: temporary file not found. Please try again.");
+            }
+
             // Checks if uploaded file is a GIF
             if ($avatar->getClientOriginalExtension() == 'gif') {
 
-                if(!copy($avatar, public_path('images/avatars/' . $filename))) throw new \Exception("Failed to copy file.");
+                if(!copy($tempPath, $avatarDir . '/' . $filename)) throw new \Exception("Failed to copy file.");
 
             }
 
             else {
-                if(!Image::make($avatar)->resize(150, 150)->save( public_path('images/avatars/' . $filename)))
+                if(!Image::make($tempPath)->resize(150, 150)->save($avatarDir . '/' . $filename))
                 throw new \Exception("Failed to process avatar.");
             }
 
