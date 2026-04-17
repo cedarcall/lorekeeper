@@ -184,6 +184,8 @@ abstract class Service {
     // 3. Nothing happens (no changes required)
     public function handleImage($image, $dir, $name, $oldName = null, $copy = false)
     {
+        $dir = $this->resolveImageDirectory($dir);
+
         if(!$oldName && !$image) return true;
 
         if(!$image)
@@ -207,6 +209,8 @@ abstract class Service {
     // Moves an old image within the same directory.
     private function moveImage($dir, $name, $oldName, $copy = false)
     {
+        $dir = $this->resolveImageDirectory($dir);
+
         if($copy) File::copy($dir . '/' . $oldName, $dir . '/' . $name);
         else File::move($dir . '/' . $oldName, $dir . '/' . $name);
         return true;
@@ -215,6 +219,8 @@ abstract class Service {
     // Moves an uploaded image into a directory, checking if it exists.
     private function saveImage($image, $dir, $name, $copy = false)
     { 
+        $dir = $this->resolveImageDirectory($dir);
+
         if(!file_exists($dir))
         {
             // Create the directory.
@@ -233,6 +239,17 @@ abstract class Service {
 
     public function deleteImage($dir, $name)
     {
+        $dir = $this->resolveImageDirectory($dir);
+
         unlink($dir . '/' . $name);
+    }
+
+    private function resolveImageDirectory($dir)
+    {
+        if(preg_match('/^[A-Za-z]:[\\\/]/', $dir) || str_starts_with($dir, DIRECTORY_SEPARATOR) || str_starts_with($dir, '\\\\')) {
+            return $dir;
+        }
+
+        return public_path($dir);
     }
 }
