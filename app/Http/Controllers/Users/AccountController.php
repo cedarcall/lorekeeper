@@ -85,6 +85,7 @@ class AccountController extends Controller {
             5 => 'daily'
         );
 
+        $timelimit = Settings::get('WE_change_timelimit') ?? 0;
         return view('account.settings', [
             'themeOptions' => $themeOptions + Auth::user()->themes()->where('theme_type', 'base')->get()->pluck('displayName', 'id')->toArray(),
             'decoratorThemes' => $decoratorOptions + Auth::user()->themes()->where('theme_type', 'decorator')->get()->pluck('displayName', 'id')->toArray(),
@@ -94,7 +95,7 @@ class AccountController extends Controller {
             'user_faction_enabled' => Settings::get('WE_user_factions'),
             'char_enabled' => Settings::get('WE_character_locations'),
             'char_faction_enabled' => Settings::get('WE_character_factions'),
-            'location_interval' => $interval[Settings::get('WE_change_timelimit')]
+            'location_interval' => $interval[$timelimit]
         ]);
     }
 
