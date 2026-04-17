@@ -92,6 +92,7 @@ body {
     transparent 2px,
     transparent 4px
   );
+  background-size: 100% 4px;
   animation: scanMove 6s linear infinite;
   pointer-events: none;
   z-index: 3;
@@ -420,13 +421,14 @@ a:hover {
     transparent 2px,
     transparent 4px
   );
+  background-size: 100% 4px;
   animation: scanMove 6s linear infinite;
   pointer-events: none;
 }
 
 @keyframes scanMove {
-  from { transform: translateY(0); }
-  to   { transform: translateY(20px); }
+  from { background-position: 0 0; }
+  to   { background-position: 0 4px; }
 }
 
 /* =========================
