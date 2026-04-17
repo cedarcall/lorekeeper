@@ -266,22 +266,14 @@ class UserService extends Service
                 }
             }
 
-            // Get the real path of the uploaded file
-            $tempPath = $avatar->getRealPath();
-            if(!$tempPath || !file_exists($tempPath)) {
-                throw new \Exception("Upload failed: temporary file not found. Please try again.");
-            }
+            // Move uploaded file into avatars directory first
+            $avatar->move($avatarDir, $filename);
+            $savedPath = $avatarDir . '/' . $filename;
 
-            // Checks if uploaded file is a GIF
-            if ($avatar->getClientOriginalExtension() == 'gif') {
-
-                if(!copy($tempPath, $avatarDir . '/' . $filename)) throw new \Exception("Failed to copy file.");
-
-            }
-
-            else {
-                if(!Image::make($tempPath)->resize(150, 150)->save($avatarDir . '/' . $filename))
-                throw new \Exception("Failed to process avatar.");
+            // Resize if not a GIF
+            if (strtolower(pathinfo($filename, PATHINFO_EXTENSION)) !== 'gif') {
+                if(!Image::make($savedPath)->resize(150, 150)->save($savedPath))
+                    throw new \Exception("Failed to process avatar.");
             }
 
             $user->avatar = $filename;
