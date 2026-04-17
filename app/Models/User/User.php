@@ -295,7 +295,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getVerifiedNameAttribute()
     {
-        return $this->name . ($this->hasAlias ? '' : ' (Unverified)');
+        return $this->name . ($this->hasAlias ? '' : ' (No Alias)');
     }
 
     /**
@@ -395,8 +395,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getDisplayAliasAttribute()
     {
-        if (!$this->hasAlias) return '(Unverified)';
-        return $this->primaryAlias ? $this->primaryAlias->displayAlias : '(Unverified)';
+        if (!$this->hasAlias) return '(No Alias)';
+        return $this->primaryAlias ? $this->primaryAlias->displayAlias : '(No Alias)';
     }
 
     /**
