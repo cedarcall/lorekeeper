@@ -256,7 +256,7 @@ class CharacterDesignUpdate extends Model
      */
     public function getImageDirectoryAttribute()
     {
-        return 'images/character-updates/'.floor($this->id / 1000);
+        return 'storage/images/character-updates/'.floor($this->id / 1000);
     }
 
     /**

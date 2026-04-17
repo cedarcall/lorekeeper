@@ -253,7 +253,7 @@ class UserService extends Service
             if(!$avatar) throw new \Exception ("Please upload a file.");
             $filename = $user->id . '.' . $avatar->getClientOriginalExtension();
 
-            $avatarDir = public_path('images/avatars');
+            $avatarDir = storage_path('app/public/images/avatars');
             if(!file_exists($avatarDir)) {
                 mkdir($avatarDir, 0755, true);
             }

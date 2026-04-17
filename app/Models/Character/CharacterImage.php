@@ -178,7 +178,7 @@ class CharacterImage extends Model
      */
     public function getImageDirectoryAttribute()
     {
-        return 'images/characters/'.floor($this->id / 1000);
+        return 'storage/images/characters/'.floor($this->id / 1000);
     }
 
     /**

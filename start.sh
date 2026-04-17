@@ -20,6 +20,12 @@ php artisan route:clear || true
 php artisan view:clear || true
 php artisan storage:link || true
 
+# Ensure image directories exist
+mkdir -p storage/app/public/images/characters
+mkdir -p storage/app/public/images/character-updates
+mkdir -p storage/app/public/images/avatars
+chmod -R a+rw storage/app/public/images
+
 # Run migrations and bootstrap
 php artisan migrate --force
 php artisan add-site-settings
