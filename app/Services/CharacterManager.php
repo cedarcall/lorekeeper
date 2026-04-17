@@ -147,6 +147,8 @@ class CharacterManager extends Service
                     $recipient->settings->is_fto = 0; // MYO slots don't affect the FTO status - YMMV
                 }
                 $recipient->settings->save();
+                // Set has_alias when a character is created
+                $recipient->update(['has_alias' => 1]);
             }
 
             // If the recipient has an account, send them a notification
@@ -1705,6 +1707,8 @@ class CharacterManager extends Service
         if(is_object($recipient)) {
             if(!$character->is_myo_slot) $recipient->settings->is_fto = 0;
             $recipient->settings->save();
+            // Set has_alias when a character is transferred to a user
+            $recipient->update(['has_alias' => 1]);
         }
 
         // Update character owner, sort order and cooldown
