@@ -299,15 +299,13 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Checks if the user has an alias (has an associated dA account)
-     * or has characters on the site.
+     * Aliases are not used on this site; always returns true.
      *
      * @return bool
      */
     public function getHasAliasAttribute()
     {
-        if ($this->attributes['has_alias']) return true;
-        return $this->characters()->exists();
+        return true;
     }
 
     /**
