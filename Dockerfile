@@ -1,8 +1,8 @@
 FROM dunglas/frankenphp:php8.4.18-bookworm
 
 # System deps + PHP extensions needed for MySQL (pdo_mysql) and image generation (gd)
-RUN apt-get update && apt-get install -y \
-    git unzip zip \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git unzip zip curl \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y \
   && docker-php-ext-install pdo_mysql gd \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install Composer directly via curl (faster than COPY --from)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+  && chmod +x /usr/local/bin/composer
 
 WORKDIR /app
 COPY . .
