@@ -198,3 +198,12 @@ a:hover {
 .navbar .dropdown-menu {
   z-index: 5002 !important;
 }
+
+/* ======================
+   CHARACTER THUMBNAIL FIX
+   ====================== */
+
+.img-thumbnail {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+}
