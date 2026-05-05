@@ -13,6 +13,12 @@ if [ -f package.json ] && { [ ! -f public/css/app.css ] || [ ! -f public/js/app.
   npm run production
 fi
 
+# Create Laravel framework storage directories (volume mount wipes these out)
+mkdir -p storage/framework/{sessions,views,cache,testing}
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+chmod -R a+rw storage bootstrap/cache
+
 # Clear caches first to pick up fresh env
 php artisan config:clear || true
 php artisan cache:clear || true
