@@ -261,14 +261,6 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label for="calc-background">Background</label>
-                        <select id="calc-background" class="form-control">
-                            <option value="none">None</option>
-                            <option value="simple">Simple</option>
-                            <option value="detailed">Detailed</option>
-                        </select>
-                    </div>
                     <div class="form-group col-md-4 align-self-end">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="calc-experimental">
@@ -399,10 +391,6 @@ $(document).ready(function() {
         addReward(total, pets * 3, pets * 2);
         addReward(total, mounts * 5, mounts * 3);
         addReward(total, guests * 5, guests * 2);
-
-        const background = $('#calc-background').val();
-        if (background === 'simple') addReward(total, 8, 4);
-        if (background === 'detailed') addReward(total, 20, 10);
 
         if ($('#calc-experimental').is(':checked')) addReward(total, 3, 2);
 

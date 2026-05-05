@@ -271,7 +271,8 @@
                     </div>
                 </div>
 
-                {{-- Ask a Question Section --}}
+                {{-- Ask a Question Section (only for active events) --}}
+                @if($event->is_visible)
                 <div class="card mb-3" id="ask-question">
                     <div class="card-header">
                         <h3 class="mb-0"><i class="fas fa-envelope mr-2"></i> Ask a Question</h3>
