@@ -5,14 +5,22 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-class MoveImagesToStorage extends Command
+class MigrateImagesToStorage extends Command
 {
-    protected $signature = 'migrate-images-to-storage';
-    protected $description = 'Migrate existing images from public/images to persistent storage/app/public/images';
+    protected $signature = 'migrate:images {--force : Force re-migration of all images}';
+    protected $description = 'Automatically migrate images from public/images to persistent storage (runs once on deploy)';
 
     public function handle()
     {
-        $this->info('Starting image migration to persistent storage...');
+        $flagFile = storage_path('.images-migrated-flag');
+        $force = $this->option('force');
+
+        // Only run once per deployment unless --force is used
+        if (!$force && File::exists($flagFile)) {
+            return 0;
+        }
+
+        $this->info('Checking for images to migrate to persistent storage...');
 
         $directories = [
             ['public/images/characters', 'storage/app/public/images/characters', 'Character images'],
@@ -20,48 +28,64 @@ class MoveImagesToStorage extends Command
             ['public/images/avatars', 'storage/app/public/images/avatars', 'Avatars'],
         ];
 
+        $totalMigrated = 0;
+
         foreach ($directories as [$source, $dest, $label]) {
             $sourcePath = base_path($source);
             $destPath = base_path($dest);
 
             if (!File::exists($sourcePath)) {
-                $this->info("$label: Source directory not found ($sourcePath)");
                 continue;
             }
 
             // Ensure destination exists
             if (!File::isDirectory($destPath)) {
                 File::makeDirectory($destPath, 0755, true);
-                $this->info("$label: Created destination directory");
             }
 
-            // Copy all files
-            $files = File::allFiles($sourcePath);
-            $count = 0;
-            foreach ($files as $file) {
-                $relativePath = $file->getRelativePathname();
-                $destFile = $destPath . '/' . $relativePath;
-                
-                // Ensure subdirectory exists
-                $destDir = dirname($destFile);
-                if (!File::isDirectory($destDir)) {
-                    File::makeDirectory($destDir, 0755, true);
+            // Copy all files recursively
+            try {
+                $files = File::allFiles($sourcePath);
+                $count = 0;
+                foreach ($files as $file) {
+                    $relativePath = $file->getRelativePathname();
+                    $destFile = $destPath . '/' . $relativePath;
+                    
+                    // Skip if already exists (unless force)
+                    if (!$force && File::exists($destFile)) {
+                        continue;
+                    }
+
+                    // Ensure subdirectory exists
+                    $destDir = dirname($destFile);
+                    if (!File::isDirectory($destDir)) {
+                        File::makeDirectory($destDir, 0755, true);
+                    }
+
+                    // Copy file
+                    if (File::copy($file->getPathname(), $destFile)) {
+                        $count++;
+                        $totalMigrated++;
+                    }
                 }
-
-                // Copy file
-                File::copy($file->getPathname(), $destFile);
-                $count++;
+                
+                if ($count > 0) {
+                    $this->info("$label: Migrated $count files");
+                }
+            } catch (\Exception $e) {
+                $this->error("$label: Migration failed - " . $e->getMessage());
             }
-
-            $this->info("$label: Migrated $count files");
         }
 
-        $this->info('Image migration complete!');
-        $this->warn('IMPORTANT: Ensure storage/ is mounted as a Docker volume to persist across redeploys.');
-        $this->line('Add to docker-compose.yml under lorekeeper service volumes:');
-        $this->line('  - lorekeeper_storage:/app/storage');
-        $this->line('And add volume at root:');
-        $this->line('volumes:');
-        $this->line('  lorekeeper_storage:');
+        if ($totalMigrated > 0) {
+            $this->info("✓ Total: $totalMigrated files migrated to persistent storage");
+        } else {
+            $this->info("✓ All images already in persistent storage (or none found)");
+        }
+
+        // Create flag file so migration only runs once
+        File::put($flagFile, now()->toDateTimeString());
+
+        return 0;
     }
 }
