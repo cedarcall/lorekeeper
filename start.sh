@@ -14,7 +14,7 @@ if [ -f package.json ] && { [ ! -f public/css/app.css ] || [ ! -f public/js/app.
 fi
 
 # Create Laravel framework storage directories (volume mount wipes these out)
-mkdir -p storage/framework/{sessions,views,cache,testing}
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
 mkdir -p storage/logs
 mkdir -p bootstrap/cache
 chmod -R a+rw storage bootstrap/cache
