@@ -43,7 +43,14 @@
                         @endif
 
                         <div class="world-entry-text">
-                            {!! trim($species->parsed_page_text ?: $species->parsed_description) !!}
+                            @php
+                                $speciesLore = trim($species->parsed_page_text ?: $species->parsed_description);
+                            @endphp
+                            @if($speciesLore)
+                                {!! $speciesLore !!}
+                            @else
+                                <p class="text-muted mb-0">Species information is not available yet.</p>
+                            @endif
                         </div>
                     </div>
                 </div>

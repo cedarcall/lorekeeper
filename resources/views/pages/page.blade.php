@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title') {{ $page->title }} @endsection
+@section('title') {{ html_entity_decode($page->title, ENT_QUOTES, 'UTF-8') }} @endsection
 
 @section('content')
 {!! breadcrumbs([$page->title => $page->url]) !!}
-<h1>{{ $page->title }}</h1>
+<h1>{{ html_entity_decode($page->title, ENT_QUOTES, 'UTF-8') }}</h1>
 
 @if($page->description)
     <div class="alert alert-info mb-4">

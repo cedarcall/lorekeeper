@@ -177,6 +177,18 @@ class PageController extends Controller
             return $content;
         }
 
+        // Normalize known broken Getting Started links copied from local/dev contexts.
+        $content = preg_replace(
+            '/href=["\'](?:https?:\\/\\/)?(?:127\.0\.0\.1(?::\d+)?|localhost(?::\d+)?)\\/user\\/Hermescasp["\']/i',
+            'href="https://www.deviantart.com/hermescasp"',
+            $content
+        );
+        $content = preg_replace(
+            '/href=["\'](?:https?:\\/\\/)?(?:www\.)?deviantart\.com\\/user\\/hermescasp["\']/i',
+            'href="https://www.deviantart.com/hermescasp"',
+            $content
+        );
+
         $patterns = [
             '/data-deviation="\{">.*?\}"/is',
             '/\{\\"t\\":\\"(?:preview|social_preview|fullview|\\d+[A-Z])\\".*?\}(?:,|\\s|<)/is',

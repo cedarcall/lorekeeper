@@ -19,7 +19,7 @@
     {!! breadcrumbs(['Contracts' => url('contracts')]) !!}
 
     <div class="alert alert-info mb-3">
-        <i class="fas fa-info-circle mr-2"></i> Want to learn about contracts? <a href="{{ url('info/getting-started') }}"><strong>Go to this page!</strong></a>
+        <i class="fas fa-info-circle mr-2"></i> Want to learn about contracts and expeditions? <a href="https://www.deviantart.com/hermescasp/journal/Expeditions-1283254552" target="_blank" rel="noopener noreferrer"><strong>Read the official guide.</strong></a>
     </div>
 
     @if($current)

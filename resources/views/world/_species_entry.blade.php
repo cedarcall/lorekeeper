@@ -15,7 +15,7 @@
             </div>
         @endif
         <div class="world-entry-text">
-            {!! $species->parsed_description !!}
+            {!! trim($species->parsed_page_text ?: $species->parsed_description) !!}
         </div>
     </div>
 </div>
