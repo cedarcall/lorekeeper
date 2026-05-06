@@ -160,7 +160,7 @@
                         <h3 class="mb-0"><i class="fas fa-palette mr-2"></i> Inspiration</h3>
                     </div>
                     <div class="card-body">
-                        @if($event->inspiration_images && count($event->inspiration_images) > 0)
+                        @if(!empty($event->inspiration_image_urls))
                             <p class="text-muted mb-3">Reference images and inspiration for this event:</p>
                             <div class="row">
                                 @foreach($event->inspiration_image_urls as $url)

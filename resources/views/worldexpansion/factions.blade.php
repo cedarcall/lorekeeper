@@ -66,9 +66,16 @@
                     <div class="pt-3">
                         <strong class="mt-3 mb-0">Contains the following:</strong>
                         @foreach($faction->children->groupBy('type_id') as $group => $children)
+                        @php
+                            $groupType = $loctypes->find($group);
+                        @endphp
                         <p class="mb-0">
                             <strong>
-                                @if(count($children) == 1) {{ $loctypes->find($group)->name }}@else{{ $loctypes->find($group)->names }}@endif:
+                                @if($groupType)
+                                    @if(count($children) == 1) {{ $groupType->name }}@else{{ $groupType->names }}@endif:
+                                @else
+                                    Type:
+                                @endif
                             </strong>
 
                             @foreach($children as $key => $child) {!! $child->fullDisplayName !!}@if($key != count($children)-1), @endif @endforeach

@@ -9,20 +9,23 @@
 @if(count($forums))
 
     @foreach($forums as $forum)
-        @if($forum->children->where('is_active',1)->count())
+        @php
+            $visibleBoards = $forum->children->sortBy('id')->sortBy('sort')->filter(function($board) {
+                return (!$board->hasRestrictions) || (Auth::check() && Auth::user()->canVisitForum($board->id));
+            });
+        @endphp
+        @if(!$forum->children->count() || $visibleBoards->count())
             <div class="card mb-3">
                 <div class="card-body px-3 py-2">
                     <h3 class="mb-0" data-toggle="tooltip" title="{!! $forum->description !!}">{!! $forum->displayName !!} </h3>
                 </div>
-                <ul class="list-group list-group-flush">
-                    @foreach($forum->children->sortBy('id')->sortBy('sort') as $board)
-                        @if($board->hasRestrictions && Auth::check() && Auth::user()->canVisitForum($board->id))
+                @if($forum->children->count())
+                    <ul class="list-group list-group-flush">
+                        @foreach($visibleBoards as $board)
                             @include('forums._index_board', ['board' => $board])
-                        @elseif(!$board->hasRestrictions)
-                            @include('forums._index_board', ['board' => $board])
-                        @endif
-                    @endforeach
-                </ul>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
     @endforeach

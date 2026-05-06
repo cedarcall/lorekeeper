@@ -972,6 +972,11 @@ class CharacterManager extends Service
             $image->is_visible = isset($data['is_visible']);
             $image->save();
 
+            if($image->character->character_image_id == $image->id && $image->is_visible && !$image->character->is_visible) {
+                $image->character->is_visible = 1;
+                $image->character->save();
+            }
+
             // Add a log for the character
             // This logs all the updates made to the character
             $this->createLog($user->id, null, null, null, $image->character_id, 'Image Visibility/Validity Updated', '[#'.$image->id.']', 'character');

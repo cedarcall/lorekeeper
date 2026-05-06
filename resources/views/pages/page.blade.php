@@ -243,11 +243,15 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group col-md-4 align-self-end">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="calc-art-background">
-                                <label class="form-check-label" for="calc-art-background">Background (+5 Credits | +2 REP)</label>
-                            </div>
+                        <div class="form-group col-md-6">
+                            <label for="calc-art-background-type">Background Detail</label>
+                            <select id="calc-art-background-type" class="form-control">
+                                <option value="none">None</option>
+                                <option value="abstract">Abstract</option>
+                                <option value="simple">Simple (+8 Credits | +4 REP)</option>
+                                <option value="detailed-unshaded">Detailed (Unshaded) (+20 Credits | +10 REP)</option>
+                                <option value="detailed-shaded">Detailed (Shaded) (+25 Credits | +12 REP)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -305,10 +309,6 @@
                         <label class="form-check-label" for="calc-art-writing-addon">Writing added to art (500 words) (+5 Credits | +2 REP)</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="calc-art-shading">
-                        <label class="form-check-label" for="calc-art-shading">Shading (+5 Credits | +2 REP)</label>
-                    </div>
-                    <div class="form-check">
                         <input type="checkbox" class="form-check-input" id="calc-art-limbs">
                         <label class="form-check-label" for="calc-art-limbs">All limbs included (+9 Credits | +4 REP)</label>
                     </div>
@@ -344,6 +344,14 @@ $(document).ready(function() {
         100: { credits: 20, rep: 10 }
     };
 
+    const backgroundRewards = {
+        none: { credits: 0, rep: 0 },
+        abstract: { credits: 5, rep: 2 },
+        simple: { credits: 8, rep: 4 },
+        'detailed-unshaded': { credits: 20, rep: 10 },
+        'detailed-shaded': { credits: 25, rep: 12 }
+    };
+
     function intValue(selector, minValue, maxValue) {
         let value = parseInt($(selector).val(), 10);
         if (isNaN(value)) value = 0;
@@ -371,12 +379,12 @@ $(document).ready(function() {
                 addReward(total, 20, 10);
 
                 const wordsUpTo2000 = Math.max(0, Math.min(words, 2000) - 1000);
-                const hundredSteps = Math.floor(wordsUpTo2000 / 100);
-                addReward(total, hundredSteps * 3, hundredSteps * 1);
+                const oneFiftySteps = Math.floor(wordsUpTo2000 / 150);
+                addReward(total, oneFiftySteps * 3, oneFiftySteps * 1);
 
                 const wordsOver2000 = Math.max(0, words - 2000);
-                const fiveHundredSteps = Math.floor(wordsOver2000 / 500);
-                addReward(total, fiveHundredSteps * 7, fiveHundredSteps * 3);
+                const thousandSteps = Math.floor(wordsOver2000 / 1000);
+                addReward(total, thousandSteps * 7, thousandSteps * 3);
             } else {
                 notes.push('Writing base rewards start at 1,000 words.');
             }
@@ -386,11 +394,13 @@ $(document).ready(function() {
             const visibility = parseInt($('#calc-art-visibility').val(), 10);
             const artCharacters = intValue('#calc-art-characters', 1, 4);
             const artComplexClaims = intValue('#calc-art-complex', 0, 2);
+            const backgroundType = $('#calc-art-background-type').val();
 
             const visibilityReward = visibilityRewards[visibility] || visibilityRewards[25];
+            const backgroundReward = backgroundRewards[backgroundType] || backgroundRewards.none;
             addReward(total, visibilityReward.credits * artCharacters, visibilityReward.rep * artCharacters);
             addReward(total, artComplexClaims * 5, artComplexClaims * 2);
-            if ($('#calc-art-background').is(':checked')) addReward(total, 5, 2);
+            addReward(total, backgroundReward.credits, backgroundReward.rep);
         }
 
         const pets = intValue('#calc-pets', 0, 2);
@@ -406,12 +416,21 @@ $(document).ready(function() {
         if ($('#calc-collab-enabled').is(':checked')) {
             addReward(total, 5, 2);
 
+            const collaborators = intValue('#calc-collaborators', 2);
+
             if (mode === 'writing') {
-                const collaborators = intValue('#calc-collaborators', 2);
                 const words = intValue('#calc-words', 0);
                 const requiredWords = collaborators * 1000;
                 if (words < requiredWords) {
                     notes.push('Collab writing minimum for ' + collaborators + ' collaborators is ' + requiredWords + ' words.');
+                }
+                if (words > 0 && words % collaborators !== 0) {
+                    notes.push('Collab writing should split equally; adjust word count to divide evenly by collaborators.');
+                }
+            } else {
+                const artCharacters = intValue('#calc-art-characters', 1, 4);
+                if (artCharacters < collaborators) {
+                    notes.push('Collab art should include at least one character per collaborator.');
                 }
             }
         }
@@ -420,7 +439,6 @@ $(document).ready(function() {
             if ($('#calc-writing-image').is(':checked')) addReward(total, 5, 2);
         } else {
             if ($('#calc-art-writing-addon').is(':checked')) addReward(total, 5, 2);
-            if ($('#calc-art-shading').is(':checked')) addReward(total, 5, 2);
             if ($('#calc-art-limbs').is(':checked')) addReward(total, 9, 4);
         }
 

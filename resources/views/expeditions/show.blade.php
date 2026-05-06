@@ -23,7 +23,7 @@
 
             <div class="card mb-3" style="background: rgba(10, 20, 40, 0.6); border: 1px solid #00ccff;">
                 <div class="card-body">
-                    <p><strong>Galaxy:</strong> {{ $planet->galaxy->name ?? 'Unknown' }}</p>
+                    <p><strong>Galaxy:</strong> {{ optional($planet->galaxy)->name ?? 'Unknown' }}</p>
                     <p><strong>Rarity:</strong> <span class="badge badge-{{ $planet->rarity == 'legendary' ? 'warning' : ($planet->rarity == 'rare' ? 'info' : 'secondary') }}">{{ ucfirst($planet->rarity) }}</span></p>
                     @if($planet->has_hazard)
                         <p><strong>Hazard:</strong> {{ $planet->hazard_name ?: 'Environmental Hazard' }}</p>
