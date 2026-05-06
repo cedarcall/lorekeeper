@@ -133,7 +133,8 @@ class FactionController extends Controller
      */
     public function getFaction($id)
     {
-        $faction = Faction::where('is_active',1)->find($id);
+        $faction = Faction::find($id);
+        if(!$faction) abort(404);
         if(!$faction->is_active && (!Auth::check() || !(Auth::check() && Auth::user()->isStaff))) abort(404);
 
         return view('worldexpansion.faction_page', [

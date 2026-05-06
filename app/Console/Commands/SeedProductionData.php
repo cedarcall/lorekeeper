@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use DB;
+use Schema;
 
 class SeedProductionData extends Command
 {
@@ -35,13 +36,24 @@ class SeedProductionData extends Command
             return 0;
         }
 
-        // Check if data already exists (use site_pages as a canary - if it has
-        // more than the default text pages, data was already imported)
-        $pageCount = DB::table('site_pages')->count();
+        // Check whether meaningful world content already exists.
+        // This avoids false skips when site pages exist but events/factions/planets do not.
         $defaultPageCount = count(config('lorekeeper.text_pages', []));
-        
-        if ($pageCount > $defaultPageCount && !$this->option('force')) {
-            $this->info('Production data appears to already be seeded (site_pages has '.$pageCount.' rows). Skipping.');
+        $counts = [
+            'site_pages' => Schema::hasTable('site_pages') ? DB::table('site_pages')->count() : 0,
+            'events' => Schema::hasTable('events') ? DB::table('events')->count() : 0,
+            'factions' => Schema::hasTable('factions') ? DB::table('factions')->count() : 0,
+            'planets' => Schema::hasTable('planets') ? DB::table('planets')->count() : 0,
+            'featured_planets' => Schema::hasTable('featured_planets') ? DB::table('featured_planets')->count() : 0,
+        ];
+
+        $hasSeededWorldContent =
+            ($counts['site_pages'] > $defaultPageCount)
+            && ($counts['events'] > 0 || $counts['factions'] > 0 || $counts['planets'] > 0 || $counts['featured_planets'] > 0);
+
+        if ($hasSeededWorldContent && !$this->option('force')) {
+            $this->info('Production data appears to already be seeded. Skipping.');
+            $this->line('Current counts: '.json_encode($counts));
             $this->info('Use --force to re-import.');
             return 0;
         }

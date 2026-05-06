@@ -68,14 +68,22 @@ function breadcrumbs($links) {
  */
 function format_date($timestamp, $showTime = true) {
     if(!$timestamp) return '';
-    if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+    try {
+        if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+    } catch(\Throwable $e) {
+        return '';
+    }
 
     return $timestamp->format('j F Y' . ($showTime ? ', H:i:s' : '')) . ($showTime ? ' <abbr data-toggle="tooltip" title="UTC'.$timestamp->timezone->toOffsetName().'">' . strtoupper($timestamp->timezone->getAbbreviatedName($timestamp->isDST())) . '</abbr>' : '');
 }
 
 function pretty_date($timestamp, $showTime = true) {
    if(!$timestamp) return '';
-   if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+   try {
+       if(!$timestamp instanceof \Carbon\Carbon) $timestamp = \Carbon\Carbon::parse($timestamp);
+   } catch(\Throwable $e) {
+       return '';
+   }
 
    return '<abbr data-toggle="tooltip" title="' . $timestamp->format('F j Y' . ($showTime ? ', H:i:s' : '')) . ' ' . strtoupper($timestamp->timezone->getAbbreviatedName($timestamp->isDST())).'">' .$timestamp->diffForHumans() . '</abbr>';
 }
