@@ -49,7 +49,9 @@ class SeedProductionData extends Command
 
         $hasSeededWorldContent =
             ($counts['site_pages'] > $defaultPageCount)
-            && ($counts['events'] > 0 || $counts['factions'] > 0 || $counts['planets'] > 0 || $counts['featured_planets'] > 0);
+            && ($counts['events'] > 0)
+            && ($counts['factions'] > 0)
+            && ($counts['planets'] > 0);
 
         if ($hasSeededWorldContent && !$this->option('force')) {
             $this->info('Production data appears to already be seeded. Skipping.');
