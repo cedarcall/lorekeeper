@@ -12,6 +12,9 @@
 */
 
 Route::get('/', 'HomeController@getIndex')->name('home');
+Route::get('/health', function () {
+    return response('ok', 200);
+});
 Auth::routes(['verify' => true]);
 
 # BROWSE
