@@ -52,13 +52,30 @@ class EventController extends Controller
             'start_at' => 'nullable|date_format:Y-m-d H:i:s',
             'end_at' => 'nullable|date_format:Y-m-d H:i:s',
             'content' => 'nullable',
+            'section_1_title' => 'nullable|string|max:255',
+            'section_1_content' => 'nullable',
+            'section_1_unlock_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'section_2_title' => 'nullable|string|max:255',
+            'section_2_content' => 'nullable',
+            'section_2_unlock_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'section_3_title' => 'nullable|string|max:255',
+            'section_3_content' => 'nullable',
+            'section_3_unlock_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'locations_content' => 'nullable',
+            'prompt_ideas_content' => 'nullable',
             'loot_table_id' => 'nullable|exists:loot_tables,id',
             'award_id' => 'nullable|exists:awards,id'
         ];
 
         $request->validate($rules);
 
-        $data = $request->only(['slug','title','content','qna_content','start_at','end_at','is_visible','loot_table_id','award_id']);
+        $data = $request->only([
+            'slug','title','content','qna_content','start_at','end_at','is_visible','loot_table_id','award_id',
+            'section_1_title','section_1_content','section_1_unlock_at',
+            'section_2_title','section_2_content','section_2_unlock_at',
+            'section_3_title','section_3_content','section_3_unlock_at',
+            'locations_content','prompt_ideas_content'
+        ]);
         $isVisibleInput = $request->input('is_visible', 0);
         if(is_array($isVisibleInput)) $isVisibleInput = end($isVisibleInput);
         $data['is_visible'] = filter_var($isVisibleInput, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
@@ -94,6 +111,28 @@ class EventController extends Controller
             $data['qna_parsed_text'] = function_exists('parse') ? parse($data['qna_content']) : $data['qna_content'];
         } else {
             $data['qna_parsed_text'] = '';
+        }
+
+        for($i = 1; $i <= 3; $i++) {
+            $contentKey = 'section_'.$i.'_content';
+            $parsedKey = 'section_'.$i.'_parsed_text';
+            if(isset($data[$contentKey]) && $data[$contentKey]) {
+                $data[$parsedKey] = function_exists('parse') ? parse($data[$contentKey]) : $data[$contentKey];
+            } else {
+                $data[$parsedKey] = '';
+            }
+        }
+
+        if(isset($data['locations_content']) && $data['locations_content']) {
+            $data['locations_parsed_text'] = function_exists('parse') ? parse($data['locations_content']) : $data['locations_content'];
+        } else {
+            $data['locations_parsed_text'] = '';
+        }
+
+        if(isset($data['prompt_ideas_content']) && $data['prompt_ideas_content']) {
+            $data['prompt_ideas_parsed_text'] = function_exists('parse') ? parse($data['prompt_ideas_content']) : $data['prompt_ideas_content'];
+        } else {
+            $data['prompt_ideas_parsed_text'] = '';
         }
 
         // handle header image

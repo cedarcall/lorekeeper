@@ -13,6 +13,30 @@
             // Prefer parsed_description (from World events admin) over parsed_text
             $eventBody = $event->parsed_description ?? $event->parsed_text ?? $event->description ?? $event->content;
             $eventFaq = $event->qna_parsed_text ?? $event->qna_content ?? $event->parsed_qna ?? $event->qna;
+            $eventLocations = $event->locations_parsed_text ?? $event->locations_content;
+            $eventPromptIdeas = $event->prompt_ideas_parsed_text ?? $event->prompt_ideas_content;
+
+            $unlockSections = collect([1, 2, 3])->map(function($i) use ($event) {
+                $titleKey = 'section_'.$i.'_title';
+                $contentKey = 'section_'.$i.'_parsed_text';
+                $fallbackContentKey = 'section_'.$i.'_content';
+                $unlockKey = 'section_'.$i.'_unlock_at';
+
+                $content = $event->{$contentKey} ?: $event->{$fallbackContentKey};
+                if(!$content) return null;
+
+                $unlockAt = $event->{$unlockKey};
+                $isUnlocked = !$unlockAt || now()->gte($unlockAt);
+
+                return [
+                    'index' => $i,
+                    'anchor' => 'event-update-'.$i,
+                    'title' => $event->{$titleKey} ?: 'Update '.$i,
+                    'content' => $content,
+                    'unlock_at' => $unlockAt,
+                    'is_unlocked' => $isUnlocked,
+                ];
+            })->filter()->values();
         @endphp
 
         {!! breadcrumbs(['Monthly Event' => url('monthly-event'), $eventTitle => url('monthly-event/'.($event->slug ?? $event->id))]) !!}
@@ -38,6 +62,21 @@
                     @if($event->lootTable)
                     <a class="nav-link" href="#event-rewards">
                         <i class="fas fa-gift mr-1"></i> Rewards
+                    </a>
+                    @endif
+                    @foreach($unlockSections as $section)
+                    <a class="nav-link" href="#{{ $section['anchor'] }}">
+                        <i class="fas fa-stream mr-1"></i> {{ $section['title'] }}
+                    </a>
+                    @endforeach
+                    @if($eventLocations)
+                    <a class="nav-link" href="#event-locations">
+                        <i class="fas fa-map-marker-alt mr-1"></i> Locations
+                    </a>
+                    @endif
+                    @if($eventPromptIdeas)
+                    <a class="nav-link" href="#event-prompt-ideas">
+                        <i class="fas fa-lightbulb mr-1"></i> Prompt Ideas
                     </a>
                     @endif
                     <a class="nav-link" href="#event-inspiration">
@@ -150,6 +189,52 @@
                                     <p class="text-muted mb-0">No rewards configured yet.</p>
                                 @endif
                             </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @foreach($unlockSections as $section)
+                <div class="card mb-3" id="{{ $section['anchor'] }}">
+                    <div class="card-header">
+                        <h3 class="mb-0"><i class="fas fa-stream mr-2"></i>{{ $section['title'] }}</h3>
+                        @if($section['unlock_at'])
+                            <small class="text-muted d-block mt-1">Unlocks {!! pretty_date($section['unlock_at']) !!}</small>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @if($section['is_unlocked'])
+                            <div class="parsed-text news-body event-content-centered">
+                                {!! $section['content'] !!}
+                            </div>
+                        @else
+                            <p class="text-muted mb-0"><em>This section is locked until its scheduled release date.</em></p>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+
+                @if($eventLocations)
+                <div class="card mb-3" id="event-locations">
+                    <div class="card-header">
+                        <h3 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Locations</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="parsed-text news-body event-content-centered">
+                            {!! $eventLocations !!}
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if($eventPromptIdeas)
+                <div class="card mb-3" id="event-prompt-ideas">
+                    <div class="card-header">
+                        <h3 class="mb-0"><i class="fas fa-lightbulb mr-2"></i>Prompt Ideas</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="parsed-text news-body event-content-centered">
+                            {!! $eventPromptIdeas !!}
                         </div>
                     </div>
                 </div>

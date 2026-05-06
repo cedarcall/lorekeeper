@@ -31,6 +31,42 @@
     {!! Form::textarea('qna_content', old('qna_content', $event->qna_parsed_text ?: $event->qna_content), ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="card mb-3">
+    <div class="card-header h5">Unlockable Event Sections (Optional)</div>
+    <div class="card-body">
+        <p class="text-muted">These sections appear on the event page and can be locked until a release date.</p>
+
+        @for($i = 1; $i <= 3; $i++)
+            <div class="border rounded p-3 mb-3">
+                <h5 class="mb-3">Section {{ $i }}</h5>
+                <div class="form-group">
+                    {!! Form::label('section_'.$i.'_title', 'Section Title') !!}
+                    {!! Form::text('section_'.$i.'_title', old('section_'.$i.'_title', $event->{'section_'.$i.'_title'}), ['class' => 'form-control', 'placeholder' => 'e.g. Day '.$i.' Intel Drop']) !!}
+                </div>
+                <div class="form-group">
+                    {!! Form::label('section_'.$i.'_unlock_at', 'Unlock At (Optional)') !!}
+                    {!! Form::text('section_'.$i.'_unlock_at', old('section_'.$i.'_unlock_at', $event->{'section_'.$i.'_unlock_at'} ? $event->{'section_'.$i.'_unlock_at'}->format('Y-m-d H:i:s') : null), ['class' => 'form-control datepicker']) !!}
+                    <small class="text-muted">If blank, this section is visible immediately.</small>
+                </div>
+                <div class="form-group mb-0">
+                    {!! Form::label('section_'.$i.'_content', 'Section Content') !!}
+                    {!! Form::textarea('section_'.$i.'_content', old('section_'.$i.'_content', $event->{'section_'.$i.'_parsed_text'} ?: $event->{'section_'.$i.'_content'}), ['class' => 'form-control wysiwyg']) !!}
+                </div>
+            </div>
+        @endfor
+    </div>
+</div>
+
+<div class="form-group">
+    {!! Form::label('Locations Tab Content (Optional)') !!}
+    {!! Form::textarea('locations_content', old('locations_content', $event->locations_parsed_text ?: $event->locations_content), ['class' => 'form-control wysiwyg']) !!}
+</div>
+
+<div class="form-group">
+    {!! Form::label('Prompt Ideas Tab Content (Optional)') !!}
+    {!! Form::textarea('prompt_ideas_content', old('prompt_ideas_content', $event->prompt_ideas_parsed_text ?: $event->prompt_ideas_content), ['class' => 'form-control wysiwyg']) !!}
+</div>
+
 <div class="row">
     <div class="col-md-4">
         <div class="form-group">
