@@ -115,6 +115,14 @@ class CraftingController extends Controller
         $recipe = Recipe::find($id);
         if(!$recipe) abort(404);
 
+        $this->consolidateUserStacksForCrafting(Auth::user()->id);
+
+        $selected = $service->pluckIngredients(Auth::user(), $recipe);
+        if(!$recipe->onlyCurrency && $selected === null) {
+            flash('You do not have the materials to craft this.')->error();
+            return redirect()->to('crafting');
+        }
+
         if($service->craftRecipe($request->only(['stack_id', 'stack_quantity', 'catalyst_ingredient_id']), $recipe, Auth::user())) {
             flash('Recipe crafted successfully.')->success();
             if($request->filled('catalyst_ingredient_id')) {

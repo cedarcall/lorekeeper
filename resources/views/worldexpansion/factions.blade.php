@@ -13,7 +13,7 @@
                 {!! Form::text('name', Request::get('name'), ['class' => 'form-control', 'placeholder' => 'Name']) !!}
             </div>
             <div class="form-group ml-3 mb-3">
-                {!! Form::select('type_id', $types, Request::get('name'), ['class' => 'form-control']) !!}
+                {!! Form::select('type_id', $types, Request::get('type_id'), ['class' => 'form-control']) !!}
             </div>
         </div>
         <div class="form-inline justify-content-end">

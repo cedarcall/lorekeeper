@@ -6,6 +6,19 @@
 {!! breadcrumbs(['World' => 'world',  ucfirst(__('lorekeeper.species')) => 'world/species']) !!}
 <h1>Species</h1>
 
+@if(isset($speciesInfoPage) && $speciesInfoPage)
+    @php
+        $speciesInfoText = $speciesInfoPage->parsed_text ?: $speciesInfoPage->text;
+    @endphp
+    @if($speciesInfoText)
+        <div class="card mb-3">
+            <div class="card-body parsed-text">
+                {!! $speciesInfoText !!}
+            </div>
+        </div>
+    @endif
+@endif
+
 <div>
     {!! Form::open(['method' => 'GET', 'class' => 'form-inline justify-content-end']) !!}
         <div class="form-group mr-3 mb-3">

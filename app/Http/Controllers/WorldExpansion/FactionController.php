@@ -82,15 +82,20 @@ class FactionController extends Controller
     public function getFactions(Request $request)
     {
         $query = Faction::with('type')->orderBy('sort', 'DESC');
-        $data = $request->only(['type_id', 'name', 'sort']);
-        if(isset($data['type_id']) && $data['type_id'] != 'none')
-            $query->where('type_id', $data['type_id']);
-        if(isset($data['name']))
-            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        $typeId = $request->get('type_id');
+        $name = trim((string) $request->get('name'));
+        $sort = $request->get('sort');
 
-        if(isset($data['sort']))
+        if($typeId && $typeId !== 'none') {
+            $query->where('type_id', $typeId);
+        }
+        if($name !== '') {
+            $query->where('name', 'LIKE', '%'.$name.'%');
+        }
+
+        if($sort)
         {
-            switch($data['sort']) {
+            switch($sort) {
                 case 'alpha':
                     $query->sortAlphabetical();
                     break;

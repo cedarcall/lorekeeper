@@ -74,14 +74,14 @@ class ExpeditionController extends Controller
         
         if (Auth::check()) {
             // User can access if galaxy is current OR they are the discoverer
-            if ($planet->galaxy->is_current || $planet->isDiscoveredByUser(Auth::id())) {
+            if ((optional($planet->galaxy)->is_current) || $planet->isDiscoveredByUser(Auth::id())) {
                 $canAccess = true;
             }
             
             $userExpedition = UserPlanetExpedition::where('user_id', Auth::id())
                 ->where('planet_id', $planet->id)
                 ->first();
-        } elseif ($planet->galaxy->is_current) {
+        } elseif (optional($planet->galaxy)->is_current) {
             $canAccess = true;
         }
         

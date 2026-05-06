@@ -118,11 +118,15 @@
                                                     <tr>
                                                         <td>
                                                             @if($loot->rewardable_type == 'Item')
-                                                                {!! $loot->reward->displayName !!}
+                                                                @if($loot->reward)
+                                                                    {!! $loot->reward->displayName !!}
+                                                                @else
+                                                                    <span class="text-muted">Missing item</span>
+                                                                @endif
                                                             @elseif($loot->rewardable_type == 'Currency')
-                                                                {{ $loot->reward->name }}
+                                                                {{ $loot->reward ? $loot->reward->name : 'Missing currency' }}
                                                             @elseif($loot->rewardable_type == 'LootTable')
-                                                                {{ $loot->reward->name }} (Loot Table)
+                                                                {{ $loot->reward ? $loot->reward->name : 'Missing loot table' }} (Loot Table)
                                                             @elseif($loot->rewardable_type == 'None')
                                                                 <span class="text-muted">Nothing</span>
                                                             @else

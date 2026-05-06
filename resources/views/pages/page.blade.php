@@ -242,6 +242,14 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4 align-self-end">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="calc-art-background">
+                                <label class="form-check-label" for="calc-art-background">Background (+5 Credits | +2 REP)</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <h5>Extras & Add-ons</h5>
@@ -382,6 +390,7 @@ $(document).ready(function() {
             const visibilityReward = visibilityRewards[visibility] || visibilityRewards[25];
             addReward(total, visibilityReward.credits * artCharacters, visibilityReward.rep * artCharacters);
             addReward(total, artComplexClaims * 5, artComplexClaims * 2);
+            if ($('#calc-art-background').is(':checked')) addReward(total, 5, 2);
         }
 
         const pets = intValue('#calc-pets', 0, 2);

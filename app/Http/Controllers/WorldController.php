@@ -8,6 +8,7 @@ use Auth;
 
 use App\Models\Currency\Currency;
 use App\Models\Rarity;
+use App\Models\SitePage;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\Item\ItemCategory;
@@ -91,7 +92,11 @@ class WorldController extends Controller
         $query = Species::query();
         $name = $request->get('name');
         if($name) $query->where('name', 'LIKE', '%'.$name.'%');
+
+        $speciesInfoPage = SitePage::where('key', 'species')->where('is_visible', 1)->first();
+
         return view('world.specieses', [
+            'speciesInfoPage' => $speciesInfoPage,
             'specieses' => $query->with(['subtypes' => function($query) {
                 $query->orderBy('sort', 'DESC');
             }])->orderBy('sort', 'DESC')->paginate(20)->appends($request->query()),

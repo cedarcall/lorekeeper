@@ -24,15 +24,22 @@ class ForumController extends Controller
      */
     public function getIndex()
     {
-        $forums = Forum::with('children')->has('children')->visible()->category()->orderBy('sort', 'DESC')->staff()->get();
+        $forums = Forum::with('children')->visible()->category()->orderBy('sort', 'DESC')->staff()->get();
         $customforums = collect();
 
         foreach($forums as $key => $forum)
         {
+            if(!$forum->children->count()) {
+                if(!$forum->hasRestrictions || (Auth::check() && Auth::user()->canVisitForum($forum->id))) {
+                    $customforums->push($forum);
+                }
+                continue;
+            }
+
             foreach($forum->children as $child)
             {
                 if($forum->hasRestrictions && !Auth::check()) break;
-                elseif(!$child->hasRestrictions || Auth::check() && Auth::user()->canVisitForum($forum->id)) {
+                elseif(!$child->hasRestrictions || (Auth::check() && Auth::user()->canVisitForum($child->id))) {
                     $customforums->push($forum);
                     break;
                 }

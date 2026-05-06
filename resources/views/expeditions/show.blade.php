@@ -16,7 +16,7 @@
             @endif
 
             @if($planet->discoverer)
-                <p class="text-muted">First explored by <strong>{{ $planet->discoverer->name }}</strong> on {{ $planet->discovered_at->format('M d, Y') }}</p>
+                <p class="text-muted">First explored by <strong>{{ $planet->discoverer->name }}</strong>@if($planet->discovered_at) on {{ $planet->discovered_at->format('M d, Y') }}@endif</p>
             @else
                 <p class="text-muted"><em>Not yet discovered</em></p>
             @endif

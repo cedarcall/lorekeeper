@@ -18,8 +18,31 @@
 
     {!! breadcrumbs(['Contracts' => url('contracts')]) !!}
 
-    <div class="alert alert-info mb-3">
-        <i class="fas fa-info-circle mr-2"></i> Want to learn about contracts and expeditions? <a href="https://www.deviantart.com/hermescasp/journal/Expeditions-1283254552" target="_blank" rel="noopener noreferrer"><strong>Read the official guide.</strong></a>
+    <div class="alert alert-info mb-3 d-flex justify-content-between align-items-center">
+        <div><i class="fas fa-info-circle mr-2"></i> Want to learn how contracts and expeditions work?</div>
+        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#contractsHowItWorksModal">
+            How It Works
+        </button>
+    </div>
+
+    <div class="modal fade" id="contractsHowItWorksModal" tabindex="-1" role="dialog" aria-labelledby="contractsHowItWorksLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contractsHowItWorksLabel">How Contracts Work</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body parsed-text">
+                    @if(!empty($howItWorks))
+                        {!! $howItWorks !!}
+                    @else
+                        <p class="mb-0 text-muted">No contract guide content is configured yet.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 
     @if($current)
