@@ -90,14 +90,16 @@ class VerificationController extends Controller
 
         try {
             $request->user()->sendEmailVerificationNotification();
-            return back()->with('resent', true);
+            // Use route fallback if no referrer is available
+            return back(fallback: route('verification.notice'))->with('resent', true);
         } catch (\Throwable $e) {
             Log::error('Resend verification email failed.', [
                 'user_id' => optional($request->user())->id,
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('warning', 'Could not send verification email right now. Please try again shortly.');
+            // Use route fallback if no referrer is available
+            return back(fallback: route('verification.notice'))->with('warning', 'Could not send verification email right now. Please try again shortly.');
         }
     }
 }
