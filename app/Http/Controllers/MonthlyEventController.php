@@ -17,6 +17,7 @@ use App\Facades\Notifications;
 use App\Services\InventoryManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class MonthlyEventController extends Controller
@@ -79,24 +80,25 @@ class MonthlyEventController extends Controller
     // Show current event (or latest) and a carousel of previous events
     public function index()
     {
-        if(!Schema::hasTable('events')) {
-            return view('monthly_event.show', [
-                'current' => null,
-                'previous' => collect(),
-                'userQuestions' => null,
-                'userSubmissions' => null,
-                'hasBadge' => false,
-                'submissionBoostItems' => [],
-                'resourceBoostTargets' => [],
-            ]);
-        }
+        try {
+            if(!Schema::hasTable('events')) {
+                return view('monthly_event.show', [
+                    'current' => null,
+                    'previous' => collect(),
+                    'userQuestions' => null,
+                    'userSubmissions' => null,
+                    'hasBadge' => false,
+                    'submissionBoostItems' => [],
+                    'resourceBoostTargets' => [],
+                ]);
+            }
 
-        Event::archiveExpiredVisibleEvents();
-        $now = Carbon::now();
-        $with = $this->eventWithRelations();
-        $hasVisible = $this->eventsHasColumn('is_visible');
-        $hasStart = $this->eventsHasColumn('start_at');
-        $hasEnd = $this->eventsHasColumn('end_at');
+            Event::archiveExpiredVisibleEvents();
+            $now = Carbon::now();
+            $with = $this->eventWithRelations();
+            $hasVisible = $this->eventsHasColumn('is_visible');
+            $hasStart = $this->eventsHasColumn('start_at');
+            $hasEnd = $this->eventsHasColumn('end_at');
         
         // Get current/active event
         $currentQuery = Event::query();
@@ -174,43 +176,61 @@ class MonthlyEventController extends Controller
             }
         }
 
-        return view('monthly_event.show', compact('current', 'previous', 'userQuestions', 'userSubmissions', 'hasBadge', 'submissionBoostItems', 'resourceBoostTargets'));
+            return view('monthly_event.show', compact('current', 'previous', 'userQuestions', 'userSubmissions', 'hasBadge', 'submissionBoostItems', 'resourceBoostTargets'));
+        } catch (\Throwable $e) {
+            Log::error('Monthly event index failed.', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return view('monthly_event.show', [
+                'current' => null,
+                'previous' => collect(),
+                'userQuestions' => null,
+                'userSubmissions' => null,
+                'hasBadge' => false,
+                'submissionBoostItems' => [],
+                'resourceBoostTargets' => [],
+            ]);
+        }
     }
 
     // Show a single event by slug
     public function show($slug)
     {
-        if(!Schema::hasTable('events')) abort(404);
+        try {
+            if(!Schema::hasTable('events')) abort(404);
 
-        Event::archiveExpiredVisibleEvents();
-        $with = $this->eventWithRelations();
-        $eventQuery = Event::query();
-        if($this->eventsHasColumn('slug')) $eventQuery->whereRaw('LOWER(slug) = ?', [strtolower($slug)]);
-        elseif(is_numeric($slug)) $eventQuery->where('id', (int) $slug);
-        else $eventQuery->where('id', 0);
+            Event::archiveExpiredVisibleEvents();
+            $with = $this->eventWithRelations();
+            $eventQuery = Event::query();
+            if($this->eventsHasColumn('slug')) $eventQuery->whereRaw('LOWER(slug) = ?', [strtolower($slug)]);
+            elseif(is_numeric($slug)) $eventQuery->where('id', (int) $slug);
+            else $eventQuery->where('id', 0);
 
-        $event = $eventQuery->with($with)->first();
+            $event = $eventQuery->with($with)->first();
             
-        if(!$event) abort(404);
-        $this->normalizeEventRelations($event);
+            if(!$event) abort(404);
+            $this->normalizeEventRelations($event);
         
-        $previousQuery = Event::query();
-        if($this->eventsHasColumn('is_visible')) $previousQuery->where('is_visible', 1);
-        $previous = $previousQuery
-            ->where('id', '!=', $event->id)
-            ->with($with);
-        $previous = $this->applyEventOrdering($previous)->get();
-        $this->normalizeEventCollectionRelations($previous);
+            $previousQuery = Event::query();
+            if($this->eventsHasColumn('is_visible')) $previousQuery->where('is_visible', 1);
+            $previous = $previousQuery
+                ->where('id', '!=', $event->id)
+                ->with($with);
+            $previous = $this->applyEventOrdering($previous)->get();
+            $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
-        $userQuestions = null;
-        $userSubmissions = null;
-        $hasBadge = false;
-        $submissionBoostItems = [];
-        $resourceBoostTargets = [];
-        $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
-        $resourceBoostTargets = $this->getResourceBoostTargetsFromLootTable($event->lootTable);
-        if(Auth::check()) {
+            $userQuestions = null;
+            $userSubmissions = null;
+            $hasBadge = false;
+            $submissionBoostItems = [];
+            $resourceBoostTargets = [];
+            $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
+            $resourceBoostTargets = $this->getResourceBoostTargetsFromLootTable($event->lootTable);
+            if(Auth::check()) {
             if(Schema::hasTable('event_questions')) {
                 $userQuestions = EventQuestion::where('user_id', Auth::user()->id)
                     ->where('event_id', $event->id)
@@ -242,9 +262,18 @@ class MonthlyEventController extends Controller
                     $submissionBoostItems[$surveyBeaconItem->id] = $surveyBeaconItem->name;
                 }
             }
+            }
+
+            return view('monthly_event.show', ['current' => $event, 'previous' => $previous, 'userQuestions' => $userQuestions, 'userSubmissions' => $userSubmissions, 'hasBadge' => $hasBadge, 'submissionBoostItems' => $submissionBoostItems, 'resourceBoostTargets' => $resourceBoostTargets]);
+        } catch (\Throwable $e) {
+            Log::error('Monthly event show failed.', [
+                'slug' => $slug,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return redirect('monthly-event');
         }
-        
-        return view('monthly_event.show', ['current' => $event, 'previous' => $previous, 'userQuestions' => $userQuestions, 'userSubmissions' => $userSubmissions, 'hasBadge' => $hasBadge, 'submissionBoostItems' => $submissionBoostItems, 'resourceBoostTargets' => $resourceBoostTargets]);
     }
 
     /**
@@ -252,7 +281,33 @@ class MonthlyEventController extends Controller
      */
     public function history()
     {
-        if(!Schema::hasTable('events')) {
+        try {
+            if(!Schema::hasTable('events')) {
+                $events = new LengthAwarePaginator([], 0, 12, 1, [
+                    'path' => request()->url(),
+                    'query' => request()->query(),
+                ]);
+                return view('monthly_event.history', [
+                    'events' => $events,
+                ]);
+            }
+
+            Event::archiveExpiredVisibleEvents();
+            $with = $this->eventWithRelations();
+            $eventsQuery = Event::query();
+            if($this->eventsHasColumn('is_visible')) $eventsQuery->where('is_visible', 0);
+            $events = $this->applyEventOrdering($eventsQuery->with($with))->paginate(12);
+            $this->normalizeEventCollectionRelations($events->getCollection());
+
+            return view('monthly_event.history', [
+                'events' => $events,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Monthly event history failed.', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             $events = new LengthAwarePaginator([], 0, 12, 1, [
                 'path' => request()->url(),
                 'query' => request()->query(),
@@ -261,17 +316,6 @@ class MonthlyEventController extends Controller
                 'events' => $events,
             ]);
         }
-
-        Event::archiveExpiredVisibleEvents();
-        $with = $this->eventWithRelations();
-        $eventsQuery = Event::query();
-        if($this->eventsHasColumn('is_visible')) $eventsQuery->where('is_visible', 0);
-        $events = $this->applyEventOrdering($eventsQuery->with($with))->paginate(12);
-        $this->normalizeEventCollectionRelations($events->getCollection());
-
-        return view('monthly_event.history', [
-            'events' => $events,
-        ]);
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Services\ExpeditionService;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class ExpeditionController extends Controller
 {
@@ -65,87 +66,98 @@ class ExpeditionController extends Controller
      */
     public function show($id, ExpeditionService $service)
     {
-        $planet = Planet::findOrFail($id);
-        
-        $currentGalaxy = Galaxy::where('is_current', true)->first();
-        
-        // Check access
-        $canAccess = false;
-        $userExpedition = null;
-        
-        if (Auth::check()) {
-            // User can access if galaxy is current OR they are the discoverer
-            if ((optional($planet->galaxy)->is_current) || $planet->isDiscoveredByUser(Auth::id())) {
-                $canAccess = true;
-            }
-            
-            $userExpedition = UserPlanetExpedition::where('user_id', Auth::id())
-                ->where('planet_id', $planet->id)
-                ->first();
-        } elseif (optional($planet->galaxy)->is_current) {
-            $canAccess = true;
-        }
-        
-        if (!$canAccess) {
-            flash('You cannot access this planet in the current rotation.')->error();
-            return redirect('expeditions');
-        }
-        
-        // Get progressively unlocked info
-        $planetInfo = [];
-        if ($userExpedition) {
-            $planetInfo = $service->getPlanetInfo($planet, Auth::id());
-        }
+        try {
+            $planet = Planet::findOrFail($id);
 
-        $hasInfoTiersTable = Schema::hasTable('planet_info_tiers');
-        
-        // Check if user has a pending submission
-        $hasSubmission = Auth::check() && ExpeditionSubmission::where('user_id', Auth::id())
-            ->where('planet_id', $planet->id)
-            ->where('status', 'pending')
-            ->exists();
-        
-        $featuredPlanet = null;
-        if(Schema::hasTable('featured_planets')) {
-            try {
-                $featuredQuery = FeaturedPlanet::query();
-                if(Schema::hasTable('loot_tables')) $featuredQuery->with('lootTable.loot.reward');
-                $featuredPlanet = $featuredQuery->where('is_active', 1)
+            $currentGalaxy = Galaxy::where('is_current', true)->first();
+
+            // Check access
+            $canAccess = false;
+            $userExpedition = null;
+
+            if (Auth::check()) {
+                // User can access if galaxy is current OR they are the discoverer
+                if ((optional($planet->galaxy)->is_current) || $planet->isDiscoveredByUser(Auth::id())) {
+                    $canAccess = true;
+                }
+
+                $userExpedition = UserPlanetExpedition::where('user_id', Auth::id())
                     ->where('planet_id', $planet->id)
                     ->first();
-                if($featuredPlanet && !Schema::hasTable('loot_tables')) $featuredPlanet->setRelation('lootTable', null);
-            } catch(\Exception $e) {
-                $featuredPlanet = null;
+            } elseif (optional($planet->galaxy)->is_current) {
+                $canAccess = true;
             }
-        }
 
-        $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
-        $submissionBoostItems = [];
-        $resourceBoostTargets = [];
-        if($featuredPlanet && $featuredPlanet->lootTable) {
-            $resourceBoostTargets = $featuredPlanet->lootTable->loot
-                ->where('rewardable_type', 'Item')
-                ->map(function($loot) {
-                    return $loot->reward;
-                })
-                ->filter()
-                ->unique('id')
-                ->sortBy('name')
-                ->pluck('name', 'id')
-                ->toArray();
-        }
+            if (!$canAccess) {
+                flash('You cannot access this planet in the current rotation.')->error();
+                return redirect('expeditions');
+            }
 
-        if(Auth::check() && $surveyBeaconItem && count($resourceBoostTargets)) {
-            $hasSurveyBeacon = UserItem::where('user_id', Auth::id())
-                ->where('item_id', $surveyBeaconItem->id)
-                ->where('count', '>', 0)
+            // Get progressively unlocked info
+            $planetInfo = [];
+            if ($userExpedition) {
+                $planetInfo = $service->getPlanetInfo($planet, Auth::id());
+            }
+
+            $hasInfoTiersTable = Schema::hasTable('planet_info_tiers');
+
+            // Check if user has a pending submission
+            $hasSubmission = Auth::check() && ExpeditionSubmission::where('user_id', Auth::id())
+                ->where('planet_id', $planet->id)
+                ->where('status', 'pending')
                 ->exists();
-            if($hasSurveyBeacon) {
-                $submissionBoostItems[$surveyBeaconItem->id] = $surveyBeaconItem->name;
-            }
-        }
 
-        return view('expeditions.show', compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets', 'hasInfoTiersTable'));
+            $featuredPlanet = null;
+            if(Schema::hasTable('featured_planets')) {
+                try {
+                    $featuredQuery = FeaturedPlanet::query();
+                    if(Schema::hasTable('loot_tables') && Schema::hasTable('loot_table_rewards')) $featuredQuery->with('lootTable.loot.reward');
+                    $featuredPlanet = $featuredQuery->where('is_active', 1)
+                        ->where('planet_id', $planet->id)
+                        ->first();
+                    if($featuredPlanet && (!Schema::hasTable('loot_tables') || !Schema::hasTable('loot_table_rewards'))) $featuredPlanet->setRelation('lootTable', null);
+                } catch(\Exception $e) {
+                    $featuredPlanet = null;
+                }
+            }
+
+            $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
+            $submissionBoostItems = [];
+            $resourceBoostTargets = [];
+            if($featuredPlanet && $featuredPlanet->lootTable) {
+                $resourceBoostTargets = $featuredPlanet->lootTable->loot
+                    ->where('rewardable_type', 'Item')
+                    ->map(function($loot) {
+                        return $loot->reward;
+                    })
+                    ->filter()
+                    ->unique('id')
+                    ->sortBy('name')
+                    ->pluck('name', 'id')
+                    ->toArray();
+            }
+
+            if(Auth::check() && $surveyBeaconItem && count($resourceBoostTargets)) {
+                $hasSurveyBeacon = UserItem::where('user_id', Auth::id())
+                    ->where('item_id', $surveyBeaconItem->id)
+                    ->where('count', '>', 0)
+                    ->exists();
+                if($hasSurveyBeacon) {
+                    $submissionBoostItems[$surveyBeaconItem->id] = $surveyBeaconItem->name;
+                }
+            }
+
+            return view('expeditions.show', compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets', 'hasInfoTiersTable'));
+        } catch (\Throwable $e) {
+            Log::error('Expedition show failed.', [
+                'planet_id' => $id,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            flash('This expedition is temporarily unavailable.')->error();
+            return redirect('expeditions');
+        }
     }
     
     /**
