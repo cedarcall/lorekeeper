@@ -18,6 +18,23 @@ use Illuminate\Support\Facades\Log;
 
 class ExpeditionController extends Controller
 {
+    protected function renderShowViewSafely(array $data, $context = [])
+    {
+        try {
+            return response(view('expeditions.show', $data)->render());
+        } catch (\Throwable $e) {
+            Log::error('Expedition show view render failed.', array_merge($context, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]));
+
+            flash('This expedition is temporarily unavailable.')->error();
+            return redirect('expeditions');
+        }
+    }
+
     /**
      * Show all planets with current status.
      */
@@ -147,7 +164,10 @@ class ExpeditionController extends Controller
                 }
             }
 
-            return view('expeditions.show', compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets', 'hasInfoTiersTable'));
+            return $this->renderShowViewSafely(
+                compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets', 'hasInfoTiersTable'),
+                ['planet_id' => $id]
+            );
         } catch (\Throwable $e) {
             Log::error('Expedition show failed.', [
                 'planet_id' => $id,

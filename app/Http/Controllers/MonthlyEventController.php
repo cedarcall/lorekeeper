@@ -22,6 +22,26 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class MonthlyEventController extends Controller
 {
+    protected function renderShowViewSafely(array $data, $context = [])
+    {
+        try {
+            return response(view('monthly_event.show', $data)->render());
+        } catch (\Throwable $e) {
+            Log::error('Monthly event show view render failed.', array_merge($context, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]));
+
+            return response(
+                '<h2>Monthly Event is temporarily unavailable.</h2><p>Please check back shortly.</p>',
+                200,
+                ['Content-Type' => 'text/html; charset=UTF-8']
+            );
+        }
+    }
+
     protected function eventsHasColumn($column)
     {
         return Schema::hasTable('events') && Schema::hasColumn('events', $column);
@@ -176,7 +196,10 @@ class MonthlyEventController extends Controller
             }
         }
 
-            return view('monthly_event.show', compact('current', 'previous', 'userQuestions', 'userSubmissions', 'hasBadge', 'submissionBoostItems', 'resourceBoostTargets'));
+            return $this->renderShowViewSafely(
+                compact('current', 'previous', 'userQuestions', 'userSubmissions', 'hasBadge', 'submissionBoostItems', 'resourceBoostTargets'),
+                ['context' => 'index', 'event_id' => optional($current)->id]
+            );
         } catch (\Throwable $e) {
             Log::error('Monthly event index failed.', [
                 'message' => $e->getMessage(),
@@ -184,7 +207,7 @@ class MonthlyEventController extends Controller
                 'line' => $e->getLine(),
             ]);
 
-            return view('monthly_event.show', [
+            return $this->renderShowViewSafely([
                 'current' => null,
                 'previous' => collect(),
                 'userQuestions' => null,
@@ -192,7 +215,7 @@ class MonthlyEventController extends Controller
                 'hasBadge' => false,
                 'submissionBoostItems' => [],
                 'resourceBoostTargets' => [],
-            ]);
+            ], ['context' => 'index-fallback']);
         }
     }
 
@@ -264,7 +287,15 @@ class MonthlyEventController extends Controller
             }
             }
 
-            return view('monthly_event.show', ['current' => $event, 'previous' => $previous, 'userQuestions' => $userQuestions, 'userSubmissions' => $userSubmissions, 'hasBadge' => $hasBadge, 'submissionBoostItems' => $submissionBoostItems, 'resourceBoostTargets' => $resourceBoostTargets]);
+            return $this->renderShowViewSafely([
+                'current' => $event,
+                'previous' => $previous,
+                'userQuestions' => $userQuestions,
+                'userSubmissions' => $userSubmissions,
+                'hasBadge' => $hasBadge,
+                'submissionBoostItems' => $submissionBoostItems,
+                'resourceBoostTargets' => $resourceBoostTargets,
+            ], ['context' => 'show', 'slug' => $slug, 'event_id' => $event->id]);
         } catch (\Throwable $e) {
             Log::error('Monthly event show failed.', [
                 'slug' => $slug,
