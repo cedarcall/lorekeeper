@@ -146,7 +146,7 @@
                     <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail character-masterlist-thumbnail" alt="Thumbnail for {{ $character->fullName }}"/></a>
                 </div>
                 <div class="mt-1">
-                    <a href="{{ $character->url }}" class="h5 mb-0">@if(!$character->is_visible) <i class="fas fa-eye-slash"></i> @endif {{ $character->fullName }}</a>
+                    <a href="{{ $character->url }}" class="h5 mb-0">@if(!$character->is_visible && !optional($character->image)->is_visible) <i class="fas fa-eye-slash"></i> @endif {{ $character->fullName }}</a>
                 </div>
                 <div class="small">
                     {!! $character->image->species_id ? $character->image->species->displayName : 'No '.ucfirst(__('lorekeeper.species')) !!} ・ {!! $character->image->rarity_id ? $character->image->rarity->displayName : 'No Rarity' !!} ・ {!! $character->displayOwner !!}
@@ -171,7 +171,7 @@
             @foreach($characters as $character)
                 <tr>
                     <td>{!! $character->displayOwner !!}</td>
-                    <td>@if(!$character->is_visible) <i class="fas fa-eye-slash"></i> @endif {!! $character->displayName !!}</td>
+                    <td>@if(!$character->is_visible && !optional($character->image)->is_visible) <i class="fas fa-eye-slash"></i> @endif {!! $character->displayName !!}</td>
                     <td>{!! $character->image->rarity_id ? $character->image->rarity->displayName : 'None' !!}</td>
                     <td>{!! $character->image->species_id ? $character->image->species->displayName : 'None' !!}</td>
                     <td>{!! format_date($character->created_at) !!}</td>

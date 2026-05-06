@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class Event extends Model
 {
@@ -63,6 +64,10 @@ class Event extends Model
 
     public static function archiveExpiredVisibleEvents()
     {
+        if(!Schema::hasTable('events') || !Schema::hasColumn('events', 'is_visible') || !Schema::hasColumn('events', 'end_at')) {
+            return 0;
+        }
+
         return static::where('is_visible', 1)
             ->whereNotNull('end_at')
             ->where('end_at', '<', Carbon::now())

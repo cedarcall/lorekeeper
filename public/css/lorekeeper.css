@@ -82,7 +82,8 @@ body {
 }
 
 #gridView .img-thumbnail,
-.character-masterlist-thumbnail.img-thumbnail {
+.character-masterlist-thumbnail.img-thumbnail,
+.character-profile-thumbnail.img-thumbnail {
     background-color: transparent;
 }
 

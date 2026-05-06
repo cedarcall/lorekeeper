@@ -16,18 +16,52 @@ use App\Models\User\UserAward;
 use App\Facades\Notifications;
 use App\Services\InventoryManager;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class MonthlyEventController extends Controller
 {
+    protected function eventsHasColumn($column)
+    {
+        return Schema::hasTable('events') && Schema::hasColumn('events', $column);
+    }
+
+    protected function eventWithRelations()
+    {
+        $with = [];
+        if($this->eventsHasColumn('loot_table_id') && Schema::hasTable('loot_tables')) $with[] = 'lootTable';
+        if($this->eventsHasColumn('award_id') && Schema::hasTable('awards')) $with[] = 'award';
+        return $with;
+    }
+
+    protected function normalizeEventRelations($event)
+    {
+        if(!$event) return;
+        if(!Schema::hasTable('loot_tables') || !$this->eventsHasColumn('loot_table_id')) $event->setRelation('lootTable', null);
+        if(!Schema::hasTable('awards') || !$this->eventsHasColumn('award_id')) $event->setRelation('award', null);
+    }
+
+    protected function normalizeEventCollectionRelations($events)
+    {
+        foreach($events as $event) {
+            $this->normalizeEventRelations($event);
+        }
+    }
+
     // Show current event (or latest) and a carousel of previous events
     public function index()
     {
         Event::archiveExpiredVisibleEvents();
         $now = Carbon::now();
+        $with = $this->eventWithRelations();
+        $hasVisible = $this->eventsHasColumn('is_visible');
+        $hasStart = $this->eventsHasColumn('start_at');
+        $hasEnd = $this->eventsHasColumn('end_at');
         
         // Get current/active event
-        $current = Event::where('is_visible', 1)
-            ->where(function($q) use ($now) {
+        $currentQuery = Event::query();
+        if($hasVisible) $currentQuery->where('is_visible', 1);
+        if($hasStart && $hasEnd) {
+            $currentQuery->where(function($q) use ($now) {
                 $q->where(function($query) use ($now) {
                     $query->whereNotNull('start_at')
                           ->where('start_at', '<=', $now)
@@ -36,25 +70,34 @@ class MonthlyEventController extends Controller
                           });
                 })
                 ->orWhereNull('start_at');
-            })
-            ->with('lootTable', 'award')
+            });
+        }
+        $current = $currentQuery
+            ->with($with)
             ->orderBy('start_at', 'desc')
             ->first();
 
         if(!$current) {
-            $current = Event::where('is_visible', 1)
-                ->with('lootTable', 'award')
+            $fallbackQuery = Event::query();
+            if($hasVisible) $fallbackQuery->where('is_visible', 1);
+            $current = $fallbackQuery
+                ->with($with)
                 ->orderBy('start_at', 'desc')
                 ->orderBy('id', 'desc')
                 ->first();
         }
+        $this->normalizeEventRelations($current);
 
-        $previous = Event::where('is_visible', 1)
+        $previousQuery = Event::query();
+        if($hasVisible) $previousQuery->where('is_visible', 1);
+        $previous = $previousQuery
             ->when($current, function($q) use ($current){
                 return $q->where('id', '!=', $current->id);
             })
+            ->with($with)
             ->orderBy('start_at', 'desc')
             ->get();
+        $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
         $userQuestions = null;
@@ -112,16 +155,25 @@ class MonthlyEventController extends Controller
     public function show($slug)
     {
         Event::archiveExpiredVisibleEvents();
-        $event = Event::where('slug', $slug)
-            ->with('lootTable', 'award')
-            ->first();
+        $with = $this->eventWithRelations();
+        $eventQuery = Event::query();
+        if($this->eventsHasColumn('slug')) $eventQuery->whereRaw('LOWER(slug) = ?', [strtolower($slug)]);
+        elseif(is_numeric($slug)) $eventQuery->where('id', (int) $slug);
+        else $eventQuery->where('id', 0);
+
+        $event = $eventQuery->with($with)->first();
             
         if(!$event) abort(404);
+        $this->normalizeEventRelations($event);
         
-        $previous = Event::where('is_visible', 1)
+        $previousQuery = Event::query();
+        if($this->eventsHasColumn('is_visible')) $previousQuery->where('is_visible', 1);
+        $previous = $previousQuery
             ->where('id', '!=', $event->id)
+            ->with($with)
             ->orderBy('start_at', 'desc')
             ->get();
+        $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
         $userQuestions = null;
@@ -181,11 +233,15 @@ class MonthlyEventController extends Controller
     public function history()
     {
         Event::archiveExpiredVisibleEvents();
-        $events = Event::where('is_visible', 0)
-            ->with('lootTable', 'award')
+        $with = $this->eventWithRelations();
+        $eventsQuery = Event::query();
+        if($this->eventsHasColumn('is_visible')) $eventsQuery->where('is_visible', 0);
+        $events = $eventsQuery
+            ->with($with)
             ->orderBy('start_at', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(12);
+        $this->normalizeEventCollectionRelations($events->getCollection());
 
         return view('monthly_event.history', [
             'events' => $events,

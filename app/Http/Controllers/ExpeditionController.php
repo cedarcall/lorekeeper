@@ -13,6 +13,7 @@ use App\Models\User\UserItem;
 use App\Services\ExpeditionService;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class ExpeditionController extends Controller
 {
@@ -102,9 +103,19 @@ class ExpeditionController extends Controller
             ->where('status', 'pending')
             ->exists();
         
-        $featuredPlanet = FeaturedPlanet::with('lootTable.loot.reward')->where('is_active', 1)
-            ->where('planet_id', $planet->id)
-            ->first();
+        $featuredPlanet = null;
+        if(Schema::hasTable('featured_planets')) {
+            try {
+                $featuredQuery = FeaturedPlanet::query();
+                if(Schema::hasTable('loot_tables')) $featuredQuery->with('lootTable.loot.reward');
+                $featuredPlanet = $featuredQuery->where('is_active', 1)
+                    ->where('planet_id', $planet->id)
+                    ->first();
+                if($featuredPlanet && !Schema::hasTable('loot_tables')) $featuredPlanet->setRelation('lootTable', null);
+            } catch(\Exception $e) {
+                $featuredPlanet = null;
+            }
+        }
 
         $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
         $submissionBoostItems = [];

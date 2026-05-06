@@ -1004,6 +1004,7 @@ class CharacterManager extends Service
             if(!$image->is_visible) throw new \Exception("Cannot set a non-visible image as the character's active image.");
 
             $image->character->character_image_id = $image->id;
+            if(!$image->character->is_visible) $image->character->is_visible = 1;
             $image->character->save();
 
             // Add a log for the character

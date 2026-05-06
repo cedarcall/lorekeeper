@@ -144,7 +144,11 @@ class Faction extends Model
      */
     public function scopeVisible($query)
     {
-        if(!Auth::check() || !(Auth::check() && Auth::user()->isStaff)) return $query->where('is_active', 1);
+        if(!Auth::check() || !(Auth::check() && Auth::user()->isStaff)) {
+            return $query->where(function($q) {
+                $q->where('is_active', 1)->orWhereNull('is_active');
+            });
+        }
         else return $query;
     }
 
@@ -157,7 +161,15 @@ class Faction extends Model
     public function scopeSortFactionType($query)
     {
         $ids = FactionType::orderBy('sort', 'DESC')->pluck('id')->toArray();
-        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(type_id, '.implode(',', $ids).')')) : $query;
+        if(!count($ids)) return $query;
+
+        if(DB::connection()->getDriverName() === 'mysql') {
+            return $query->orderByRaw(DB::raw('FIELD(type_id, '.implode(',', $ids).')'));
+        }
+
+        return $query->leftJoin('faction_types', 'factions.type_id', '=', 'faction_types.id')
+            ->orderBy('faction_types.sort', 'DESC')
+            ->select('factions.*');
     }
     /**
      * Scope a query to sort items in alphabetical order.
