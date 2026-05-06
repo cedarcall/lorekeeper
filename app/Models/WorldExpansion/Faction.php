@@ -146,7 +146,12 @@ class Faction extends Model
     {
         if(!Auth::check() || !(Auth::check() && Auth::user()->isStaff)) {
             return $query->where(function($q) {
-                $q->where('is_active', 1)->orWhereNull('is_active');
+                // Handle mixed legacy/storage boolean formats across environments.
+                $q->whereNull('is_active')
+                    ->orWhere('is_active', 1)
+                    ->orWhere('is_active', true)
+                    ->orWhere('is_active', '1')
+                    ->orWhere('is_active', 'true');
             });
         }
         else return $query;
