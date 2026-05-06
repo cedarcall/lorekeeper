@@ -259,8 +259,9 @@
                                             @if($submission->description)
                                                 <p class="mb-1 mt-2 text-muted small">{!! nl2br(e(\Illuminate\Support\Str::limit($submission->description, 100))) !!}</p>
                                             @endif
-                                            @if($submission->created_at)
-                                                <small class="text-muted">Submitted {{ $submission->created_at->diffForHumans() }}</small>
+                                            @php $submittedAt = optional($submission->created_at)->diffForHumans(); @endphp
+                                            @if($submittedAt)
+                                                <small class="text-muted">Submitted {{ $submittedAt }}</small>
                                             @endif
                                         </div>
                                     </div>
@@ -317,13 +318,15 @@
                                                 <div class="mt-2 p-3 border rounded">
                                                     <strong>Answer from {!! $question->staff ? $question->staff->displayName : 'Staff' !!}:</strong>
                                                     <p class="mb-0 mt-1">{!! nl2br(e($question->answer)) !!}</p>
-                                                    @if($question->answered_at)
-                                                        <small class="text-muted">Answered {{ $question->answered_at->diffForHumans() }}</small>
+                                                    @php $answeredAt = optional($question->answered_at)->diffForHumans(); @endphp
+                                                    @if($answeredAt)
+                                                        <small class="text-muted">Answered {{ $answeredAt }}</small>
                                                     @endif
                                                 </div>
                                             @else
-                                                @if($question->created_at)
-                                                    <small class="text-muted">Asked {{ $question->created_at->diffForHumans() }}</small>
+                                                @php $askedAt = optional($question->created_at)->diffForHumans(); @endphp
+                                                @if($askedAt)
+                                                    <small class="text-muted">Asked {{ $askedAt }}</small>
                                                 @endif
                                             @endif
                                         </div>

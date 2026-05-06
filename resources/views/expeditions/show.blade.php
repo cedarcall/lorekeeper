@@ -124,15 +124,16 @@
                     <div class="card-body">
                         @if($unlockedTiers->count() > 0)
                             @foreach($unlockedTiers as $tier)
+                                @php $tierInfo = is_array($tier->info_data) ? $tier->info_data : []; @endphp
                                 <div class="mb-3 pb-2" style="border-bottom: 1px solid rgba(0, 204, 255, 0.2);">
-                                    @if(!empty($tier->info_data['type']))
-                                        <span class="badge badge-info">{{ $tier->info_data['type'] }}</span>
+                                    @if(!empty($tierInfo['type']))
+                                        <span class="badge badge-info">{{ $tierInfo['type'] }}</span>
                                     @endif
-                                    @if(!empty($tier->info_data['risk']))
-                                        <span class="badge badge-{{ $tier->info_data['risk'] == 'High' || $tier->info_data['risk'] == 'Extreme' ? 'danger' : ($tier->info_data['risk'] == 'Moderate' ? 'warning' : 'secondary') }}">{{ $tier->info_data['risk'] }} Risk</span>
+                                    @if(!empty($tierInfo['risk']))
+                                        <span class="badge badge-{{ $tierInfo['risk'] == 'High' || $tierInfo['risk'] == 'Extreme' ? 'danger' : ($tierInfo['risk'] == 'Moderate' ? 'warning' : 'secondary') }}">{{ $tierInfo['risk'] }} Risk</span>
                                     @endif
-                                    @if(!empty($tier->info_data['description']))
-                                        <p class="mb-0 mt-1">{{ $tier->info_data['description'] }}</p>
+                                    @if(!empty($tierInfo['description']))
+                                        <p class="mb-0 mt-1">{{ $tierInfo['description'] }}</p>
                                     @endif
                                 </div>
                             @endforeach
