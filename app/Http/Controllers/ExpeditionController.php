@@ -96,6 +96,8 @@ class ExpeditionController extends Controller
         if ($userExpedition) {
             $planetInfo = $service->getPlanetInfo($planet, Auth::id());
         }
+
+        $hasInfoTiersTable = Schema::hasTable('planet_info_tiers');
         
         // Check if user has a pending submission
         $hasSubmission = Auth::check() && ExpeditionSubmission::where('user_id', Auth::id())
@@ -143,7 +145,7 @@ class ExpeditionController extends Controller
             }
         }
 
-        return view('expeditions.show', compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets'));
+        return view('expeditions.show', compact('planet', 'userExpedition', 'planetInfo', 'canAccess', 'hasSubmission', 'featuredPlanet', 'submissionBoostItems', 'resourceBoostTargets', 'hasInfoTiersTable'));
     }
     
     /**

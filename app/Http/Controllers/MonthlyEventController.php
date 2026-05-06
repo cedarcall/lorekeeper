@@ -17,6 +17,7 @@ use App\Facades\Notifications;
 use App\Services\InventoryManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MonthlyEventController extends Controller
 {
@@ -78,6 +79,18 @@ class MonthlyEventController extends Controller
     // Show current event (or latest) and a carousel of previous events
     public function index()
     {
+        if(!Schema::hasTable('events')) {
+            return view('monthly_event.show', [
+                'current' => null,
+                'previous' => collect(),
+                'userQuestions' => null,
+                'userSubmissions' => null,
+                'hasBadge' => false,
+                'submissionBoostItems' => [],
+                'resourceBoostTargets' => [],
+            ]);
+        }
+
         Event::archiveExpiredVisibleEvents();
         $now = Carbon::now();
         $with = $this->eventWithRelations();
@@ -167,6 +180,8 @@ class MonthlyEventController extends Controller
     // Show a single event by slug
     public function show($slug)
     {
+        if(!Schema::hasTable('events')) abort(404);
+
         Event::archiveExpiredVisibleEvents();
         $with = $this->eventWithRelations();
         $eventQuery = Event::query();
@@ -237,6 +252,16 @@ class MonthlyEventController extends Controller
      */
     public function history()
     {
+        if(!Schema::hasTable('events')) {
+            $events = new LengthAwarePaginator([], 0, 12, 1, [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]);
+            return view('monthly_event.history', [
+                'events' => $events,
+            ]);
+        }
+
         Event::archiveExpiredVisibleEvents();
         $with = $this->eventWithRelations();
         $eventsQuery = Event::query();

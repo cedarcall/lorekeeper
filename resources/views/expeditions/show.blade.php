@@ -109,10 +109,16 @@
                 </div>
 
                 @php
-                    $unlockedTiers = $planet->infoTiers()->where('tier_number', '<=', $userExpedition->visit_count)->orderBy('tier_number')->get();
-                    $nextTier = $planet->infoTiers()->where('tier_number', '>', $userExpedition->visit_count)->orderBy('tier_number')->first();
+                    $unlockedTiers = collect();
+                    $nextTier = null;
+                    $hasAnyInfoTiers = false;
+                    if(!empty($hasInfoTiersTable)) {
+                        $unlockedTiers = $planet->infoTiers()->where('tier_number', '<=', $userExpedition->visit_count)->orderBy('tier_number')->get();
+                        $nextTier = $planet->infoTiers()->where('tier_number', '>', $userExpedition->visit_count)->orderBy('tier_number')->first();
+                        $hasAnyInfoTiers = $planet->infoTiers()->count() > 0;
+                    }
                 @endphp
-                @if($planet->infoTiers()->count() > 0)
+                @if($hasAnyInfoTiers)
                 <div class="card mb-3">
                     <div class="card-header h5"><i class="fas fa-lightbulb mr-2"></i>Fun Facts</div>
                     <div class="card-body">
