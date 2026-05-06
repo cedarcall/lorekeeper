@@ -275,6 +275,7 @@
                         @endauth
                     </div>
                 </div>
+                @endif
 
                 {{-- Ask a Question Section (only for active events) --}}
                 @if($event->is_visible)
