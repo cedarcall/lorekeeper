@@ -10,15 +10,15 @@ use App\Models\User\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Arr;
 
 use App\Models\Invitation;
 use App\Services\UserService;
 use App\Services\InvitationService;
+use App\Models\UserVerificationApplication;
 
 class RegisterController extends Controller
 {
@@ -45,9 +45,6 @@ class RegisterController extends Controller
     /**
      * Handle a registration request for the application.
      *
-     * We intentionally catch verification email failures so a mail transport
-     * issue does not present a 500 after the account has already been created.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
@@ -57,17 +54,7 @@ class RegisterController extends Controller
 
         $user = $this->create($request->all());
 
-        try {
-            event(new Registered($user));
-        } catch (\Throwable $e) {
-            Log::error('Registration verification email failed.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            session()->flash('warning', 'Your account was created successfully, but we could not send a verification email right now. Please contact staff if this persists.');
-        }
+        session()->flash('warning', 'Your account was created. Staff must review your verification quiz before full site access is enabled.');
 
         $this->guard()->login($user);
 
@@ -114,6 +101,10 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'agreement' => ['required', 'accepted'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'social_media_link' => ['required', 'string', 'max:255', 'url'],
+            'join_reason' => ['required', 'string', 'min:10', 'max:2000'],
+            'rules_confirmation' => ['required', 'accepted'],
+            'voidi_species_answer' => ['required', 'string', 'max:255'],
             'dob' => ['required', function ($attribute, $value, $fail) {
                      {
                         $date = $value['day']."-".$value['month']."-".$value['year'];
@@ -147,6 +138,18 @@ class RegisterController extends Controller
         DB::beginTransaction();
         $service = new UserService;
         $user = $service->createUser(Arr::only($data, ['name', 'email', 'password', 'dob']));
+
+        if(Schema::hasTable('user_verification_applications')) {
+            UserVerificationApplication::create([
+                'user_id' => $user->id,
+                'social_media_link' => $data['social_media_link'],
+                'join_reason' => $data['join_reason'],
+                'rules_confirmed' => !empty($data['rules_confirmation']),
+                'voidi_species_answer' => $data['voidi_species_answer'],
+                'status' => 'pending',
+            ]);
+        }
+
         if(!Settings::get('is_registration_open')) {
             (new InvitationService)->useInvitation(Invitation::where('code', $data['code'])->first(), $user);
         }

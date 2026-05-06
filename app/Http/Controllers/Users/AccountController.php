@@ -307,6 +307,12 @@ class AccountController extends Controller {
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'error' => $e->getMessage(),
+                'mail_driver' => config('mail.driver'),
+                'mail_host' => config('mail.host'),
+                'mail_port' => config('mail.port'),
+                'mail_encryption' => config('mail.encryption'),
+                'mail_from' => config('mail.from.address'),
+                'mail_username_set' => !empty(config('mail.username')),
             ]);
             return false;
         }

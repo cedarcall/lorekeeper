@@ -17,6 +17,10 @@ Route::group(['prefix' => 'users', 'namespace' => 'Users'], function() {
     Route::group(['middleware' => 'power:edit_user_info'], function() {
         Route::get('/', 'UserController@getIndex');
 
+        Route::get('verification-applications', 'UserVerificationController@getIndex');
+        Route::get('verification-applications/{id}', 'UserVerificationController@getApplication');
+        Route::post('verification-applications/{id}', 'UserVerificationController@postApplication');
+
         Route::get('{name}/edit', 'UserController@getUser');
         Route::post('{name}/basic', 'UserController@postUserBasicInfo');
         Route::post('{name}/location', 'UserController@postUserLocation');

@@ -134,7 +134,7 @@
                 @foreach($event->inspiration_images as $img)
                     <div class="col-md-3 mb-2">
                         <div class="card">
-                            <img src="{{ asset('images/events/inspiration/'.$img) }}" class="card-img-top" style="max-height: 120px; object-fit: cover;">
+                            <img src="{{ $event->inspiration_image_urls[$loop->index] ?? asset('images/events/inspiration/'.$img) }}" class="card-img-top" style="max-height: 120px; object-fit: cover;">
                             <div class="card-body p-2 text-center">
                                 <div class="form-check">
                                     {!! Form::checkbox('remove_inspiration[]', $img, false, ['class' => 'form-check-input']) !!}

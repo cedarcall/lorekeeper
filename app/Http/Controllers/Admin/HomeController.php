@@ -19,6 +19,8 @@ use App\Models\Contract;
 use App\Models\ExpeditionSubmission;
 use App\Models\EventQuestion;
 use App\Models\EventSubmission;
+use App\Models\UserVerificationApplication;
+use Illuminate\Support\Facades\Schema;
 
 use App\Http\Controllers\Controller;
 
@@ -34,6 +36,9 @@ class HomeController extends Controller
         $openTransfersQueue = Settings::get('open_transfers_queue');
         $galleryRequireApproval = Settings::get('gallery_submissions_require_approval');
         $galleryCurrencyAwards = Settings::get('gallery_submissions_reward_currency');
+        $verificationApplicationCount = Schema::hasTable('user_verification_applications')
+            ? UserVerificationApplication::pending()->count()
+            : 0;
         return view('admin.index', [
             'submissionCount'           => Submission::where('status', 'Pending')->whereNotNull('prompt_id')->count(),
             'claimCount'                => Submission::where('status', 'Pending')->whereNull('prompt_id')->count(),
@@ -58,7 +63,8 @@ class HomeController extends Controller
             'contractCount'             => Contract::count(),
             'expeditionSubmissionCount' => ExpeditionSubmission::where('status', 'pending')->count(),
             'eventQuestionCount'        => EventQuestion::pending()->count(),
-            'eventSubmissionCount'      => EventSubmission::pending()->count()
+            'eventSubmissionCount'      => EventSubmission::pending()->count(),
+            'verificationApplicationCount' => $verificationApplicationCount,
         ]);
     }
 }

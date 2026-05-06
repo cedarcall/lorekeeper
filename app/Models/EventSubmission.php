@@ -118,12 +118,17 @@ class EventSubmission extends Model
             return null;
         }
         
-        $path = storage_path('app/public/event_submissions/' . $this->image_name);
-        if (!file_exists($path)) {
-            return null;
+        $path = storage_path('app/public/images/event-submissions/' . $this->image_name);
+        if (file_exists($path)) {
+            return asset('storage/images/event-submissions/' . $this->image_name);
         }
-        
-        return asset('storage/event_submissions/' . $this->image_name);
+
+        $legacyPath = storage_path('app/public/event_submissions/' . $this->image_name);
+        if (file_exists($legacyPath)) {
+            return asset('storage/event_submissions/' . $this->image_name);
+        }
+
+        return null;
     }
 
     /**

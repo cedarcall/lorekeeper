@@ -232,9 +232,12 @@ class EventSubmissionController extends Controller
         
         // Delete the file if exists
         if($submission->image_name) {
-            $path = storage_path('app/public/event_submissions/' . $submission->image_name);
+            $path = storage_path('app/public/images/event-submissions/' . $submission->image_name);
+            $legacyPath = storage_path('app/public/event_submissions/' . $submission->image_name);
             if(file_exists($path)) {
                 unlink($path);
+            } elseif(file_exists($legacyPath)) {
+                unlink($legacyPath);
             }
         }
         

@@ -96,6 +96,12 @@ class VerificationController extends Controller
             Log::error('Resend verification email failed.', [
                 'user_id' => optional($request->user())->id,
                 'error' => $e->getMessage(),
+                'mail_driver' => config('mail.driver'),
+                'mail_host' => config('mail.host'),
+                'mail_port' => config('mail.port'),
+                'mail_encryption' => config('mail.encryption'),
+                'mail_from' => config('mail.from.address'),
+                'mail_username_set' => !empty(config('mail.username')),
             ]);
 
             // Use route fallback if no referrer is available

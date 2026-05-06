@@ -26,6 +26,8 @@ class MigrateImagesToStorage extends Command
             ['public/images/characters', 'storage/app/public/images/characters', 'Character images'],
             ['public/images/character-updates', 'storage/app/public/images/character-updates', 'Design update images'],
             ['public/images/avatars', 'storage/app/public/images/avatars', 'Avatars'],
+            ['public/images/events', 'storage/app/public/images/events', 'Monthly event images'],
+            ['storage/app/public/event_submissions', 'storage/app/public/images/event-submissions', 'Monthly event submissions (legacy path)'],
         ];
 
         $totalMigrated = 0;

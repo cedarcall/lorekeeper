@@ -1,26 +1,34 @@
 @extends('layouts.app')
 
-@section('title') Verify Email @endsection
+@section('title') Account Approval @endsection
 
 @section('content')
-<h1>Verify Email</h1>
+<h1>Account Approval</h1>
+@php
+    $application = \Illuminate\Support\Facades\Schema::hasTable('user_verification_applications')
+        ? Auth::user()->verificationApplications()->latest('id')->first()
+        : null;
+@endphp
 @if (session('warning'))
     <div class="alert alert-warning" role="alert">
         {{ session('warning') }}
     </div>
 @endif
-@if (session('resent'))
+@if ($application && $application->status === 'approved')
     <div class="alert alert-success" role="alert">
-        {{ __('A fresh verification link has been sent to your email address.') }}
+        Your account is approved.
+    </div>
+@elseif ($application && $application->status === 'denied')
+    <div class="alert alert-danger" role="alert">
+        Your application was denied. You can still log in, but access is restricted. Contact staff if you have questions.
+    </div>
+@elseif ($application && $application->status === 'pending')
+    <div class="alert alert-info" role="alert">
+        Your verification quiz is pending staff review. You will gain full access once approved.
+    </div>
+@else
+    <div class="alert alert-warning" role="alert">
+        We could not find a verification application for this account. Please contact staff.
     </div>
 @endif
-
-{{ __('Before proceeding, please check your email for a verification link.') }}
-{{ __('If you did not receive the email') }}, 
-<form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-    @csrf
-    <button type="submit" class="btn btn-link p-0 m-0 align-baseline">
-        {{ __('click here to request another') }}
-    </button>.
-</form>
 @endsection

@@ -31,7 +31,7 @@ class Event extends Model
     /**
      * Directory for event inspiration images.
      */
-    public $inspirationImageDirectory = 'images/events/inspiration';
+    public $inspirationImageDirectory = 'storage/images/events/inspiration';
     
     /**
      * Get inspiration images as array of URLs.
@@ -42,7 +42,12 @@ class Event extends Model
             return [];
         }
         return array_map(function($img) {
-            return asset($this->inspirationImageDirectory . '/' . $img);
+            $storagePath = storage_path('app/public/images/events/inspiration/' . $img);
+            if (file_exists($storagePath)) {
+                return asset($this->inspirationImageDirectory . '/' . $img);
+            }
+
+            return asset('images/events/inspiration/' . $img);
         }, $this->inspiration_images);
     }
     

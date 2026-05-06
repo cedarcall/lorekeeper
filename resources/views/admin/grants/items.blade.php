@@ -58,10 +58,14 @@
 
 <script>
     $(document).ready(function() {
-        $('#usernameList').selectize({
+        var selectizeConfig = {
+            dropdownParent: 'body'
+        };
+
+        $('#usernameList').selectize($.extend({}, selectizeConfig, {
             maxItems: 10
-        });
-        $('.default.item-select').selectize();
+        }));
+        $('.default.item-select').selectize(selectizeConfig);
         $('#add-item').on('click', function(e) {
             e.preventDefault();
             addItemRow();
@@ -83,7 +87,7 @@
                 e.preventDefault();
                 removeItemRow($(this));
             })
-            $clone.find('.item-select').selectize();
+            $clone.find('.item-select').selectize(selectizeConfig);
         }
         function removeItemRow($trigger) {
             $trigger.parent().remove();

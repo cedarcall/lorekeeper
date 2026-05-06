@@ -461,7 +461,7 @@ class MonthlyEventController extends Controller
             $imageExtension = $ext;
             
             // Store file
-            $file->storeAs('public/event_submissions', $imageName);
+            $file->storeAs('public/images/event-submissions', $imageName);
         }
 
         // Create submission
@@ -589,6 +589,7 @@ class MonthlyEventController extends Controller
 
         // Delete the image file if exists
         if ($submission->image_name) {
+            Storage::delete('public/images/event-submissions/' . $submission->image_name);
             Storage::delete('public/event_submissions/' . $submission->image_name);
         }
 

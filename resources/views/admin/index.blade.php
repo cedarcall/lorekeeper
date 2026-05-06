@@ -202,6 +202,25 @@
     </div>
 </div>
 <div class="row">
+    <div class="col-sm-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Account Verification Applications @if($verificationApplicationCount)<span class="badge badge-primary">{{ $verificationApplicationCount }}</span>@endif</h5>
+                <p class="card-text">
+                    @if($verificationApplicationCount)
+                        {{ $verificationApplicationCount }} application{{ $verificationApplicationCount == 1 ? '' : 's' }} awaiting review.
+                    @else
+                        No pending account verification applications.
+                    @endif
+                </p>
+                <div class="text-right">
+                    <a href="{{ url('admin/users/verification-applications') }}" class="card-link">Review Applications <span class="fas fa-caret-right ml-1"></span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
     @if (Auth::user()->hasPower('manage_reports'))
     <div class="col-sm-6">
         <div class="card mb-3">

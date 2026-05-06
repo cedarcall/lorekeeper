@@ -139,14 +139,15 @@ class EventController extends Controller
         if($request->hasFile('header_image')) {
             $file = $request->file('header_image');
             $filename = time().'_'.preg_replace('/[^a-z0-9\.\-]/i', '_', $file->getClientOriginalName());
-            $destination = public_path('images/events');
+            $destination = storage_path('app/public/images/events');
             if(!file_exists($destination)) mkdir($destination, 0755, true);
             $file->move($destination, $filename);
-            $data['header_image'] = 'images/events/'.$filename;
+            $data['header_image'] = 'storage/images/events/'.$filename;
         }
 
         // Handle inspiration images (5-10 images)
-        $inspirationDir = public_path('images/events/inspiration');
+        $inspirationDir = storage_path('app/public/images/events/inspiration');
+        $legacyInspirationDir = public_path('images/events/inspiration');
         if(!file_exists($inspirationDir)) mkdir($inspirationDir, 0755, true);
         
         // Get existing images
@@ -164,8 +165,11 @@ class EventController extends Controller
                 if($key !== false) {
                     // Delete file
                     $filePath = $inspirationDir . '/' . $imgToRemove;
+                    $legacyFilePath = $legacyInspirationDir . '/' . $imgToRemove;
                     if(file_exists($filePath)) {
                         unlink($filePath);
+                    } elseif(file_exists($legacyFilePath)) {
+                        unlink($legacyFilePath);
                     }
                     unset($existingImages[$key]);
                 }
@@ -242,17 +246,17 @@ class EventController extends Controller
                 }
                 
                 $filename = time() . '_' . preg_replace('/[^a-z0-9\.\-]/i', '_', $file->getClientOriginalName());
-                $destination = public_path('images/events');
+                $destination = storage_path('app/public/images/events');
                 
                 if(!file_exists($destination)) {
                     mkdir($destination, 0755, true);
                 }
                 
                 $file->move($destination, $filename);
-                $fullPath = 'images/events/'.$filename;
+                $fullPath = 'storage/images/events/'.$filename;
                 
                 // Verify file was actually moved
-                if(!file_exists(public_path($fullPath))) {
+                if(!file_exists($destination . '/' . $filename)) {
                     return response()->json(['error' => 'File upload failed - could not save file'], 400);
                 }
                 

@@ -62,6 +62,66 @@
             </div>
         </div>
 
+        <h4 class="mt-4">Account Verification Quiz</h4>
+
+        <div class="form-group row">
+            <label for="social_media_link" class="col-md-4 col-form-label text-md-right">One Social Media Link</label>
+
+            <div class="col-md-6">
+                <input id="social_media_link" type="url" class="form-control{{ $errors->has('social_media_link') ? ' is-invalid' : '' }}" name="social_media_link" value="{{ old('social_media_link') }}" placeholder="https://..." required>
+
+                @if ($errors->has('social_media_link'))
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $errors->first('social_media_link') }}</strong>
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="join_reason" class="col-md-4 col-form-label text-md-right">Why do you want to join this ARPG?</label>
+
+            <div class="col-md-6">
+                <textarea id="join_reason" class="form-control{{ $errors->has('join_reason') ? ' is-invalid' : '' }}" name="join_reason" rows="4" required>{{ old('join_reason') }}</textarea>
+
+                @if ($errors->has('join_reason'))
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $errors->first('join_reason') }}</strong>
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="voidi_species_answer" class="col-md-4 col-form-label text-md-right">What Voidi species cannot be made for free?</label>
+
+            <div class="col-md-6">
+                <input id="voidi_species_answer" type="text" class="form-control{{ $errors->has('voidi_species_answer') ? ' is-invalid' : '' }}" name="voidi_species_answer" value="{{ old('voidi_species_answer') }}" required>
+
+                @if ($errors->has('voidi_species_answer'))
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $errors->first('voidi_species_answer') }}</strong>
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-6 offset-md-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        {!! Form::checkbox('rules_confirmation', 1, old('rules_confirmation'), ['class' => 'form-check-input']) !!}
+                        I have read the ARPG rules.
+                    </label>
+                </div>
+                @if ($errors->has('rules_confirmation'))
+                    <span class="text-danger small d-block mt-1">
+                        <strong>{{ $errors->first('rules_confirmation') }}</strong>
+                    </span>
+                @endif
+            </div>
+        </div>
+
         @if(!Settings::get('is_registration_open'))
             <div class="form-group row">
                 <label for="name" class="col-md-4 col-form-label text-md-right">Invitation Key {!! add_help('Registration is currently closed. An invitation key is required to create an account.') !!}</label>

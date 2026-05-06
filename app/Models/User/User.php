@@ -28,6 +28,7 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GalleryFavorite;
 use App\Models\Theme;
+use App\Models\UserVerificationApplication;
 use App\Models\Rank\RankPower;
 use App\Models\Report\Report;
 use App\Models\Trade;
@@ -105,6 +106,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function settings()
     {
         return $this->hasOne('App\Models\User\UserSettings');
+    }
+
+    /**
+     * Get verification applications submitted by the user.
+     */
+    public function verificationApplications()
+    {
+        return $this->hasMany(UserVerificationApplication::class, 'user_id');
     }
 
     /**
