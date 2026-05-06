@@ -69,14 +69,9 @@
                         <i class="fas fa-stream mr-1"></i> {{ $section['title'] }}
                     </a>
                     @endforeach
-                    @if($eventLocations)
-                    <a class="nav-link" href="#event-locations">
-                        <i class="fas fa-map-marker-alt mr-1"></i> Locations
-                    </a>
-                    @endif
-                    @if($eventPromptIdeas)
-                    <a class="nav-link" href="#event-prompt-ideas">
-                        <i class="fas fa-lightbulb mr-1"></i> Prompt Ideas
+                    @if($eventLocations || $eventPromptIdeas)
+                    <a class="nav-link" href="#event-resources">
+                        <i class="fas fa-layer-group mr-1"></i> Event Resources
                     </a>
                     @endif
                     <a class="nav-link" href="#event-inspiration">
@@ -214,27 +209,45 @@
                 </div>
                 @endforeach
 
-                @if($eventLocations)
-                <div class="card mb-3" id="event-locations">
+                @if($eventLocations || $eventPromptIdeas)
+                <div class="card mb-3" id="event-resources">
                     <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Locations</h3>
+                        <h3 class="mb-0"><i class="fas fa-layer-group mr-2"></i>Event Resources</h3>
                     </div>
                     <div class="card-body">
-                        <div class="parsed-text news-body event-content-centered">
-                            {!! $eventLocations !!}
-                        </div>
-                    </div>
-                </div>
-                @endif
+                        <ul class="nav nav-tabs" role="tablist">
+                            @if($eventLocations)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $eventLocations ? 'active' : '' }}" id="event-locations-tab" data-toggle="tab" href="#event-locations-pane" role="tab" aria-controls="event-locations-pane" aria-selected="true">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>Locations
+                                    </a>
+                                </li>
+                            @endif
+                            @if($eventPromptIdeas)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ !$eventLocations ? 'active' : '' }}" id="event-prompt-ideas-tab" data-toggle="tab" href="#event-prompt-ideas-pane" role="tab" aria-controls="event-prompt-ideas-pane" aria-selected="{{ $eventLocations ? 'false' : 'true' }}">
+                                        <i class="fas fa-lightbulb mr-1"></i>Prompt Ideas
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
 
-                @if($eventPromptIdeas)
-                <div class="card mb-3" id="event-prompt-ideas">
-                    <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-lightbulb mr-2"></i>Prompt Ideas</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="parsed-text news-body event-content-centered">
-                            {!! $eventPromptIdeas !!}
+                        <div class="tab-content pt-3">
+                            @if($eventLocations)
+                                <div class="tab-pane fade {{ $eventLocations ? 'show active' : '' }}" id="event-locations-pane" role="tabpanel" aria-labelledby="event-locations-tab">
+                                    <div class="parsed-text news-body event-content-centered">
+                                        {!! $eventLocations !!}
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($eventPromptIdeas)
+                                <div class="tab-pane fade {{ !$eventLocations ? 'show active' : '' }}" id="event-prompt-ideas-pane" role="tabpanel" aria-labelledby="event-prompt-ideas-tab">
+                                    <div class="parsed-text news-body event-content-centered">
+                                        {!! $eventPromptIdeas !!}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
