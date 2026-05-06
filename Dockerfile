@@ -18,16 +18,21 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
   && chmod +x /usr/local/bin/composer
 
 WORKDIR /app
+
+# Install PHP dependencies in a separate layer so code-only changes can reuse cache.
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Install frontend dependencies in a separate layer so code-only changes can reuse cache.
+COPY package.json package-lock.json ./
+RUN npm ci || npm install
+
 COPY . .
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-custom.ini
 
-# Install PHP deps (creates /app/vendor)
-# --no-scripts avoids running artisan during image build
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Install and build frontend assets for production
-RUN if [ -f package.json ]; then npm ci || npm install; npm run production; fi
+# Build frontend assets after application sources are present.
+RUN if [ -f package.json ]; then npm run production; fi
 
 # Permissions for Laravel
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \

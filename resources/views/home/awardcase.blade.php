@@ -43,17 +43,6 @@
 </h3>
 <div class="card mb-3 awardcase-category">
     <div class="card-body awardcase-body">
-        @php
-            // get all completed awards where the award has allow_reclaiming set to false
-            $completedAwards = $user->awards()->where(function($query) {
-                $query->where('allow_reclaim', 0);
-            })->pluck('award_id')->toArray();
-            $inProgressAwards = \App\Models\Award\Award::whereNotIn('id', $completedAwards)->get();
-            // get rid of any that do not have progressions
-            $inProgressAwards = $inProgressAwards->filter(function($award) {
-                return $award->progressions->count() > 0;
-            });
-        @endphp
         @if(!$inProgressAwards->count())
             <p class="text-success">You have completed all available {{__('awards.awards')}}. Yay!</p>
         @else

@@ -35,26 +35,44 @@ class AwardCaseController extends Controller
      */
     public function getIndex()
     {
+        $user = Auth::user();
         $categories = AwardCategory::orderBy('sort', 'DESC')->get();
         $awards = count($categories) ?
-            Auth::user()->awards()
+            $user->awards()
                 ->where('count', '>', 0)
                 ->orderByRaw('FIELD(award_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
                 ->orderBy('name')
                 ->orderBy('updated_at')
                 ->get()
                 ->groupBy(['award_category_id', 'id']) :
-            Auth::user()->awards()
+            $user->awards()
                 ->where('count', '>', 0)
                 ->orderBy('name')
                 ->orderBy('updated_at')
                 ->get()
                 ->groupBy(['award_category_id', 'id']);
+
+        $inProgressAwards = Award::with(['progressions.progression'])
+            ->orderBy('name')
+            ->get()
+            ->filter(function($award) use ($user) {
+                $progressionCount = $award->progressions->count();
+
+                if(!$progressionCount) {
+                    return false;
+                }
+
+                $progress = $award->progressionProgress($user);
+
+                return $progress < $progressionCount || $award->canClaim($user);
+            });
+
         return view('home.awardcase', [
             'categories' => $categories->keyBy('id'),
             'awards' => $awards,
             'userOptions' => User::visible()->where('id', '!=', Auth::user()->id)->orderBy('name')->pluck('name', 'id')->toArray(),
-            'user' => Auth::user()
+            'user' => $user,
+            'inProgressAwards' => $inProgressAwards,
         ]);
     }
 
