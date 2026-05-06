@@ -23,6 +23,8 @@ class ExpeditionController extends Controller
         try {
             return response(view('expeditions.show', $data)->render());
         } catch (\Throwable $e) {
+            error_log('Expedition show view render failed: '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine());
+            error_log($e->getTraceAsString());
             Log::error('Expedition show view render failed.', array_merge($context, [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),

@@ -27,6 +27,8 @@ class MonthlyEventController extends Controller
         try {
             return response(view('monthly_event.show', $data)->render());
         } catch (\Throwable $e) {
+            error_log('Monthly event show view render failed: '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine());
+            error_log($e->getTraceAsString());
             Log::error('Monthly event show view render failed.', array_merge($context, [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
