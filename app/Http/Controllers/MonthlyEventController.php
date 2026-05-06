@@ -239,12 +239,22 @@ class MonthlyEventController extends Controller
             if(!$event) abort(404);
             $this->normalizeEventRelations($event);
         
-            $previousQuery = Event::query();
-            if($this->eventsHasColumn('is_visible')) $previousQuery->where('is_visible', 1);
-            $previous = $previousQuery
+            $hasStart = $this->eventsHasColumn('start_at');
+            $previousQuery = Event::query()
                 ->where('id', '!=', $event->id)
                 ->with($with);
-            $previous = $this->applyEventOrdering($previous)->get();
+
+            // Show events that are truly prior to the selected one.
+            if($hasStart && $event->start_at) {
+                $previousQuery->where(function($q) use ($event) {
+                    $q->whereNotNull('start_at')
+                      ->where('start_at', '<', $event->start_at);
+                });
+            } else {
+                $previousQuery->where('id', '<', $event->id);
+            }
+
+            $previous = $this->applyEventOrdering($previousQuery)->get();
             $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
