@@ -47,6 +47,34 @@ class MonthlyEventController extends Controller
         }
     }
 
+    protected function applyEventOrdering($query)
+    {
+        if($this->eventsHasColumn('start_at')) {
+            $query->orderBy('start_at', 'desc');
+        }
+        return $query->orderBy('id', 'desc');
+    }
+
+    protected function getResourceBoostTargetsFromLootTable($lootTable)
+    {
+        if(!$lootTable || !Schema::hasTable('loot_table_rewards')) return [];
+
+        try {
+            return $lootTable->loot
+                ->where('rewardable_type', 'Item')
+                ->map(function($loot) {
+                    return $loot->reward;
+                })
+                ->filter()
+                ->unique('id')
+                ->sortBy('name')
+                ->pluck('name', 'id')
+                ->toArray();
+        } catch(\Exception $e) {
+            return [];
+        }
+    }
+
     // Show current event (or latest) and a carousel of previous events
     public function index()
     {
@@ -72,19 +100,12 @@ class MonthlyEventController extends Controller
                 ->orWhereNull('start_at');
             });
         }
-        $current = $currentQuery
-            ->with($with)
-            ->orderBy('start_at', 'desc')
-            ->first();
+        $current = $this->applyEventOrdering($currentQuery->with($with))->first();
 
         if(!$current) {
             $fallbackQuery = Event::query();
             if($hasVisible) $fallbackQuery->where('is_visible', 1);
-            $current = $fallbackQuery
-                ->with($with)
-                ->orderBy('start_at', 'desc')
-                ->orderBy('id', 'desc')
-                ->first();
+            $current = $this->applyEventOrdering($fallbackQuery->with($with))->first();
         }
         $this->normalizeEventRelations($current);
 
@@ -94,9 +115,8 @@ class MonthlyEventController extends Controller
             ->when($current, function($q) use ($current){
                 return $q->where('id', '!=', $current->id);
             })
-            ->with($with)
-            ->orderBy('start_at', 'desc')
-            ->get();
+            ->with($with);
+        $previous = $this->applyEventOrdering($previous)->get();
         $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
@@ -106,31 +126,24 @@ class MonthlyEventController extends Controller
         $submissionBoostItems = [];
         $resourceBoostTargets = [];
         $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
-        if($current && $current->lootTable) {
-            $resourceBoostTargets = $current->lootTable->loot
-                ->where('rewardable_type', 'Item')
-                ->map(function($loot) {
-                    return $loot->reward;
-                })
-                ->filter()
-                ->unique('id')
-                ->sortBy('name')
-                ->pluck('name', 'id')
-                ->toArray();
-        }
+        if($current) $resourceBoostTargets = $this->getResourceBoostTargetsFromLootTable($current->lootTable);
         if(Auth::check() && $current) {
-            $userQuestions = EventQuestion::where('user_id', Auth::user()->id)
-                ->where('event_id', $current->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            if(Schema::hasTable('event_questions')) {
+                $userQuestions = EventQuestion::where('user_id', Auth::user()->id)
+                    ->where('event_id', $current->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
             
-            $userSubmissions = EventSubmission::where('user_id', Auth::user()->id)
-                ->where('event_id', $current->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            if(Schema::hasTable('event_submissions')) {
+                $userSubmissions = EventSubmission::where('user_id', Auth::user()->id)
+                    ->where('event_id', $current->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
 
             // Check if user has badge
-            if($current->award_id) {
+            if($current->award_id && Schema::hasTable('user_event_badges')) {
                 $hasBadge = DB::table('user_event_badges')
                     ->where('user_id', Auth::user()->id)
                     ->where('event_id', $current->id)
@@ -170,9 +183,8 @@ class MonthlyEventController extends Controller
         if($this->eventsHasColumn('is_visible')) $previousQuery->where('is_visible', 1);
         $previous = $previousQuery
             ->where('id', '!=', $event->id)
-            ->with($with)
-            ->orderBy('start_at', 'desc')
-            ->get();
+            ->with($with);
+        $previous = $this->applyEventOrdering($previous)->get();
         $this->normalizeEventCollectionRelations($previous);
 
         // Get user's questions and submissions for this event
@@ -182,31 +194,24 @@ class MonthlyEventController extends Controller
         $submissionBoostItems = [];
         $resourceBoostTargets = [];
         $surveyBeaconItem = Item::where('name', 'Survey Beacon')->first();
-        if($event && $event->lootTable) {
-            $resourceBoostTargets = $event->lootTable->loot
-                ->where('rewardable_type', 'Item')
-                ->map(function($loot) {
-                    return $loot->reward;
-                })
-                ->filter()
-                ->unique('id')
-                ->sortBy('name')
-                ->pluck('name', 'id')
-                ->toArray();
-        }
+        $resourceBoostTargets = $this->getResourceBoostTargetsFromLootTable($event->lootTable);
         if(Auth::check()) {
-            $userQuestions = EventQuestion::where('user_id', Auth::user()->id)
-                ->where('event_id', $event->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            if(Schema::hasTable('event_questions')) {
+                $userQuestions = EventQuestion::where('user_id', Auth::user()->id)
+                    ->where('event_id', $event->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
             
-            $userSubmissions = EventSubmission::where('user_id', Auth::user()->id)
-                ->where('event_id', $event->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            if(Schema::hasTable('event_submissions')) {
+                $userSubmissions = EventSubmission::where('user_id', Auth::user()->id)
+                    ->where('event_id', $event->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
 
             // Check if user has badge
-            if($event->award_id) {
+            if($event->award_id && Schema::hasTable('user_event_badges')) {
                 $hasBadge = DB::table('user_event_badges')
                     ->where('user_id', Auth::user()->id)
                     ->where('event_id', $event->id)
@@ -236,11 +241,7 @@ class MonthlyEventController extends Controller
         $with = $this->eventWithRelations();
         $eventsQuery = Event::query();
         if($this->eventsHasColumn('is_visible')) $eventsQuery->where('is_visible', 0);
-        $events = $eventsQuery
-            ->with($with)
-            ->orderBy('start_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(12);
+        $events = $this->applyEventOrdering($eventsQuery->with($with))->paginate(12);
         $this->normalizeEventCollectionRelations($events->getCollection());
 
         return view('monthly_event.history', [

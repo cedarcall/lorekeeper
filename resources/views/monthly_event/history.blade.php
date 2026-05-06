@@ -21,7 +21,8 @@
                     $eventEnd = $event->end_at ?? $event->occur_end;
                     $eventBody = $event->parsed_description ?? $event->parsed_text ?? $event->description ?? $event->content;
                     $eventHeader = $event->header_image ?? ($event->image_extension ? 'images/data/event/'.$event->id.'-image.'.$event->image_extension : null);
-                    $fallbackInspiration = ($event->inspiration_image_urls && count($event->inspiration_image_urls)) ? $event->inspiration_image_urls[0] : null;
+                    $inspirationUrls = $event->inspiration_image_urls;
+                    $fallbackInspiration = (is_array($inspirationUrls) && count($inspirationUrls)) ? $inspirationUrls[0] : null;
                     $cardImage = $eventHeader ? asset($eventHeader) : $fallbackInspiration;
                 @endphp
 

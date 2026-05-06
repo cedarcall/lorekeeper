@@ -140,12 +140,17 @@
                 </div>
                 @endif
 
-                @if($planet->refImages && count($planet->refImages) > 0)
+                @php
+                    $refImages = $planet->refImages;
+                    $hasRefImages = is_countable($refImages) && count($refImages) > 0;
+                    $colorPalette = is_array($planet->color_palette) ? $planet->color_palette : [];
+                @endphp
+                @if($hasRefImages)
                     <div class="card mb-3">
                         <div class="card-header h5">Reference Images</div>
                         <div class="card-body">
                             <div class="row">
-                                @foreach($planet->refImages as $num => $imageUrl)
+                                @foreach($refImages as $num => $imageUrl)
                                     <div class="col-4 mb-2">
                                         <a href="{{ $imageUrl }}" data-lightbox="planet-refs" data-title="Reference {{ $num }}">
                                             <img src="{{ $imageUrl }}" class="img-fluid img-thumbnail" style="max-height: 100px;">
@@ -153,21 +158,21 @@
                                     </div>
                                 @endforeach
                             </div>
-                            @if($planet->color_palette && count($planet->color_palette) > 0)
+                            @if(count($colorPalette) > 0)
                                 <h6 class="mt-3">Color Palette</h6>
                                 <div>
-                                    @foreach($planet->color_palette as $color)
+                                    @foreach($colorPalette as $color)
                                         <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ $color }}; border: 1px solid #333; margin-right: 5px; border-radius: 4px;" title="{{ $color }}"></span>
                                     @endforeach
                                 </div>
                             @endif
                         </div>
                     </div>
-                @elseif($planet->color_palette && count($planet->color_palette) > 0)
+                @elseif(count($colorPalette) > 0)
                     <div class="card mb-3">
                         <div class="card-header h5">Color Palette</div>
                         <div class="card-body">
-                            @foreach($planet->color_palette as $color)
+                            @foreach($colorPalette as $color)
                                 <span style="display: inline-block; width: 40px; height: 40px; background-color: {{ $color }}; border: 1px solid #333; margin-right: 5px; border-radius: 4px;" title="{{ $color }}"></span>
                             @endforeach
                         </div>
