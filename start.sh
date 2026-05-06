@@ -47,8 +47,13 @@ run_step "artisan migrate --force" php artisan migrate --force || true
 run_step "artisan add-site-settings" php artisan add-site-settings || true
 run_step "artisan add-text-pages" php artisan add-text-pages || true
 run_step "artisan add-world-expansion" php artisan add-world-expansion || true
-run_step "artisan seed-production-data" php artisan seed-production-data || true
-run_step "artisan copy-default-images" php artisan copy-default-images || true
+if [ ! -f storage/.production-seeded-flag ]; then
+  run_step "artisan seed-production-data" php artisan seed-production-data || true
+  run_step "artisan copy-default-images" php artisan copy-default-images || true
+  date > storage/.production-seeded-flag || true
+else
+  echo ">>> [start.sh] Skipping one-time production seeding (flag present)"
+fi
 
 # Create admin user automatically (command handles env var checks internally)
 echo ">>> About to run force-create-admin..."

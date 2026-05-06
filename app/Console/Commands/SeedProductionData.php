@@ -47,10 +47,11 @@ class SeedProductionData extends Command
             'featured_planets' => Schema::hasTable('featured_planets') ? DB::table('featured_planets')->count() : 0,
         ];
 
+        // Do not require factions to be present to skip seeding.
+        // Factions may be managed independently and the SQL dump may not include them.
         $hasSeededWorldContent =
             ($counts['site_pages'] > $defaultPageCount)
             && ($counts['events'] > 0)
-            && ($counts['factions'] > 0)
             && ($counts['planets'] > 0);
 
         if ($hasSeededWorldContent && !$this->option('force')) {
